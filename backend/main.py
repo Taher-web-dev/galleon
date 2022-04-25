@@ -10,6 +10,7 @@ import uvicorn
 import json_logging
 from utils.settings import settings
 from api.debug.router import router as debug
+from api.user.router import router as user
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -47,6 +48,8 @@ async def middle(request: Request, call_next):
                     if "site-packages" not in frame.f_code.co_filename:
                         stack.append({'file': frame.f_code.co_filename, 'function': frame.f_code.co_name, 'line': lineno})
                 logger.error(str(ex), extra={'props': {'stack': stack}})
+                #print(str(ex))
+                #print(stack)
             response = JSONResponse(status_code=500, content={"status": "failed", "error": {"code": 99, "message": "internal error"}})
     else:
         response = JSONResponse(status_code=400, content={'status': 'failed', 'error': {'code': 100, 'message': 'invalid'}})
@@ -67,6 +70,7 @@ async def root():
     return {"Hello": "World"}
 
 app.include_router(debug, prefix='/debug')
+app.include_router(user, prefix='/user')
 
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):

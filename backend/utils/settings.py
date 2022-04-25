@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     """ Main settings class """
     app_name: str = "myapp"
     log_path: str = "./logs/"
+    jwt_secret: str = ""
+    jwt_algorithm: str = ""
     listening_host: str = "0.0.0.0"
     listening_port: int = 8080
     api_key: str = ""
