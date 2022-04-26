@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     log_path: str = "./logs/"
     jwt_secret: str = ""
     jwt_algorithm: str = ""
+    slack_webhook_url: str = ""
+    slack_notify: bool = False
     listening_host: str = "0.0.0.0"
     listening_port: int = 8080
     api_key: str = ""

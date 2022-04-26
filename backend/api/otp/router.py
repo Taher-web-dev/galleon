@@ -1,27 +1,58 @@
 """ OTP api set """
 
-from utils.template import json_render
 from fastapi import APIRouter
-from .some import some
+from pydantic import BaseModel
+from .utils import gen_alphanumeric, gen_numeric, slack_notify
+from utils.db import Otp, db
+
+# from typing import Optional
 
 router = APIRouter()
 
+@router.post('/request/{msisdn}')
+async def generate(msisdn: str):
+    """ Request new Otp """
 
-@router.get('/mytemp')
-async def mytemp():
-    """ Jinja template example """
-    return json_render(__file__, "mytemp.json.j2", {"name": "Alibaba", "age": 40})
+    # If a prior otp exists, delete it.
+    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
+    if otp:
+        db.delete(otp)
+        db.commit()
+    
+    code = gen_numeric()
+    otp = Otp(msisdn=msisdn, code=code)
+    db.add(otp)
+    db.commit()
+    db.refresh(otp)
+    slack_notify(msisdn, code)
+    return {"msisdn": otp.msisdn}
+
+class OtpConfirm(BaseModel):
+    msisdn: str # Optional[str]
+    code: str
+
+@router.post('/confirm')
+async def confirm(confirm: OtpConfirm):
+    """ Confirm Otp """
+    otp = db.query(Otp).filter(Otp.msisdn==confirm.msisdn).first()
+    if otp and otp.code == confirm.code:
+        otp.confirmation = gen_alphanumeric()
+        return {"status": "success", "msisdn": confirm.msisdn, "confirmation": otp.confirmation}
+    return {"status": "failed"}
 
 
-@router.get('/sample')
-async def sample():
-    """ Sample """
-    return {'users': ['a', 'b', 'c']}
+def verify(msisdn: str, confirmation: str):
+    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
+    return otp and otp.confirmation and otp.confirmation == confirmation
+    
 
+class OtpVerify(BaseModel):
+    msisdn: str # Optional[str]
+    confirmation: str
 
-# Simulate exception to check proper handling
-# of exception and returning json response
-@router.get('/mybad')
-async def mybad():
-    """Test path"""
-    raise Exception("My bad!")
+@router.post('/verify')
+async def _verify(otp_verify: OtpVerify):
+    """Verify otp status"""
+    if verify(otp_verify.msisdn, otp_verify.confirmation): 
+        return {"msisdn": otp_verify.msisdn, "status": "success"}
+    return {"status": "failed"}

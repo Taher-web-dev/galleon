@@ -11,6 +11,7 @@ import json_logging
 from utils.settings import settings
 from api.debug.router import router as debug
 from api.user.router import router as user
+from api.otp.router import router as otp
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from utils.db import engine, Base
@@ -75,6 +76,7 @@ async def root():
 
 app.include_router(debug, prefix='/debug')
 app.include_router(user, prefix='/user')
+app.include_router(otp, prefix='/otp')
 
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):
