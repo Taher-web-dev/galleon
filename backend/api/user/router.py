@@ -11,58 +11,69 @@ class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> dict | None:
+    async def __call__(self, request: Request) -> str | None:
         credentials: HTTPAuthorizationCredentials | None = await super(JWTBearer, self).__call__(request)
         if credentials and credentials.scheme == "Bearer":
-            return decode_jwt(credentials.credentials)
+            return decode_jwt(credentials.credentials)["msisdn"]
 
 
 router = APIRouter()
 
 class RegisterUser(BaseModel):
     name: str
-    msisdn: str 
+    msisdn: str
+    email: Optional[str]
     password: str
     profile_pic_url : Optional[str]
     otp_confirmation : str
 
 class UserProfile(BaseModel):
-    name: str
-    msisdn: str 
+    name: Optional[str]
+    msisdn: Optional[str]
+    email: Optional[str]
     password : Optional[str]
     profile_pic_url : Optional[str]
 
-    #def __init__(self, name: str, msisdn: str, password: str | None = None, profile_pic_url: str | None = None):
-    #    self.name = name
-    #    self.msisdn = msisdn
-    #    self.password = password
-    #    self.profile_pic_url = profile_pic_url
-
-
 @router.post('/register')
-async def register(user: RegisterUser):
+async def register(new_user: RegisterUser):
     """ Register a new user """
-    return  user
+    user = db.query(User).filter(User.msisdn==new_user.msisdn).first()
+    if user:
+        return {"message":"user already exists"}
+
+    user = User(name=new_user.name, msisdn=new_user.msisdn, email=new_user.email, password=new_user.password ) 
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"msisdn":user.msisdn} 
 
 @router.get('/profile', response_model=UserProfile, response_model_exclude_none=True)
-async def get_profile(jwt: dict = Depends(JWTBearer())):
+async def get_profile(msisdn = Depends(JWTBearer())):
     """ Get user profile """
-    user = db.query(User).filter(User.msisdn==jwt["msisdn"]).first()
+    user = db.query(User).filter(User.msisdn==msisdn).first()
     return UserProfile(
-        name=user.name, 
+        name=user.name,
         msisdn=user.msisdn,
-        profile_pic_url = user.profile_pic_url) 
+        email=user.email,
+        password=None,
+        profile_pic_url = user.profile_pic_url)
 
 @router.post('/profile')
-async def update_profile(user_profile: UserProfile, jwt: dict = Depends(JWTBearer())):
+async def update_profile(user_profile: UserProfile, msisdn = Depends(JWTBearer())):
     """ Update user profile """
-    user = db.query(User).filter(User.msisdn==jwt["msisdn"]).first()
-    user.name = user.name
+    user = db.query(User).filter(User.msisdn==msisdn).first()
+    if user_profile.name:
+        user.name = user_profile.name
     if user_profile.password:
-        user.password = user.password
+        user.password = user_profile.password
+    if user_profile.email:
+        user.email = user_profile.email
     if user_profile.profile_pic_url:
-        user.profile_pic_url = user.profile_pic_url
-    return {"msisdn": user["msisdn"]} 
+        user.profile_pic_url = user_profile.profile_pic_url
+    db.commit()
+    db.refresh(user)
+    return {"msisdn": user.msisdn}
 
 class Credentials(BaseModel):
     msisdn: str
@@ -71,21 +82,25 @@ class Credentials(BaseModel):
 @router.post('/auth/refresh')
 async def refresh(credentials: Credentials) -> dict:
     """ Generate refresh token """
-    token = sign_jwt({"msisdn": credentials.msisdn}) 
-    return {"msisdn": credentials.msisdn, "refresh_token": token, "access_token": token} 
+    token = sign_jwt({"msisdn": credentials.msisdn})
+    return {"msisdn": credentials.msisdn, "refresh_token": token, "access_token": token}
 
 class Refresh(BaseModel):
     msisdn: str
     refresh_token: str
 
 @router.post('/auth/access')
-async def access(refresh: Refresh, jwt : dict =Depends(JWTBearer())):
+async def access(refresh: Refresh, msisdn=Depends(JWTBearer())):
     """ Generate access token """
-    user = db.query(User).filter(User.msisdn==jwt["msisdn"]).first()
+    user = db.query(User).filter(User.msisdn==msisdn).first()
     assert refresh.msisdn == user.msisdn
-    return {"access_token": refresh} 
+    return {"access_token": refresh}
 
-@router.post('/delete', dependencies=[Depends(JWTBearer())])
-async def delete():
+@router.post('/delete')
+async def delete(msisdn = Depends(JWTBearer())):
     """ Delete user """
-    return {} 
+    user = db.query(User).filter(User.msisdn==msisdn).first()
+    assert user
+    db.delete(user)
+    db.commit()
+    return {"msisdn": msisdn}

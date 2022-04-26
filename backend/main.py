@@ -13,6 +13,9 @@ from api.debug.router import router as debug
 from api.user.router import router as user
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from utils.db import engine, Base
+
+Base.metadata.create_all(bind=engine)
 
 # from db import SessionLocal
 
@@ -29,6 +32,7 @@ json_logging.init_request_instrument(app)
 @app.on_event("startup")
 async def app_startup():
     logger.info("Starting")
+    Base.metadata.create_all(bind=engine)
 
 
 @app.middleware("http")
