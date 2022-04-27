@@ -35,9 +35,15 @@ class OtpConfirm(BaseModel):
 async def confirm(confirm: OtpConfirm):
     """ Confirm Otp """
     otp = db.query(Otp).filter(Otp.msisdn==confirm.msisdn).first()
-    if otp and otp.code == confirm.code:
-        otp.confirmation = gen_alphanumeric()
-        return {"status": "success", "msisdn": confirm.msisdn, "confirmation": otp.confirmation}
+    if otp: 
+        otp.tries += 1
+        db.commit()
+        db.refresh(otp)
+        if otp.code == confirm.code:
+            otp.confirmation = gen_alphanumeric()
+            db.commit()
+            db.refresh(otp)
+            return {"status": "success", "msisdn": confirm.msisdn, "confirmation": otp.confirmation}
     return {"status": "failed"}
 
 

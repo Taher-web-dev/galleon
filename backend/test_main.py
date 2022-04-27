@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 import json
 from main import app
 from utils.db import db, Otp
+from time import sleep
 
 client = TestClient(app)
 
@@ -48,6 +49,11 @@ def test_update_profile():
     # print(json.dumps(response.json()))
 
 
+def test_logout():
+    headers = {"Authorization": "Bearer " + access_token}
+    response = client.post("/user/auth/logout", headers = headers)
+    assert {"status":"success"} == response.json()
+
 def test_delete():
     headers = {"Authorization": "Bearer " + access_token}
     response = client.post("/user/delete", headers = headers)
@@ -64,6 +70,7 @@ def test_request_otp():
 
 def test_confirm_otp(): 
     global confirmation
+    global code
     response = client.post("/otp/confirm", json={'msisdn': msisdn, 'code': code})
     #print(json.dumps(response.json()))
     confirmation = response.json()['confirmation']
@@ -79,6 +86,7 @@ if __name__ == "__main__":
     #test_update_profile()
     #test_delete()
     test_request_otp() 
+    sleep(2)
     test_confirm_otp() 
     test_verify_otp() 
 

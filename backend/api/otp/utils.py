@@ -26,7 +26,7 @@ def slack_notify(msisdn: str, code: str):
                 "color": "#9733EE",
                 "fields": [
                     {
-                        "value": f"Otp code {code} for msisdn {msisdn}",
+                        "value": f"Otp code `{code}` for msisdn `{msisdn}`",
                         "short": "true",
                     }
                 ]
@@ -36,8 +36,8 @@ def slack_notify(msisdn: str, code: str):
     byte_length = str(sys.getsizeof(slack_data))
     headers = {'Content-Type': "application/json", 'Content-Length': byte_length}
     response = requests.post(settings.slack_webhook_url, data=json.dumps(slack_data), headers=headers)
-    print(json.dumps(slack_data))
-    print(response.text)
+    # print(json.dumps(slack_data))
+    # print(response.text)
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
 

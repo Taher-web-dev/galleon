@@ -50,15 +50,16 @@ pip install -r backend/requirements.txt
 mkdir ../logs/
 
 cd backend 
+export BACKEND_ENV=sample.env 
 
 # Unit test
 python tests.py
 
 # pytest
-pytest
+pytest -v
 
 # To run:
-BACKEND_ENV=sample.env python main.py
+python main.py
 # or 
 ./run.sh
 

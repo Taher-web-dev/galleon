@@ -82,8 +82,23 @@ class Credentials(BaseModel):
 @router.post('/auth/refresh')
 async def refresh(credentials: Credentials) -> dict:
     """ Generate refresh token """
-    token = sign_jwt({"msisdn": credentials.msisdn})
-    return {"msisdn": credentials.msisdn, "refresh_token": token, "access_token": token}
+    user = db.query(User).filter(User.msisdn==credentials.msisdn).first()
+    if user and  credentials.password == user.password:
+        token = sign_jwt({"msisdn": credentials.msisdn})
+        user.refresh_token = token["token"]
+        db.commit()
+        return {"msisdn": credentials.msisdn, "refresh_token": token, "access_token": token}
+    return {"status":"failed"}
+
+@router.post('/auth/logout')
+async def logtout(msisdn = Depends(JWTBearer())):
+    """ Logout (aka delete refresh token) """
+    user = db.query(User).filter(User.msisdn==msisdn).first()
+    if user and user.refresh_token:
+        user.refresh_token = ""
+        db.commit()
+    return {"status":"success"}
+
 
 class Refresh(BaseModel):
     msisdn: str
