@@ -1,0 +1,63 @@
+sim0 = {"code": 0, "message": "Normal, no NBA"}
+sim1 = {"code": 1, "message": "Restricted, recharge!"}
+sim2 = {"code": 2, "message": "Restricted, call support!"}  # block from login
+sim3 = {"code": 3, "message": "Pre-active, make first call!"}
+usim_cta = {"code": 4, "message": "Legacy SIM, upgrade to 4G!"}
+
+sim_nba_lookup = {
+    "B01": {"1": sim0, "2": sim1, "3": sim1, "4": sim2, "5": sim2},
+    "B02": {
+        "1": sim2,
+        "4": sim2,
+    },
+    "B03": {"1": sim2, "2": sim2, "3": sim2, "4": sim2, "5": sim2},
+    "B04": {"1": sim2, "2": sim2, "3": sim2, "4": sim2, "5": sim2},
+    "B06": {
+        "0": sim3,
+    },
+}
+
+eligible_primary_offerings = [
+    "100100",
+    "100163",
+    "100133",
+    "100129",
+    "2206693",
+    "100121",
+    "100120",
+    "100119",
+    "100107",
+    "100108",
+    "100111",
+    "2141792",
+    "100102",
+    "2176843",
+    "2201842",
+    "100130",
+    "100115",
+    "100114",
+    "100113",
+    "2119793",
+    "100104",
+    "100116",
+    "2229894",
+    "2231751",
+]
+
+# fake for now, in IQD
+negcred_lookup = {
+    "991": 2000,
+    "992": 4000,
+    "993": 6000,
+    "994": 8000,
+    "995": 10000,
+    "996": 12000,
+}
+
+
+def get_sub_cms_details(sub) -> dict:
+    """
+    Placeholder for fetching CMS offer details
+    """
+    sub["cms"] = {"offer_name": "Offer ABC"}
+    return sub
