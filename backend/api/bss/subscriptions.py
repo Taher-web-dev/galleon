@@ -12,8 +12,7 @@ class Subscription(BaseModel) :
     offer : dict = {}
     id : int = 0
 
-    def __init__(self, raw : dict[str, Any]):
-        super().__init__()
+    def load(self, raw : dict[str, Any]):
         self.status = int(raw.get("status", 0))
 
         self.id = raw["id"]
@@ -26,6 +25,8 @@ class Subscription(BaseModel) :
 
         self.app_handling = self.get_app_handling()
         self.offer = self.get_offer()
+
+        return self
 
     def get_offer(self) -> dict:
         """ Placeholder for fetching CMS offer details """
@@ -70,7 +71,7 @@ def get_subscriptions(msisdn: str) -> list[Subscription]:
 
     subscriptions : list[Subscription] = []
     for raw in raw_subscriptions:
-        subscription = Subscription(raw)
+        subscription = Subscription().load(raw)
         if(subscription.is_relevant()) : 
             subscriptions.append(subscription)
     return  subscriptions
