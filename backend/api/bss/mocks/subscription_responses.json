@@ -1,0 +1,86 @@
+[
+  {
+    "response": {
+      "code": "405000000",
+      "message": "Operation is successful."
+    },
+    "data": {
+      "subscriptions": [
+        {
+          "id": "200092",
+          "effective_time": "20220130153646",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        },
+        {
+          "id": "214017",
+          "effective_time": "20220327123942",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        },
+        {
+          "id": "55300",
+          "effective_time": "20220418131229",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": "20220418000000",
+          "cycle_end": "20220426000000"
+        },
+        {
+          "id": "100171",
+          "effective_time": "20220130153646",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        },
+        {
+          "id": "991",
+          "effective_time": "20220430153646",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": "20220430153646",
+          "cycle_end": "20220507153646"
+        }
+      ]
+    }
+  },
+  {
+    "response": {
+      "code": "405000000",
+      "message": "Operation is successful."
+    },
+    "data": {
+      "subscriptions": [
+        {
+          "id": "200092",
+          "effective_time": "20220130153646",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        },
+        {
+          "id": "214017",
+          "effective_time": "20220327123942",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        },
+        {
+          "id": "100171",
+          "effective_time": "20220130153646",
+          "expire_time": "20370101000000",
+          "status": "0",
+          "cycle_start": null,
+          "cycle_end": null
+        }
+      ]
+    }
+  }
+]

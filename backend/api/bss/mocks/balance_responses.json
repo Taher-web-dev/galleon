@@ -1,0 +1,22 @@
+[
+  {
+    "response": {
+      "code": "0000",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "amount": "1000000",
+      "validity": "20220801"
+    }
+  },
+  {
+    "response": {
+      "code": "0000",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "amount": "0",
+      "validity": "20220611"
+    }
+  }
+]

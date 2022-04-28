@@ -9,17 +9,18 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
-from api.debug.tests import test as debug
+from api.bss.tests import test as bss 
 
-debug_response = debug()
-report = [ {"sms": debug_response}, ]
-for one in report:
-    name = next(iter(one))
-    for api in one[name]:
-        endpoint = next(iter(api))
-        print(WARNING + name + ENDC, end =" : ")
-        print(OKGREEN + endpoint + ENDC, end =" : response code = ")
-        print(OKCYAN + str(api[endpoint]["response"]["code"]) + ENDC)
+#bss_response = bss()
+print(json.dumps(bss(), indent=2, sort_keys=True, default=str))
+#report = [ {"bss": bss_response}, ]
+#for one in report:
+#    name = next(iter(one))
+#    for api in one[name]:
+#        endpoint = next(iter(api))
+#        print(WARNING + name + ENDC, end =" : ")
+#        print(OKGREEN + endpoint + ENDC, end =" : response code = ")
+#        print(OKCYAN + str(api[endpoint]["response"]["code"]) + ENDC)
 
 
     #print(json.dumps(one[name], indent=2, sort_keys=True, default=str))

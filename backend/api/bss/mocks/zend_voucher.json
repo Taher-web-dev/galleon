@@ -1,0 +1,21 @@
+{
+  "data": {
+    "BatchID": 22030002,
+    "CallingNumber": 9647841631859,
+    "CardCosID": 101,
+    "CardCosName": "EV",
+    "CardStartDate": "2022-03-15 00:00:00+03:00",
+    "CardStopDate": "2023-03-10 00:00:00+03:00",
+    "CurDistributor": null,
+    "Currency": 1157,
+    "FaceValue": 5000000,
+    "HotCardFlag": 1,
+    "RechargeNumber": 9647841631859,
+    "SerialNo": 22030002000000,
+    "TradeTime": "2022-04-05 12:16:46+03:00"
+  },
+  "response": {
+    "code": 0,
+    "message": "Success"
+  }
+}

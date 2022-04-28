@@ -1,39 +1,32 @@
-from .mocks import BalanceResponseMock, SubscriptionsResponseMock
-from .utils import negcred_lookup
+from pydantic.main import BaseModel
+from typing import Any
+
+from .cms import negcred_lookup
+from .zend import zend_balance, zend_subcriptions
 
 
-def check_negcred(subscriptions: list) -> dict:
-    # later this would be via CMS
-    neg_cred_ids = negcred_lookup.keys()
+class WalletEntry(BaseModel):
+    value: int | None
+    expiry: str | None
 
-    data = {"loan": {"value": None, "expiry": None}}
+class Wallet(BaseModel) :
+    balance: WalletEntry 
+    loan: WalletEntry 
 
-    for sub in subscriptions:
-        if sub.get("id") in neg_cred_ids:
-            data["loan"]["value"] = negcred_lookup[sub.get("id")]
-            data["loan"]["expiry"] = sub.get(
-                "cycle_end"
-            )  # might need to be expire_time, and needs to be a timestamp
+def get_wallet(msisdn: str) -> Wallet:
+    """ Main wallet balance + negative credit subscription """
 
-    return data
+    raw_balance: dict[str, Any] = zend_balance(msisdn)
+    """{"amount": 100000, "validity":"20220801"}"""
+    raw_subscriptions: list[dict[str,Any]] = zend_subcriptions(msisdn) 
+    """[{"id": "123", "cyle_end": "20220426000000", "expire_time":"20370101000000"}]""" 
+    loan = WalletEntry(value=None, expiry=None)
+    for sub in raw_subscriptions: 
+        if sub["id"] in negcred_lookup:
+            loan.value= negcred_lookup[sub["id"]]
+            loan.expiry=sub["cycle_end"] # expiry_time timestamp?
+            break
 
-
-def get_wallet(
-    msisdn: str = None, balance_mock: int = 0, subscription_mock: int = 0
-) -> dict:
-    """
-    Combines Zain main wallet with negative credit subscriptions
-    """
-    # we would replace these with calls to the BE API GW
-    # currently handling happy scenario only i.e., no error message
-    balance_response = BalanceResponseMock(state=balance_mock).data
-    subscriptions_response = SubscriptionsResponseMock(state=subscription_mock).data
-
-    data = {**balance_response.get("data"), **subscriptions_response.get("data")}
-    amt = int(data['amount'])/1000 # converts to IQD
-    validity = data['validity']
-
-    return {
-        "balance": {"value": amt, "expiry": validity},
-        **check_negcred(data.get("subscriptions"))
-    }
+    amount = int(int(raw_balance["amount"])/ 1000) # convert from Fils to IQD
+    balance = WalletEntry(value = amount, expiry = str(raw_balance["validity"]))
+    return Wallet(balance=balance, loan=loan)

@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     slack_notify: bool = False
     listening_host: str = "0.0.0.0"
     listening_port: int = 8080
+    zend_api: str = ""
+    
     api_key: str = ""
 
     database_url: str = ""

@@ -1,3 +1,5 @@
+
+
 sim0 = {"code": 0, "message": "Normal, no NBA"}
 sim1 = {"code": 1, "message": "Restricted, recharge!"}
 sim2 = {"code": 2, "message": "Restricted, call support!"}  # block from login
@@ -54,10 +56,3 @@ negcred_lookup = {
     "996": 12000,
 }
 
-
-def get_sub_cms_details(sub) -> dict:
-    """
-    Placeholder for fetching CMS offer details
-    """
-    sub["cms"] = {"offer_name": "Offer ABC"}
-    return sub

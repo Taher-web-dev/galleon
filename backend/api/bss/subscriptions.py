@@ -1,66 +1,77 @@
-import datetime as dt
-from .mocks import SubscriptionsResponseMock
-from .utils import get_sub_cms_details
+from .zend import zend_subcriptions
 
+from pydantic.main import BaseModel
+from typing import Any
+from datetime import datetime
 
-def relevant_subscription(sub):
-    """
-    Tells us whether an offer should be listed on the app
-    """
-    # set default as irrelevant
-    relevant = False
+class Subscription(BaseModel) :
+    cycle_end : int = 0
+    expire_time : int =0 
+    status : int = 0
+    app_handling : str = ""
+    offer : dict = {}
+    id : int = 0
 
-    # cycle end date exists i.e., recurring or temporary offer
-    if sub["cycle_end"]:
+    def __init__(self, raw : dict[str, Any]):
+        super().__init__()
+        self.status = int(raw.get("status", 0))
+
+        self.id = raw["id"]
+        if "expire_time" in raw and raw["expire_time"]:
+            self.expire_time = int(datetime.fromisoformat(raw["expire_time"]).timestamp())
+
+        #print(raw["cycle_end"], raw["id"])
+        if "cycle_end" in raw and raw["cycle_end"]:
+            self.cycle_end = int(datetime.fromisoformat(raw["cycle_end"]).timestamp()) 
+
+        self.app_handling = self.get_app_handling()
+        self.offer = self.get_offer()
+
+    def get_offer(self) -> dict:
+        """ Placeholder for fetching CMS offer details """
+        return {"name": "Offer ABC"}
+
+    def is_relevant(self) -> bool:
+        """ If an offer should be listed on the app """
+        # cycle end date exists i.e., recurring or temporary offer
         # not an expired or soon-to-be expired offer
-        if sub["status"] != "2":
-            # not an expired or soon-to-be expired offer
-            if (
-                dt.datetime.strptime(sub["expire_time"], "%Y%m%d%H%M%S")
-                >= dt.datetime.today()
-            ):
-                relevant = True
-    return relevant
+        # not an expired or soon-to-be expired offer
+        #print(self.id, self.cycle_end, self.status, self.expire_time)
+        #print(int(datetime.today().timestamp()))
+        return self.cycle_end > 0 and self.status != 2 and self.expire_time >= int(datetime.today().timestamp())
 
+    def get_app_handling(self) -> str:
+        """ How the app should handle an offer """
+        if self.status == 0:
+            if self.expire_time == self.cycle_end:
+                return "Expiring"
+            elif self.expire_time > self.cycle_end:
+                return "Renewing"
+        elif self.status == 1:
+            if self.expire_time == self.cycle_end:
+                return "Cancelled"
+            elif self.expire_time > self.cycle_end:
+                return "Suspended"
+        return "Invalid" 
 
-def label_subscription(sub):
+def get_subscriptions(msisdn: str) -> list[Subscription]:
+    """ Get subscriptions for the provided msisdn """
+    raw_subscriptions = zend_subcriptions(msisdn)
     """
-    Tells us how the app should handle an offer
+    [ {
+      "id": 991,
+      "cycle_end": "2022-04-26 00:00:00+03:00",
+      "cycle_start": "2022-04-18 00:00:00+03:00",
+      "effective_time": "2022-04-18 13:12:29+03:00",
+      "expire_time": "2037-01-01 00:00:00+03:00",
+      "status": 0
+    } ]
     """
-    if sub["status"] == "0":
-        if sub["expire_time"] == sub["cycle_end"]:
-            sub["app_handling"] = "Expiring"
-        elif sub["expire_time"] > sub["cycle_end"]:
-            sub["app_handling"] = "Renewing"
-    elif sub["status"] == "1":
-        if sub["expire_time"] == sub["cycle_end"]:
-            sub["app_handling"] = "Cancelled"
-        elif sub["expire_time"] > sub["cycle_end"]:
-            sub["app_handling"] = "Suspended"
-    else:
-        raise ValueError
-    return sub
 
+    subscriptions : list[Subscription] = []
+    for raw in raw_subscriptions:
+        subscription = Subscription(raw)
+        if(subscription.is_relevant()) : 
+            subscriptions.append(subscription)
+    return  subscriptions
 
-def get_subscriptions(msisdn: str = None, subscription_mock: int = 0) -> dict:
-    """
-    Gets required info on the provided customer's current subscriptions
-    """
-    # we would replace with calls to the BE API GW
-    # currently handling happy scenario only i.e., no error message
-    data = SubscriptionsResponseMock(state=subscription_mock).data.get("data")
-
-    # add app handling
-    app_handling = [
-        label_subscription(sub)
-        for sub in data.get("subscriptions")
-        if relevant_subscription(sub)
-    ]
-
-    # add offer details
-    offer_details = [get_sub_cms_details(sub) for sub in app_handling]
-
-    # augment old subscriptions data with new app handling & CMS info
-    data["subscriptions"] = offer_details
-
-    return data

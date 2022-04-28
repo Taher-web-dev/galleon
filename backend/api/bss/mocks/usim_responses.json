@@ -1,0 +1,66 @@
+[
+  {
+    "response": {
+      "code": "0",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "sim_compatible_4G": 0,
+      "handset_compatible_4G": 0
+    }
+  },
+  {
+    "response": {
+      "code": "0",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "sim_compatible_4G": 1,
+      "handset_compatible_4G": 0
+    }
+  },
+  {
+    "response": {
+      "code": "0",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "sim_compatible_4G": 0,
+      "handset_compatible_4G": 1
+    }
+  },
+  {
+    "response": {
+      "code": "0",
+      "message": "SUCCESS"
+    },
+    "data": {
+      "sim_compatible_4G": 1,
+      "handset_compatible_4G": 1
+    }
+  },
+  {
+    "response": {
+      "code": "1001",
+      "message": "MSISDN CANNOT BE NULL"
+    }
+  },
+  {
+    "response": {
+      "code": "1002",
+      "message": "INVALID MSISDN FORMAT"
+    }
+  },
+  {
+    "response": {
+      "code": "1003",
+      "message": "MSISDN DOESNT EXIST"
+    }
+  },
+  {
+    "response": {
+      "code": "9999",
+      "message": "UNHANDLED EXCEPTION"
+    }
+  }
+]

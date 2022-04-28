@@ -59,6 +59,21 @@ def test_delete():
     response = client.post("/user/delete", headers = headers)
     # print(json.dumps(response.json()))
 
+def test_wallet():
+    headers = {"Authorization": "Bearer " + access_token}
+    response = client.get("/bss/wallet", headers = headers)
+    print(json.dumps(response.json()))
+
+def test_subscriptions():
+    headers = {"Authorization": "Bearer " + access_token}
+    response = client.get("/bss/subscriptions", headers = headers)
+    print(json.dumps(response.json()))
+
+def test_status():
+    headers = {"Authorization": "Bearer " + access_token}
+    response = client.get("/bss/status", headers = headers)
+    print(json.dumps(response.json()))
+
 code: str
 def test_request_otp():
     global code
@@ -80,13 +95,16 @@ def test_verify_otp():
     #print(json.dumps(response.json()))
 
 if __name__ == "__main__":
-    #test_register_user()
-    #test_refresh_user()
+    test_register_user()
+    test_refresh_user()
     #test_get_profile()
     #test_update_profile()
-    #test_delete()
-    test_request_otp() 
-    sleep(2)
-    test_confirm_otp() 
-    test_verify_otp() 
+    test_status()
+    test_wallet()
+    test_subscriptions()
+    test_delete()
+    #test_request_otp() 
+    #sleep(2)
+    #test_confirm_otp() 
+    #test_verify_otp() 
 

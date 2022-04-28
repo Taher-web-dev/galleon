@@ -1,0 +1,16 @@
+{
+  "data": {
+    "activation_date": "2022-01-30 16:00:25+03:00",
+    "cbs_status_code": 1,
+    "crm_status_code": "B01",
+    "crm_status_details": "Normal",
+    "customer_type": "Individual",
+    "expiry_date": "2022-05-19 00:00:00+03:00",
+    "primary_offering_id": 2122764,
+    "subscriber_type": 0
+  },
+  "response": {
+    "code": 0,
+    "message": "Success."
+  }
+}
