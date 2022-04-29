@@ -38,6 +38,8 @@ def get_sim_details(msisdn: str) -> Sim:
 	}
     """
     usim_status={"sim_compatible_4G": True} # Hardcoded until the service is available
+    print('{"SIM_STATUS": true}')
+    print(json.dumps(sim_status))
 
     app_eligibility = {"code": 9999, "message": "Ineligible"}
     if "primary_offering_id" in sim_status and sim_status["primary_offering_id"] in eligible_primary_offerings:

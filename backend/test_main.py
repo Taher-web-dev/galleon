@@ -12,7 +12,7 @@ def test_debug_sample():
     assert response.json() == {'users': ['a', 'b', 'c']}
 
 
-msisdn: str = "96478"
+msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hi"
 confirmation: str = "123"
