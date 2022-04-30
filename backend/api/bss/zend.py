@@ -8,14 +8,14 @@ from utils.settings import settings
 zend_balance_api = settings.zend_api + "esb/query-balance/"
 zend_sim_api = settings.zend_api + "esb/query-subscriber-information/"
 zend_subscriptions_api = settings.zend_api + "cbs/query-mgr-service/"
-zend_send_otp_api = settings.zend_api + "sms/send_top/"
+zend_send_sms_api = settings.zend_api + "sms/send/"
 
 path = os.path.dirname(__file__) + "/mocks/"
 
 def zend_send_otp(msisdn: str) -> None:
     with requests_mock.Mocker() as m:
-        m.get(zend_send_otp_api, text=Path(path+'./zend_otp_sent.json').read_text())
-        response = requests.post(zend_send_otp_api, json={"msisdn": msisdn})
+        m.get(zend_send_sms_api, text=Path(path+'./zend_otp_sent.json').read_text())
+        response = requests.post(zend_send_sms_api, json={"msisdn": msisdn, "message": "Hello world"})
         return response.json()
 
 
