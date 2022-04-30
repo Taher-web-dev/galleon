@@ -1,11 +1,13 @@
+""" User management apis """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
+from utils.error import Error
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
@@ -28,38 +30,47 @@ class NewUser(BaseModel):
     otp_confirmation : str
 
 class UserProfile(BaseModel):
+    id: int
     name: Optional[str]
     msisdn: Optional[str]
     email: Optional[str]
     password : Optional[str]
     profile_pic_url : Optional[str]
 
-@router.post('/add')
-async def add_new_user(new_user: NewUser):
+@router.post('/create', response_model=dict[str,Any])
+async def create_user(new_user: NewUser) -> dict[str,Any]:
     """ Register a new user """
     user = db.query(User).filter(User.msisdn==new_user.msisdn).first()
     if user:
-        return {"message":"user already exists"}
+        return Error(message="Customer already exists").dict() 
 
-    user = User(name=new_user.name, msisdn=new_user.msisdn, email=new_user.email, password=new_user.password ) 
+    user = User(msisdn= new_user.msisdn, name=new_user.name, password= new_user.password, email= new_user.email, profile_pic_url = new_user.profile_pic_url)
+    
+    #if new_user.email:
+    #    user.email = str(new_user.email)
+
+    #if new_user.profile_pic_url:
+    #    user.profile_pic_url = new_user.profile_pic_url
+
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    return {"msisdn":user.msisdn} 
+    return {"user_id": user.id} 
 
 @router.get('/profile', response_model=UserProfile, response_model_exclude_none=True)
-async def get_profile(msisdn = Depends(JWTBearer())):
+async def get_profile(msisdn = Depends(JWTBearer())) -> UserProfile:
     """ Get user profile """
     user = db.query(User).filter(User.msisdn==msisdn).first()
     return UserProfile(
+        id=user.id,
         name=user.name,
         msisdn=user.msisdn,
         email=user.email,
         password=None,
         profile_pic_url = user.profile_pic_url)
 
-@router.post('/profile')
+@router.patch('/profile')
 async def update_profile(user_profile: UserProfile, msisdn = Depends(JWTBearer())):
     """ Update user profile """
     user = db.query(User).filter(User.msisdn==msisdn).first()
@@ -73,24 +84,20 @@ async def update_profile(user_profile: UserProfile, msisdn = Depends(JWTBearer()
         user.profile_pic_url = user_profile.profile_pic_url
     db.commit()
     db.refresh(user)
-    return {"msisdn": user.msisdn}
+    return {}
 
-class Credentials(BaseModel):
-    msisdn: str
-    password: str
-
-@router.post('/auth/refresh')
-async def refresh(credentials: Credentials) -> dict:
-    """ Generate refresh token """
-    user = db.query(User).filter(User.msisdn==credentials.msisdn).first()
-    if user and  credentials.password == user.password:
-        token = sign_jwt({"msisdn": credentials.msisdn})
+@router.post('/login')
+async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
+    """ Login and generate refresh token """
+    user = db.query(User).filter(User.msisdn==msisdn).first()
+    if user and  password == user.password:
+        token = sign_jwt({"msisdn": msisdn})
         user.refresh_token = token["token"]
         db.commit()
-        return {"msisdn": credentials.msisdn, "refresh_token": token, "access_token": token}
-    return {"status":"failed"}
+        return {"refresh_token": token, "access_token": token}
+    return Error().dict()
 
-@router.post('/auth/logout')
+@router.post('/logout')
 async def logtout(msisdn = Depends(JWTBearer())):
     """ Logout (aka delete refresh token) """
     user = db.query(User).filter(User.msisdn==msisdn).first()
@@ -104,7 +111,8 @@ class Refresh(BaseModel):
     msisdn: str
     refresh_token: str
 
-@router.post('/auth/access')
+# FIXME get refresh token from header. access token shouldn't be required
+@router.post('/token')
 async def access(refresh: Refresh, msisdn=Depends(JWTBearer())):
     """ Generate access token """
     user = db.query(User).filter(User.msisdn==msisdn).first()

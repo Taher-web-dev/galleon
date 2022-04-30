@@ -9,7 +9,7 @@ import uvicorn
 # from settings import settings
 import json_logging
 from utils.settings import settings
-from api.debug.router import router as debug
+#from api.debug.router import router as debug
 from api.user.router import router as user
 from api.otp.router import router as otp
 from api.bss.router import router as bss
@@ -23,7 +23,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Galleon Middleware API",
     description="API microservice for Galleon middleware project",
-    version="0.0.1"
+    version="0.0.1",
+    redoc_url=None
 )
 
 logger = logging.getLogger(__name__)
@@ -58,9 +59,9 @@ async def middle(request: Request, call_next):
                 logger.error(str(ex), extra={'props': {'stack': stack}})
                 #print(str(ex))
                 #print(stack)
-            response = JSONResponse(status_code=500, content={"status": "failed", "error": {"code": 99, "message": "internal error"}})
+            response = JSONResponse(status_code=500, content={"status": "error", "code": 99, "message": "Internal error"})
     else:
-        response = JSONResponse(status_code=400, content={'status': 'failed', 'error': {'code': 100, 'message': 'invalid'}})
+        response = JSONResponse(status_code=400, content={'status': 'error', 'code': 100, 'message': 'Invalid request'})
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
@@ -72,21 +73,12 @@ async def middle(request: Request, call_next):
     return response
 
 
-#@app.get("/")
-#async def root():
-#    """ Sample / dummy root response """
-#    return {"Hello": "World"}
-
 # app.include_router(debug, prefix='/debug')
 app.include_router(user, prefix='/api/user')
 app.include_router(otp,  prefix='/api/otp')
 app.include_router(bss,  prefix='/api/bss')
 
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: int, q: Optional[str] = None):
-#    return {"item_id": item_id, "q": q}
-
 
 if __name__ == "__main__":
     # uvicorn.run("main:app", reload=True)
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)
+    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port) # type: ignore 

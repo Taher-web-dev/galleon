@@ -25,6 +25,10 @@ async def retrieve_subscriptions(msisdn = Depends(JWTBearer())) -> list[Subscrip
     return get_subscriptions(msisdn)
 
 @router.get('/wallet', response_model = Wallet)
-async def retrieve_wallet(msisdn = Depends(JWTBearer())) -> Wallet:
-    """ Retrieve Wallet """
+async def retrieve_wallet(msisdn = Depends(JWTBearer())):
+    """ Retrieve customer wallet's details (balance and load) """
     return get_wallet(msisdn)
+
+@router.post('/charge_voucher')
+async def api_charge_voucher():
+    return {}

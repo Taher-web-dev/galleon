@@ -1,16 +1,15 @@
 """ OTP api set """
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Body
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from utils.db import Otp, db
-
-# from typing import Optional
+from utils.error import Error
+from typing import Any
 
 router = APIRouter()
 
-@router.post('/request')
-async def generate(msisdn: str):
+@router.post('/request', response_model=dict[str, Any])
+async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str,Any]: 
     """ Request new Otp """
 
     # If a prior otp exists, delete it.
@@ -25,40 +24,29 @@ async def generate(msisdn: str):
     db.commit()
     db.refresh(otp)
     slack_notify(msisdn, code)
-    return {"msisdn": otp.msisdn}
+    return {}
 
-class OtpConfirm(BaseModel):
-    msisdn: str # Optional[str]
-    code: str
 
-@router.post('/confirm')
-async def confirm(confirm: OtpConfirm):
+@router.post('/confirm', response_model=dict[str,Any])
+async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, Any]:
     """ Confirm Otp """
-    otp = db.query(Otp).filter(Otp.msisdn==confirm.msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
     if otp: 
         otp.tries += 1
         db.commit()
         db.refresh(otp)
-        if otp.code == confirm.code:
+        if otp.code == code:
             otp.confirmation = gen_alphanumeric()
             db.commit()
             db.refresh(otp)
-            return {"status": "success", "msisdn": confirm.msisdn, "confirmation": otp.confirmation}
-    return {"status": "failed"}
+            return {"confirmation": otp.confirmation}
+    return Error().dict()
 
 
-def verify(msisdn: str, confirmation: str):
+@router.post('/verify', response_model=dict[str,Any])
+async def api_verify(msisdn: str = Body(...), confirmation: str = Body(...)) -> dict[str,Any]:
+    """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
-    return otp and otp.confirmation and otp.confirmation == confirmation
-    
-
-class OtpVerify(BaseModel):
-    msisdn: str # Optional[str]
-    confirmation: str
-
-@router.post('/verify')
-async def api_verify(otp_verify: OtpVerify):
-    """Verify otp status"""
-    if verify(otp_verify.msisdn, otp_verify.confirmation): 
-        return {"msisdn": otp_verify.msisdn, "status": "success"}
-    return {"status": "failed"}
+    if otp and otp.confirmation and otp.confirmation == confirmation:
+        return {}
+    return Error().dict()

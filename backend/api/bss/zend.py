@@ -37,7 +37,7 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
 def zend_subcriptions(msisdn: str) -> list[dict[str,Any]]:
     with requests_mock.Mocker() as m:
         m.get(zend_subscriptions_api+msisdn, text=Path(path+'./zend_mgr_service.json').read_text())
-        response = requests.get(zend_subscriptions_api+msisdn) # , json={"msisdn": msisdn})
+        response = requests.get(zend_subscriptions_api+msisdn) 
         json = response.json()
         return json["data"]["subscriptions"]
 
