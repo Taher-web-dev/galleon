@@ -72,15 +72,15 @@ async def middle(request: Request, call_next):
     return response
 
 
-@app.get("/")
-async def root():
-    """ Sample / dummy root response """
-    return {"Hello": "World"}
+#@app.get("/")
+#async def root():
+#    """ Sample / dummy root response """
+#    return {"Hello": "World"}
 
-app.include_router(debug, prefix='/debug')
-app.include_router(user, prefix='/user')
-app.include_router(otp, prefix='/otp')
-app.include_router(bss, prefix='/bss')
+# app.include_router(debug, prefix='/debug')
+app.include_router(user, prefix='/api/user')
+app.include_router(otp,  prefix='/api/otp')
+app.include_router(bss,  prefix='/api/bss')
 
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):

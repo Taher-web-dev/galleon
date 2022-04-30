@@ -14,14 +14,17 @@ from ..user.router import JWTBearer
 
 router = APIRouter()
 
-@router.get('/status', response_model=Sim)
-async def api_status(msisdn = Depends(JWTBearer())) -> Sim:
+@router.get('/sim_status', response_model=Sim)
+async def retrieve_status(msisdn = Depends(JWTBearer())) -> Sim:
+    """ Retrieve SIM status """
     return get_sim_details(msisdn)
 
 @router.get('/subscriptions', response_model = list[Subscription])
-async def api_subscriptions(msisdn = Depends(JWTBearer())) -> list[Subscription]:
+async def retrieve_subscriptions(msisdn = Depends(JWTBearer())) -> list[Subscription]:
+    """ Retrieve subscriptions list """
     return get_subscriptions(msisdn)
 
 @router.get('/wallet', response_model = Wallet)
-async def api_wallet(msisdn = Depends(JWTBearer())) -> Wallet:
+async def retrieve_wallet(msisdn = Depends(JWTBearer())) -> Wallet:
+    """ Retrieve Wallet """
     return get_wallet(msisdn)

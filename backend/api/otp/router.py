@@ -9,7 +9,7 @@ from utils.db import Otp, db
 
 router = APIRouter()
 
-@router.post('/request/{msisdn}')
+@router.post('/request')
 async def generate(msisdn: str):
     """ Request new Otp """
 
@@ -57,7 +57,7 @@ class OtpVerify(BaseModel):
     confirmation: str
 
 @router.post('/verify')
-async def _verify(otp_verify: OtpVerify):
+async def api_verify(otp_verify: OtpVerify):
     """Verify otp status"""
     if verify(otp_verify.msisdn, otp_verify.confirmation): 
         return {"msisdn": otp_verify.msisdn, "status": "success"}

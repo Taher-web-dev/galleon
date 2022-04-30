@@ -19,7 +19,7 @@ class JWTBearer(HTTPBearer):
 
 router = APIRouter()
 
-class RegisterUser(BaseModel):
+class NewUser(BaseModel):
     name: str
     msisdn: str
     email: Optional[str]
@@ -34,8 +34,8 @@ class UserProfile(BaseModel):
     password : Optional[str]
     profile_pic_url : Optional[str]
 
-@router.post('/register')
-async def register(new_user: RegisterUser):
+@router.post('/add')
+async def add_new_user(new_user: NewUser):
     """ Register a new user """
     user = db.query(User).filter(User.msisdn==new_user.msisdn).first()
     if user:

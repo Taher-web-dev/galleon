@@ -12,6 +12,18 @@ class Subscription(BaseModel) :
     offer : dict = {}
     id : int = 0
 
+    class Config:
+        schema_extra = {
+            "example": {
+              "id": 991,
+              "cycle_end": "2022-04-26 00:00:00+03:00",
+              "cycle_start": "2022-04-18 00:00:00+03:00",
+              "effective_time": "2022-04-18 13:12:29+03:00",
+              "expire_time": "2037-01-01 00:00:00+03:00",
+              "status": 0
+            }
+        }
+
     def load(self, raw : dict[str, Any]):
         self.status = int(raw.get("status", 0))
 

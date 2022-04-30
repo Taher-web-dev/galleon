@@ -21,14 +21,14 @@ def zend_send_otp(msisdn: str) -> None:
 
 def zend_balance(msisdn: str) -> dict[str, Any]:
     with requests_mock.Mocker() as m:
-        m.get(zend_balance_api, text=Path(path+'./zend_balance.json').read_text())
+        m.get(zend_balance_api+msisdn, text=Path(path+'./zend_balance.json').read_text())
         response = requests.get(zend_balance_api+msisdn) # , json={"msisdn": msisdn})
         json = response.json()
         return json["data"]
 
 def zend_sim(msisdn: str) -> dict[str, Any]:
     with requests_mock.Mocker() as m:
-        m.get(zend_sim_api, text=Path(path+'./zend_sim.json').read_text())
+        m.get(zend_sim_api+msisdn, text=Path(path+'./zend_sim.json').read_text())
         response = requests.get(zend_sim_api+msisdn) # , json={"msisdn": msisdn})
         json = response.json()
         return json["data"]

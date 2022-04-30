@@ -14,6 +14,24 @@ class Sim(BaseModel):
     customer_type: str # = "Individual"
     subcriber_type: int # = 0
     sim_status_nba: dict[str, Any]
+    is_eligibile: bool = False
+    associated_with_user: bool = False
+
+    class Config:
+        schema_extra = {
+            "example": {
+              "associated_with_user" : False,
+              "is_eligibile" : True,
+              "customer_type": "Individual",
+              "subscriber_type": 0,
+              "primary_offering_id": 2122764,
+              "activation_date": "2022-01-30 16:00:25+03:00",
+              "cbs_status_code": 1,
+              "crm_status_code": "B01",
+              "crm_status_details": "Normal",
+              "expiry_date": "2022-05-19 00:00:00+03:00",
+            }
+        }
 
 def get_sim_details(msisdn: str) -> Sim:
     """
@@ -38,8 +56,8 @@ def get_sim_details(msisdn: str) -> Sim:
 	}
     """
     usim_status={"sim_compatible_4G": True} # Hardcoded until the service is available
-    print('{"SIM_STATUS": true}')
-    print(json.dumps(sim_status))
+    #print('{"SIM_STATUS": true}')
+    #print(json.dumps(sim_status))
 
     app_eligibility = {"code": 9999, "message": "Ineligible"}
     if "primary_offering_id" in sim_status and sim_status["primary_offering_id"] in eligible_primary_offerings:
