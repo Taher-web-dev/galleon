@@ -1,6 +1,6 @@
 from json.decoder import JSONDecodeError
 from pydantic.main import BaseModel
-from typing import Any
+from typing import Union, Optional, Any
 from utils.error import Error
 
 from .cms import negcred_lookup
@@ -8,8 +8,8 @@ from .zend import zend_balance, zend_subcriptions
 
 
 class WalletEntry(BaseModel):
-    value: int | None
-    expiry: str | None
+    value: Optional[int] 
+    expiry: Optional[str]
 
 class Wallet(BaseModel) :
     balance: WalletEntry 
@@ -29,7 +29,7 @@ class Wallet(BaseModel) :
             }
         }
 
-def get_wallet(msisdn: str) -> Wallet | Error:
+def get_wallet(msisdn: str) -> Union[Wallet, Error]:
     """ Main wallet balance + negative credit subscription """
 
     try:

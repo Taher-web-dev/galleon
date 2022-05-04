@@ -1,24 +1,6 @@
-## FastApi Skeleton
+## Galleon Middleware
 
-A python Fastapi skeleton that is crafted to fit specific needs: Building a simple api-only backend. 
-
-### Features
-
-- Using `json_logging` and FastApi middleware to create jsonl (JSON Lines) log file 
-  - Easy to view and query using tools like `jq`
-  - Captures errors/exception with stacktrace
-  - Produces a log entry for every api call with extensible details
-- Settings setup to feed from `dotenv` style (File or Environment variables) 
-  - Port/Listen address
-  - Database connection string
-  - Log file path (jsonl)
-- Database configuration using `SQLAlchemy`
-- Suggested code structure
-  - `api` folder: apis are broken into api-sets, each Api set is served from a separate directory and can be mounted arbitrarily on the main api route. e.g. /my1stapiset, /2ndapiset ...etc.
-  - `utils` folder: contains common code like settings, db models ...etc.
-- Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules (the file fastapi-backend.tar.gz below) is only 23MB. This also makes it ideal for air-gapped deployements (copying the image to a server that doesn't have internet access). 
-- Templated json/xml api requests using jinja2
-- Basic external api mocking using requests_mock
+A thin-wrapper that implements basic business logic and invokes respective zain backend api end points.
 
 ### Install / usage
 
@@ -34,13 +16,6 @@ Optional:
 - gzip
 
 
-#### Clone the code
-
-```
-git clone https://github.com/kefahi/fastapi.git
-cd fastapi
-```
-
 #### Local / Direct Setup
 
 ```
@@ -51,6 +26,9 @@ mkdir ../logs/
 
 cd backend 
 export BACKEND_ENV=sample.env 
+
+# Install pytest
+pip install -r backend/requirements-dev.txt 
 
 # Unit test
 python tests.py
@@ -71,24 +49,23 @@ python main.py
 
 ```
 # Build
-podman rmi fastapi-backend
-podman build -t fastapi-backend .
+podman rmi galleon-middleware
+podman build -t galleon-middleware .
 
 # Run 
-podman run --name fastapi-backend --rm \
-  -e DATABASE_URL="postgresql://MYDBUSER:MYPASS@DBSERVERIP/DB" \
+podman run --name galleon-middleware --rm \
   -p 127.0.0.1:8080:8080/tcp \
-  -it fastapi-backend \
+  -it galleon-middleware \
   /home/backend/run.sh
   
 # Command line access inside the container
-podman exec -it fastapi-backend ash
+podman exec -it galleon-middleware ash
 
 # The image can be saved to a file for off-line deployement
-podman save --quiet fastapi-backend | gzip > fastapi-backend.tar.gz
+podman save --quiet galleon-middleware | gzip > galleon-middleware.tar.gz
 
 # Then loaded at the target system
-podman load -i fastapi-backend.tar.gz
+podman load -i galleon-middleware.tar.gz
 ```
 
 

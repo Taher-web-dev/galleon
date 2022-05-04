@@ -13,8 +13,8 @@ class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> str | None:
-        credentials: HTTPAuthorizationCredentials | None = await super(JWTBearer, self).__call__(request)
+    async def __call__(self, request: Request) -> Optional[str]:
+        credentials: Optional[HTTPAuthorizationCredentials]  = await super(JWTBearer, self).__call__(request)
         if credentials and credentials.scheme == "Bearer":
             return decode_jwt(credentials.credentials)["msisdn"]
 
