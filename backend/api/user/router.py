@@ -30,7 +30,7 @@ class NewUser(BaseModel):
     otp_confirmation : str
 
 class UserProfile(BaseModel):
-    id: int
+    id: Optional[int]
     name: Optional[str]
     msisdn: Optional[str]
     email: Optional[str]
