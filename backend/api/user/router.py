@@ -1,6 +1,6 @@
 """ User management apis """
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Header
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
@@ -18,27 +18,31 @@ class JWTBearer(HTTPBearer):
         if credentials and credentials.scheme == "Bearer":
             return decode_jwt(credentials.credentials)["msisdn"]
 
-
 router = APIRouter()
 
-class NewUser(BaseModel):
+class UserCreate(BaseModel):
+    otp_confirmation : str
     name: str
     msisdn: str
-    email: Optional[str]
     password: str
     profile_pic_url : Optional[str]
-    otp_confirmation : str
+    email: Optional[str]
 
-class UserProfile(BaseModel):
-    id: Optional[int]
+class UserUpdate(BaseModel):
     name: Optional[str]
-    msisdn: Optional[str]
     email: Optional[str]
     password : Optional[str]
     profile_pic_url : Optional[str]
 
+class UserRetrieve(BaseModel):
+    id: int
+    status: str
+    name: Optional[str]
+    email: Optional[str]
+    profile_pic_url : Optional[str]
+
 @router.post('/create', response_model=dict[str,Any])
-async def create_user(new_user: NewUser) -> dict[str,Any]:
+async def create_user(new_user: UserCreate) -> dict[str,Any]:
     """ Register a new user """
     user = db.query(User).filter(User.msisdn==new_user.msisdn).first()
     if user:
@@ -46,32 +50,25 @@ async def create_user(new_user: NewUser) -> dict[str,Any]:
 
     user = User(msisdn= new_user.msisdn, name=new_user.name, password= new_user.password, email= new_user.email, profile_pic_url = new_user.profile_pic_url)
     
-    #if new_user.email:
-    #    user.email = str(new_user.email)
-
-    #if new_user.profile_pic_url:
-    #    user.profile_pic_url = new_user.profile_pic_url
-
     db.add(user)
     db.commit()
     db.refresh(user)
 
     return {"user_id": user.id} 
 
-@router.get('/profile', response_model=UserProfile, response_model_exclude_none=True)
-async def get_profile(msisdn = Depends(JWTBearer())) -> UserProfile:
+@router.get('/profile', response_model=UserRetrieve, response_model_exclude_none=True)
+async def get_profile(msisdn = Depends(JWTBearer())) -> UserRetrieve:
     """ Get user profile """
     user = db.query(User).filter(User.msisdn==msisdn).first()
-    return UserProfile(
+    return UserRetrieve(
+        status="success",
         id=user.id,
         name=user.name,
-        msisdn=user.msisdn,
         email=user.email,
-        password=None,
         profile_pic_url = user.profile_pic_url)
 
 @router.patch('/profile')
-async def update_profile(user_profile: UserProfile, msisdn = Depends(JWTBearer())):
+async def update_profile(user_profile: UserUpdate, msisdn = Depends(JWTBearer())):
     """ Update user profile """
     user = db.query(User).filter(User.msisdn==msisdn).first()
     if user_profile.name:
@@ -84,7 +81,7 @@ async def update_profile(user_profile: UserProfile, msisdn = Depends(JWTBearer()
         user.profile_pic_url = user_profile.profile_pic_url
     db.commit()
     db.refresh(user)
-    return {}
+    return {"status":"success"}
 
 @router.post('/login')
 async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
@@ -94,7 +91,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
         token = sign_jwt({"msisdn": msisdn})
         user.refresh_token = token["token"]
         db.commit()
-        return {"refresh_token": token, "access_token": token}
+        return {"status": "success", "refresh_token": token, "access_token": token}
     return Error().dict()
 
 @router.post('/logout')
@@ -107,17 +104,19 @@ async def logtout(msisdn = Depends(JWTBearer())):
     return {"status":"success"}
 
 
-class Refresh(BaseModel):
-    msisdn: str
-    refresh_token: str
-
-# FIXME get refresh token from header. access token shouldn't be required
 @router.post('/token')
-async def access(refresh: Refresh, msisdn=Depends(JWTBearer())):
-    """ Generate access token """
-    user = db.query(User).filter(User.msisdn==msisdn).first()
-    assert refresh.msisdn == user.msisdn
-    return {"access_token": refresh}
+async def gen_access_token(refresh_token : Optional[str] = Header(None)):
+    """ Generate access token from provided refresh token """
+    
+    if refresh_token is not None:
+        data = decode_jwt(refresh_token)
+        if "msisdn" in data:
+            msisdn = data["msisdn"]
+            user = db.query(User).filter(User.msisdn=="msisdn").first()
+            if user is not None:
+                return {"status": "success", "access_token" : sign_jwt({"msisdn": msisdn})}
+    return {"status": "failed", "code": 99}
+
 
 @router.post('/delete')
 async def delete(msisdn = Depends(JWTBearer())):
@@ -126,4 +125,4 @@ async def delete(msisdn = Depends(JWTBearer())):
     assert user
     db.delete(user)
     db.commit()
-    return {"msisdn": msisdn}
+    return {"status": "success"}

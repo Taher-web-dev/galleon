@@ -4,12 +4,13 @@ This is the middle-ware that connects with
 zain backend systems (aka zain-backend)
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi import Depends
 
 from .balance import get_wallet, Wallet
 from .sim import get_sim_details, Sim 
 from .subscriptions import get_subscriptions, Subscription
+from .zend import recharge_voucher
 from ..user.router import JWTBearer
 
 router = APIRouter()
@@ -30,5 +31,5 @@ async def retrieve_wallet(msisdn = Depends(JWTBearer())):
     return get_wallet(msisdn)
 
 @router.post('/charge_voucher')
-async def api_charge_voucher():
-    return {}
+async def api_charge_voucher(msisdn = Depends(JWTBearer()), pin : str = Body(...)):
+    return recharge_voucher(msisdn, pin)
