@@ -15,21 +15,25 @@ from ..user.router import JWTBearer
 
 router = APIRouter()
 
-@router.get('/sim_status', response_model=Sim)
-async def retrieve_status(msisdn = Depends(JWTBearer())) -> Sim:
+@router.get('/sim-status/{msisdn}', response_model=Sim)
+async def retrieve_status(msisdn : str, session_msisdn = Depends(JWTBearer())) -> Sim:
     """ Retrieve SIM status """
+    assert msisdn == session_msisdn
     return get_sim_details(msisdn)
 
-@router.get('/subscriptions', response_model = list[Subscription])
-async def retrieve_subscriptions(msisdn = Depends(JWTBearer())) -> list[Subscription]:
+@router.get('/subscriptions/{msisdn}', response_model = list[Subscription])
+async def retrieve_subscriptions(msisdn : str, session_msisdn = Depends(JWTBearer())) -> list[Subscription]:
     """ Retrieve subscriptions list """
+    assert msisdn == session_msisdn
     return get_subscriptions(msisdn)
 
-@router.get('/wallet', response_model = Wallet)
-async def retrieve_wallet(msisdn = Depends(JWTBearer())):
+@router.get('/wallet/{msisdn}', response_model = Wallet)
+async def retrieve_wallet(msisdn : str, session_msisdn = Depends(JWTBearer())):
     """ Retrieve customer wallet's details (balance and load) """
+    assert msisdn == session_msisdn
     return get_wallet(msisdn)
 
-@router.post('/charge_voucher')
-async def api_charge_voucher(msisdn = Depends(JWTBearer()), pin : str = Body(...)):
-    return recharge_voucher(msisdn, pin)
+@router.post('/charge-voucher')
+async def api_charge_voucher(msisdn = Body(...), pincode : str = Body(...), session_msisdn = Depends(JWTBearer())):
+    assert msisdn == session_msisdn
+    return recharge_voucher(msisdn, pincode)

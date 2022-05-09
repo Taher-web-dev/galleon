@@ -25,10 +25,12 @@ pip install -r backend/requirements.txt
 mkdir ../logs/
 
 cd backend 
-export BACKEND_ENV=sample.env 
 
 # Install pytest
 pip install -r backend/requirements-dev.txt 
+
+cp sample.env secrets.env
+source env.sh
 
 # Unit test
 python tests.py
@@ -66,6 +68,16 @@ podman save --quiet galleon-middleware | gzip > galleon-middleware.tar.gz
 
 # Then loaded at the target system
 podman load -i galleon-middleware.tar.gz
+
+# Stop/start container
+podman stop galleon-middleware
+podman start galleon-middleware
+
+# Watch podman logs
+podman logs --follow --tail 0 galleon-middleware | jq
+
+# Watch app logs
+tail -n 0 -f ./logs/x-ljson.log | jq
 ```
 
 

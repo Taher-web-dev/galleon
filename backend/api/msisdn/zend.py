@@ -7,7 +7,7 @@ from utils.settings import settings
 
 zend_balance_api = settings.zend_api + "esb/query-balance/"
 zend_sim_api = settings.zend_api + "esb/query-subscriber-information/"
-zend_recharge_voucher_api = settings.zend_api + "esb/recharge_voucher/"
+zend_recharge_voucher_api = settings.zend_api + "esb/recharge-voucher/"
 zend_subscriptions_api = settings.zend_api + "cbs/query-mgr-service/"
 zend_send_sms_api = settings.zend_api + "sms/send/"
 
@@ -16,7 +16,7 @@ path = os.path.dirname(__file__) + "/mocks/"
 
 def recharge_voucher(msisdn : str, pin : str) -> dict :
     with requests_mock.Mocker() as m:
-        m.get(zend_recharge_voucher_api, text=Path(path+'./zend_recharge_voucher.json').read_text())
+        m.post(zend_recharge_voucher_api, text=Path(path+'./zend_recharge_voucher.json').read_text())
         response = requests.post(zend_recharge_voucher_api, json={"msisdn": msisdn, "pin": pin})
         return response.json()
 

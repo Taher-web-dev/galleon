@@ -59,7 +59,7 @@ async def middle(request: Request, call_next):
                 logger.error(str(ex), extra={'props': {'stack': stack}})
                 #print(str(ex))
                 #print(stack)
-            response = JSONResponse(status_code=500, content={"status": "error", "code": 99, "message": "Internal error"})
+            response = JSONResponse(status_code=500, content={"status": "error", "code": 99, "message": "Internal error", "debug": {"description": str(ex)}})
     else:
         response = JSONResponse(status_code=400, content={'status': 'error', 'code': 100, 'message': 'Invalid request'})
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
