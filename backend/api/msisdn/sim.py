@@ -213,12 +213,13 @@ def get_sim_nba(sim_status: dict) -> SimNba:
         and sim_status["cbs_status_code"]
         in sim_nba_lookup[sim_status["crm_status_code"]]
     ):
-        return sim_nba_lookup[sim_status["crm_status_code"]][
+        nba = sim_nba_lookup[sim_status["crm_status_code"]][
             sim_status["cbs_status_code"]
         ]
+        return SimNba(code=nba["code"], message=nba["message"])
     else:
         # TODO log this & ideally post to Slack or the CMS (later)
-        return sim9999
+        return SimNba(code=sim9999["code"], message=sim9999["message"])
 
 
 def get_nba(msisdn: str, sim_nba: SimNba, usim_status: dict) -> Nba:
