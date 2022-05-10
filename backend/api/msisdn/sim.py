@@ -107,18 +107,6 @@ def get_sim_details(msisdn: str) -> Sim:
     """
     # fetch SIM status
     sim_status = zend_sim(msisdn)
-    """
-	{
-	  "activation_date": "2022-01-30 16:00:25+03:00",
-	  "cbs_status_code": 1,
-	  "crm_status_code": "B01",
-	  "crm_status_details": "Normal",
-	  "customer_type": "Individual",
-	  "expiry_date": "2022-05-19 00:00:00+03:00",
-	  "primary_offering_id": 2122764,
-	  "subscriber_type": 0
-	}
-    """
 
     # fetch USIM status
     usim_status = {
@@ -142,13 +130,13 @@ def get_sim_details(msisdn: str) -> Sim:
         expiry_date=sim_status["expiry_date"],
         customer_type=sim_status["customer_type"],
         subscriber_type=sim_status["subscriber_type"],
+        
         # injected info
         app_eligibility=app_eligibility,
         sim_nba=sim_nba,
         sim_compatible_4G=usim_status["sim_compatible_4G"],
         nba=nba,
-        app_eligibility=app_eligibility,
-        sim_compatible_4G=usim_status["sim_compatible_4G"],
+
         # user info
         associated_with_user=False,
     )
