@@ -162,35 +162,35 @@ def check_app_eligibility(sim_status: dict, sim_nba: SimNba) -> dict:
     TODO should we raise as errors not return?
     """
     # starting point
-    app_eligibility = {"code": 9999, "message": "Generic ineligibility"}
+    app_eligibility = AppEligibility(code=9999, message="Generic ineligibility")
 
     # handle for missing critical data points
     if "primary_offering_id" not in sim_status:
-        return {"code": 9001, "message": "Primary offering not found"}
+        return AppEligibility(code=9001, message="Primary offering not found")
 
     if "customer_type" not in sim_status:
-        return {"code": 9002, "message": "Customer type not found"}
+        return AppEligibility(code=9002, message="Customer type not found")
 
     if "subscriber_type" not in sim_status:
-        return {"code": 9003, "message": "Subscriber type not found"}
+        return AppEligibility(code=9003, message="Subscriber type not found")
 
     # handle for datapoint validity
     if sim_status["primary_offering_id"] not in eligible_primary_offerings:
-        return {"code": 9004, "message": "Ineligible primary offering"}
+        return AppEligibility(code=9004, message="Ineligible primary offering")
 
     if sim_status["customer_type"] != "Individual":
-        return {"code": 9005, "message": "Ineligible customer type"}
+        return AppEligibility(code=9005, message="Ineligible customer type")
 
     if sim_status["subscriber_type"] != 0:
-        return {"code": 9006, "message": "Ineligible subscriber type"}
+        return AppEligibility(code=9006, message="Ineligible subscriber type")
 
     # handle for sim-specific issues
     if sim_nba.code == 2:
-        return {"code": 9007, "message": "Blocked SIM card - call support"}
+        return AppEligibility(code=9007, message="Blocked SIM card - call support")
 
     # handle for our one specific eligibility (a bit redundant but later will make sense with postpaid)
     if sim_status["subscriber_type"] == 0:
-        app_eligibility = {"code": 0, "message": "Prepaid B2C Mobile"}
+        return AppEligibility(code=0, message="Prepaid B2C Mobile")
 
     return app_eligibility
 
