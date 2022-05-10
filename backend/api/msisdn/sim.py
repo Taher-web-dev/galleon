@@ -232,11 +232,11 @@ def get_nba(msisdn: str, sim_nba: SimNba, usim_status: dict) -> Nba:
 
     # if we get a SIM status NBA that makes sense i.e., not normal or unknown, use it
     if sim_nba.code not in [0, 9999]:
-        nba = {**sim_nba["nba"]}
+        nba = sim_nba["nba"]
 
     # otherwise, if SIM not 4G eligible then use this one
     elif usim_status["sim_compatible_4G"] == 0:
-        nba = {**usim_cta["nba"]}
+        nba = usim_cta["nba"]
 
     # TODO this is where we'll put step 3 logic later incl. offers (which could be driven by MSISDN)
     else:

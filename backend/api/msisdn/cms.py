@@ -115,12 +115,13 @@ eligible_primary_offerings: list[int] = [
     2231751,
 ]
 
-# fake for now, in IQD
+# using CBS ID - other IDs available if needed; in IQD
+# apparently this is consistent across TB and production envs for CBS IDs
 negcred_lookup: dict[int, int] = {
-    991: 2000,
-    992: 4000,
-    993: 6000,
-    994: 8000,
-    995: 10000,
-    996: 12000,
+    2086106: 2000,
+    2086107: 4000,
+    2086108: 6000,
+    2086109: 8000,
+    2086110: 10000,
+    2086111: 12000,
 }
