@@ -59,6 +59,7 @@ class Sim(BaseModel):
 
     # our injected info
     app_eligibility: AppEligibility
+    is_eligible: bool
     sim_nba: SimNba
     sim_compatible_4G: bool
     nba: Nba
@@ -80,6 +81,7 @@ class Sim(BaseModel):
                 "subscriber_type": 0,
                 # injected info
                 "app_eligibility": {"code": 0, "message": "Prepaid B2C Mobile"},
+                "is_eligible": True,
                 "sim_nba": {"code": 0, "message": "Normal, no NBA"},
                 "sim_compatible_4G": True,
                 "nba": {
@@ -133,6 +135,7 @@ def get_sim_details(msisdn: str) -> Sim:
         
         # injected info
         app_eligibility=app_eligibility,
+        is_eligible=True if app_eligibility['code'] == 0 else False,
         sim_nba=sim_nba,
         sim_compatible_4G=usim_status["sim_compatible_4G"],
         nba=nba,
