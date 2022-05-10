@@ -176,6 +176,9 @@ def check_app_eligibility(sim_status: dict, sim_nba: SimNba) -> dict:
     if sim_nba.code == 2:
         return AppEligibility(code=9007, message="Blocked SIM card - call support")
 
+    if sim_nba.code == 3:
+        return AppEligibility(code=9008, message="Inactive SIM, please activate")
+
     # handle for our one specific eligibility (a bit redundant but later will make sense with postpaid)
     if sim_status["subscriber_type"] == 0:
         return AppEligibility(code=0, message="Prepaid B2C Mobile")
