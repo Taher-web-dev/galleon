@@ -17,8 +17,8 @@ SIM99 = {"code": 99, "message": "Critical Support & Log"}
 
 SIM_STATUS_LOOKUP = {
     "B01": {1: SIM0, 2: SIM1, 3: SIM1, 4: SIM2, 5: SIM90},
-    "B02": {1: SIM91, 4: SIM90},
-    "B03": {0: SIM91, 1: SIM91, 2: SIM91, 3: SIM91, 4: SIM90, 5: SIM90},
+    "B02": {1: SIM90, 4: SIM90},
+    "B03": {0: SIM90, 1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
     "B04": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
     "B06": {0: SIM92},
 }
