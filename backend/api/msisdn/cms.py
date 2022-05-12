@@ -1,19 +1,98 @@
+# NORMAL
+SIM0 = {"code": 0, "message": "Normal"}
 
-sim0 = {"code": 0, "message": "Normal, no NBA"}
-sim1 = {"code": 1, "message": "Restricted, recharge!"}
-sim2 = {"code": 2, "message": "Restricted, call support!"}  # block from login
-sim3 = {"code": 3, "message": "Pre-active, make first call!"}
-usim_cta = {"code": 4, "message": "Legacy SIM, upgrade to 4G!"}
+# NOT NORMAL BUT CAN ACCESS
+SIM1 = {"code": 1, "message": "Recharge"}
+SIM2 = {"code": 2, "message": "Support"}
 
-sim_nba_lookup = {
-    "B01": {1: sim0, 2: sim1, 3: sim1, 4: sim2, 5: sim2},
-    "B02": {1: sim2, 4: sim2},
-    "B03": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
-    "B04": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
-    "B06": {0: sim3},
+# CANNOT ACCESS - GENERIC BUT KNOWN
+SIM90 = {"code": 90, "message": "Critical Support"}
+
+# CANNOT ACCESS - SPECIFIC AND KNOWN
+SIM91 = {"code": 91, "message": "Disconnected"}
+SIM92 = {"code": 92, "message": "Activate"}
+
+# CANNOT ACCESS - UNKNOWN COMBINATION
+SIM99 = {"code": 99, "message": "Critical Support & Log"}
+
+SIM_STATUS_LOOKUP = {
+    "B01": {1: SIM0, 2: SIM1, 3: SIM1, 4: SIM2, 5: SIM90},
+    "B02": {1: SIM90, 4: SIM90},
+    "B03": {0: SIM90, 1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
+    "B04": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
+    "B06": {0: SIM92},
 }
 
-eligible_primary_offerings : list[int] = [
+SIM_NBA_LOOKUP = {
+    0: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    1: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    2: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    3: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    90: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    99: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+}
+
+
+USIM_NBA = {
+    "href": "",
+    "message_en": "",
+    "message_ar": "",
+    "message_kd": "",
+    "href_text_en": "",
+    "href_text_ar": "",
+    "href_text_kd": "",
+}
+
+
+eligible_primary_offerings: list[int] = [
     100100,
     100163,
     100133,
@@ -40,13 +119,13 @@ eligible_primary_offerings : list[int] = [
     2231751,
 ]
 
-# fake for now, in IQD
-negcred_lookup : dict[int, int] = {
-    991: 2000,
-    992: 4000,
-    993: 6000,
-    994: 8000,
-    995: 10000,
-    996: 12000,
+# using CBS ID - other IDs available if needed; in IQD
+# apparently this is consistent across TB and production envs for CBS IDs
+negcred_lookup: dict[int, int] = {
+    2086106: 2000,
+    2086107: 4000,
+    2086108: 6000,
+    2086109: 8000,
+    2086110: 10000,
+    2086111: 12000,
 }
-
