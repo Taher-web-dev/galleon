@@ -10,12 +10,13 @@ from fastapi import Depends
 from .balance import get_wallet, Wallet
 from .sim import get_sim_details, Sim 
 from .subscriptions import get_subscriptions, Subscription
-from .zend import recharge_voucher
+from .zend import recharge_voucher, change_supplementary_offering
 from ..user.router import JWTBearer
+from utils.settings import settings
 
 router = APIRouter()
 
-@router.get('/sim-status/{msisdn}', response_model=Sim)
+@router.get('/status/{msisdn}', response_model=Sim)
 async def retrieve_status(msisdn : str, session_msisdn = Depends(JWTBearer())) -> Sim:
     """ Retrieve SIM status """
     assert msisdn == session_msisdn
@@ -32,6 +33,11 @@ async def retrieve_wallet(msisdn : str, session_msisdn = Depends(JWTBearer())):
     """ Retrieve customer wallet's details (balance and load) """
     assert msisdn == session_msisdn
     return get_wallet(msisdn)
+
+@router.post('/redeem-registration-gift')
+async def api_registration_gift(msisdn : str = Body(..., embed=True), session_msisdn = Depends(JWTBearer())):
+    assert msisdn == session_msisdn
+    return change_supplementary_offering(msisdn, settings.registration_gift_offer_id, True)
 
 @router.post('/charge-voucher')
 async def api_charge_voucher(msisdn = Body(...), pincode : str = Body(...), session_msisdn = Depends(JWTBearer())):

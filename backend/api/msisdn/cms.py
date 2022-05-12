@@ -7,10 +7,7 @@ usim_cta = {"code": 4, "message": "Legacy SIM, upgrade to 4G!"}
 
 sim_nba_lookup = {
     "B01": {1: sim0, 2: sim1, 3: sim1, 4: sim2, 5: sim2},
-    "B02": {
-        1: sim2,
-        4: sim2,
-    },
+    "B02": {1: sim2, 4: sim2},
     "B03": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
     "B04": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
     "B06": {0: sim3},

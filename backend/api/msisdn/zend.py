@@ -10,8 +10,16 @@ zend_sim_api = settings.zend_api + "esb/query-subscriber-information/"
 zend_recharge_voucher_api = settings.zend_api + "esb/recharge-voucher/"
 zend_subscriptions_api = settings.zend_api + "cbs/query-mgr-service/"
 zend_send_sms_api = settings.zend_api + "sms/send/"
+zend_change_supplementary_offering_api = settings.zend_api + "/esb/change-supplementary-offering"
 
 path = os.path.dirname(__file__) + "/mocks/"
+
+
+def change_supplementary_offering(msisdn : str, offer_id : str, add_offering : bool) -> dict :
+    with requests_mock.Mocker() as m:
+        m.post(zend_change_supplementary_offering_api, text=Path(path+'./zend_change_supplementary_offering.json').read_text())
+        response = requests.post(zend_change_supplementary_offering_api, json={"msisdn": msisdn, "offer_id": offer_id, "add_offering": add_offering})
+        return response.json()
 
 
 def recharge_voucher(msisdn : str, pin : str) -> dict :

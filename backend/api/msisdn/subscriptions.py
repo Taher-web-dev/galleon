@@ -88,3 +88,5 @@ def get_subscriptions(msisdn: str) -> list[Subscription]:
             subscriptions.append(subscription)
     return  subscriptions
 
+def redeem_registration_gift(msisdn: str) -> dict: 
+    return {"msisdn": msisdn}

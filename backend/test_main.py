@@ -52,6 +52,16 @@ def test_update_profile():
     assert response.status_code == status.HTTP_200_OK
     # print(json.dumps(response.json()))
 
+def test_redeem_registration_gift():
+    headers = {
+        "Authorization": "Bearer " + access_token,
+        "Content-Type": "application/json"
+    }
+    response = client.post("/api/msisdn/redeem-registration-gift", headers = headers, json={"msisdn": msisdn})
+    print(json.dumps(response.json()))
+    assert response.status_code == status.HTTP_200_OK
+
+
 def test_logout():
     headers = {"Authorization": "Bearer " + access_token}
     response = client.post("/api/user/logout", headers = headers)
@@ -87,7 +97,7 @@ def test_charge_voucher():
 
 def test_sim_status():
     headers = {"Authorization": "Bearer " + access_token}
-    response = client.get(f"/api/msisdn/sim-status/{msisdn}", headers = headers)
+    response = client.get(f"/api/msisdn/status/{msisdn}", headers = headers)
     assert response.status_code == status.HTTP_200_OK
 
 code: str
@@ -115,17 +125,18 @@ def test_verify_otp():
     #print(json.dumps(response.json()))
 
 if __name__ == "__main__":
-    #test_create_user()
-    #test_login_user()
+    test_create_user()
+    test_login_user()
     #test_get_profile()
     #test_update_profile()
     #test_sim_status()
     #test_wallet()
     #test_subscriptions()
-    #test_delete()
     #test_request_otp() 
     #sleep(2)
     #test_confirm_otp() 
     #test_verify_otp() 
+    test_redeem_registration_gift()
+    test_delete()
     pass
 
