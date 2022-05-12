@@ -2,12 +2,12 @@ from pydantic.main import BaseModel
 from typing import Any
 import json
 
-from .cms import eligible_primary_offerings, sim_nba_lookup, usim_cta, sim9999
+from .cms import eligible_primary_offerings, SIM_STATUS_LOOKUP, USIM_NBA, SIM99, SIM_NBA_LOOKUP
 
 from .zend import zend_sim
 
 
-class AppEligibility(BaseModel):
+class SimEligibility(BaseModel):
     code: int
     message: str
 
@@ -15,7 +15,7 @@ class AppEligibility(BaseModel):
         schema_extra = {"example": {"code": 0, "message": "Prepaid B2C Mobile"}}
 
 
-class SimNba(BaseModel):
+class MiddlewareSimStatus(BaseModel):
     code: int
     message: str
 
@@ -58,9 +58,9 @@ class Sim(BaseModel):
     subscriber_type: int
 
     # our injected info
-    app_eligibility: AppEligibility
+    app_eligibility: SimEligibility
     is_eligible: bool
-    sim_nba: SimNba
+    mw_sim_status: MiddlewareSimStatus
     sim_compatible_4G: bool
     nba: Nba
 
@@ -82,7 +82,7 @@ class Sim(BaseModel):
                 # injected info
                 "app_eligibility": {"code": 0, "message": "Prepaid B2C Mobile"},
                 "is_eligible": True,
-                "sim_nba": {"code": 0, "message": "Normal, no NBA"},
+                "mw_sim_status": {"code": 0, "message": "Normal, no NBA"},
                 "sim_compatible_4G": True,
                 "nba": {
                     "href": "https://apps.iq.zain.com/zain-fi",
@@ -108,7 +108,7 @@ def get_sim_details(msisdn: str) -> Sim:
     TODO Add WeWebit USIM service - prod. env only
     """
     # fetch SIM status
-    sim_status = zend_sim(msisdn)
+    backend_sim_status = zend_sim(msisdn)
 
     # fetch USIM status
     usim_status = {
@@ -116,36 +116,34 @@ def get_sim_details(msisdn: str) -> Sim:
     }  # Hardcoded until the service is available
 
     # assess app eligibility
-    app_eligibility = check_app_eligibility(sim_status)
+    app_eligibility = check_app_eligibility(backend_sim_status)
 
-    sim_nba = get_sim_nba(sim_status)
+    mw_sim_status = get_mw_sim_status(backend_sim_status)
 
-    nba = get_nba(msisdn, sim_nba, usim_status)
+    nba = get_nba(msisdn, mw_sim_status, usim_status)
 
     return Sim(
         # backend response - mainly for debug
-        primary_offering_id=sim_status["primary_offering_id"],
-        cbs_status_code=sim_status["cbs_status_code"],
-        crm_status_code=sim_status["crm_status_code"],
-        crm_status_details=sim_status["crm_status_details"],
-        activation_date=sim_status["activation_date"],
-        expiry_date=sim_status["expiry_date"],
-        customer_type=sim_status["customer_type"],
-        subscriber_type=sim_status["subscriber_type"],
-        
+        primary_offering_id=backend_sim_status["primary_offering_id"],
+        cbs_status_code=backend_sim_status["cbs_status_code"],
+        crm_status_code=backend_sim_status["crm_status_code"],
+        crm_status_details=backend_sim_status["crm_status_details"],
+        activation_date=backend_sim_status["activation_date"],
+        expiry_date=backend_sim_status["expiry_date"],
+        customer_type=backend_sim_status["customer_type"],
+        subscriber_type=backend_sim_status["subscriber_type"],
         # injected info
         app_eligibility=app_eligibility,
-        is_eligible=True if app_eligibility['code'] == 0 else False,
-        sim_nba=sim_nba,
+        is_eligible=True if app_eligibility["code"] == 0 else False,
+        mw_sim_status=mw_sim_status,
         sim_compatible_4G=usim_status["sim_compatible_4G"],
         nba=nba,
-
         # user info
         associated_with_user=False,
     )
 
 
-def check_app_eligibility(sim_status: dict, sim_nba: SimNba) -> dict:
+def check_app_eligibility(backend_sim_status: dict, mw_sim_status: MiddlewareSimStatus) -> dict:
     """
     Given raw backend sim_status response and a sim_nba,
     confirm eligiblity & handling on the app
@@ -153,46 +151,44 @@ def check_app_eligibility(sim_status: dict, sim_nba: SimNba) -> dict:
     TODO should we raise as errors not return?
     """
     # starting point
-    app_eligibility = AppEligibility(code=9999, message="Generic ineligibility")
+    app_eligibility = SimEligibility(code=9999, message="Generic ineligibility")
 
     # handle for missing critical data points
-    if "primary_offering_id" not in sim_status:
-        return AppEligibility(code=9001, message="Primary offering not found")
-
-    if "customer_type" not in sim_status:
-        return AppEligibility(code=9002, message="Customer type not found")
-
-    if "subscriber_type" not in sim_status:
-        return AppEligibility(code=9003, message="Subscriber type not found")
+    if (
+        "primary_offering_id" not in backend_sim_status
+        or "customer_type" not in backend_sim_status
+        or "subscriber_type" not in backend_sim_status
+    ):
+        return SimEligibility(code=9001, message="Incomplete backend response")
 
     # handle for datapoint validity
-    if sim_status["primary_offering_id"] not in eligible_primary_offerings:
-        return AppEligibility(code=9004, message="Ineligible primary offering")
-
-    if sim_status["customer_type"] != "Individual":
-        return AppEligibility(code=9005, message="Ineligible customer type")
-
-    if sim_status["subscriber_type"] != 0:
-        return AppEligibility(code=9006, message="Ineligible subscriber type")
+    if backend_sim_status["primary_offering_id"] not in eligible_primary_offerings:
+        return SimEligibility(code=9002, message="Ineligible primary offering")
+    if backend_sim_status["customer_type"] != "Individual":
+        return SimEligibility(code=9003, message="Ineligible customer type")
+    if backend_sim_status["subscriber_type"] != 0:
+        return SimEligibility(code=9004, message="Ineligible subscriber type")
 
     # handle for sim-specific issues
-    if sim_nba.code == 2:
-        return AppEligibility(code=9007, message="Blocked SIM card - call support")
+    if mw_sim_status.code == 90:
+        return SimEligibility(code=9007, message="Blocked SIM card - call support")
 
-    if sim_nba.code == 3:
-        return AppEligibility(code=9008, message="Inactive SIM, please activate")
+    if mw_sim_status.code == 0:
+        return SimEligibility(code=9008, message="Inactive SIM, please activate")
 
-    if sim_nba.code == 9999:
-        return AppEligibility(code=9009, message="Unknown SIM configuration, please investigate")
+    if mw_sim_status.code == 99:
+        return SimEligibility(
+            code=9999, message="Unknown SIM configuration, please investigate"
+        )
 
     # handle for our one specific eligibility (a bit redundant but later will make sense with postpaid)
-    if sim_status["subscriber_type"] == 0:
-        return AppEligibility(code=0, message="Prepaid B2C Mobile")
+    if backend_sim_status["subscriber_type"] == 0:
+        return SimEligibility(code=0, message="Prepaid B2C Mobile")
 
     return app_eligibility
 
 
-def get_sim_nba(sim_status: dict) -> SimNba:
+def get_mw_sim_status(backend_sim_status: dict) -> MiddlewareSimStatus:
     """
     Based on provided sim_status (with CRM and CBS code keys),
     we return the next best action for the SIM e.g., to recharge.
@@ -204,22 +200,22 @@ def get_sim_nba(sim_status: dict) -> SimNba:
     {"code": 1, "message": "Restricted, recharge!"}
     """
     if (
-        "crm_status_code" in sim_status
-        and sim_status["crm_status_code"] in sim_nba_lookup
-        and "cbs_status_code" in sim_status
-        and sim_status["cbs_status_code"]
-        in sim_nba_lookup[sim_status["crm_status_code"]]
+        "crm_status_code" in backend_sim_status
+        and backend_sim_status["crm_status_code"] in SIM_STATUS_LOOKUP
+        and "cbs_status_code" in backend_sim_status
+        and backend_sim_status["cbs_status_code"]
+        in SIM_STATUS_LOOKUP[backend_sim_status["crm_status_code"]]
     ):
-        nba = sim_nba_lookup[sim_status["crm_status_code"]][
-            sim_status["cbs_status_code"]
+        mw_sim_status = SIM_STATUS_LOOKUP[backend_sim_status["crm_status_code"]][
+            backend_sim_status["cbs_status_code"]
         ]
-        return SimNba(code=nba["code"], message=nba["message"])
+        return MiddlewareSimStatus(**mw_sim_status)
     else:
         # TODO log this & ideally post to Slack or the CMS (later)
-        return SimNba(code=sim9999["code"], message=sim9999["message"])
+        return MiddlewareSimStatus(code=SIM99["code"], message=SIM99["message"])
 
 
-def get_nba(msisdn: str, sim_nba: SimNba, usim_status: dict) -> Nba:
+def get_nba(msisdn: str, sim_nba: MiddlewareSimStatus, usim_status: dict) -> Nba:
     """
     Provides NBA for the MSISDN. Covers:
     - 4G call to action for legacy SIM users
@@ -239,13 +235,13 @@ def get_nba(msisdn: str, sim_nba: SimNba, usim_status: dict) -> Nba:
     # blank slate
     nba: dict = {}
 
-    # if we get a SIM status NBA that makes sense i.e., not normal or unknown, use it
-    if sim_nba.code not in [0, 9999]:
-        nba = sim_nba["nba"]
+    # if we get a SIM status NBA that isn't normal, use it
+    if sim_nba.code != 1:
+        nba = Nba(**SIM_NBA_LOOKUP[sim_nba.code])
 
     # otherwise, if SIM not 4G eligible then use this one
     elif usim_status["sim_compatible_4G"] == 0:
-        nba = usim_cta["nba"]
+        nba = Nba(**USIM_NBA)
 
     # TODO this is where we'll put step 3 logic later incl. offers (which could be driven by MSISDN)
     else:

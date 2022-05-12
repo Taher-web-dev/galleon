@@ -1,91 +1,73 @@
-sim0 = {
-    "code": 0,
-    "message": "Normal, no NBA",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
-}
-sim1 = {
-    "code": 1,
-    "message": "Restricted, recharge!",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
-}
-sim2 = {
-    "code": 2,
-    "message": "Restricted, call support!",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
-}
-sim3 = {
-    "code": 3,
-    "message": "Pre-active, make first call!",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
-}
-usim_cta = {
-    "code": 4,
-    "message": "Legacy SIM, upgrade to 4G!",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
-}
-sim9999 = {
-    "code": 9999,
-    "message": "Unknown SIM combination",
-    "nba": {
-        "href": "",
-        "message_en": "",
-        "message_ar": "",
-        "message_kd": "",
-        "href_text_en": "",
-        "href_text_ar": "",
-        "href_text_kd": "",
-    },
+SIM0 = {"code": 0, "message": "Activate"}
+SIM1 = {"code": 1, "message": "Normal"}
+SIM2 = {"code": 2, "message": "Recharge"}
+SIM3 = {"code": 3, "message": "Support"}  # PLACEHOLDER
+SIM90 = {"code": 90, "message": "Critical Support"}
+SIM99 = {"code": 99, "message": "Critical Support & Log"}
+
+SIM_STATUS_LOOKUP = {
+    "B01": {1: SIM1, 2: SIM2, 3: SIM2, 4: SIM90, 5: SIM90},
+    "B02": {1: SIM90, 4: SIM90},
+    "B03": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
+    "B04": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
+    "B06": {0: SIM0},
 }
 
-sim_nba_lookup = {
-    "B01": {1: sim0, 2: sim1, 3: sim1, 4: sim2, 5: sim2},
-    "B02": {
-        1: sim2,
-        4: sim2,
+sim_nbas = {
+    0: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
     },
-    "B03": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
-    "B04": {1: sim2, 2: sim2, 3: sim2, 4: sim2, 5: sim2},
-    "B06": {0: sim3},
+    1: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    2: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    3: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    90: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    99: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
 }
 
 eligible_primary_offerings: list[int] = [
