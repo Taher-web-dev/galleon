@@ -1,16 +1,26 @@
-SIM0 = {"code": 0, "message": "Activate"}
-SIM1 = {"code": 1, "message": "Normal"}
-SIM2 = {"code": 2, "message": "Recharge"}
-SIM50 = {"code": 50, "message": "Disconnected"}
+# NORMAL
+SIM0 = {"code": 0, "message": "Normal"}
+
+# NOT NORMAL BUT CAN ACCESS
+SIM1 = {"code": 1, "message": "Recharge"}
+SIM2 = {"code": 2, "message": "Support"}
+
+# CANNOT ACCESS - GENERIC BUT KNOWN
 SIM90 = {"code": 90, "message": "Critical Support"}
+
+# CANNOT ACCESS - SPECIFIC AND KNOWN
+SIM91 = {"code": 91, "message": "Disconnected"}
+SIM92 = {"code": 92, "message": "Activate"}
+
+# CANNOT ACCESS - UNKNOWN COMBINATION
 SIM99 = {"code": 99, "message": "Critical Support & Log"}
 
 SIM_STATUS_LOOKUP = {
-    "B01": {1: SIM1, 2: SIM2, 3: SIM2, 4: SIM90, 5: SIM90},
-    "B02": {1: SIM50, 4: SIM90},
-    "B03": {0: SIM50, 1: SIM50, 2: SIM50, 3: SIM50, 4: SIM90, 5: SIM90},
+    "B01": {1: SIM0, 2: SIM1, 3: SIM1, 4: SIM2, 5: SIM90},
+    "B02": {1: SIM91, 4: SIM90},
+    "B03": {0: SIM91, 1: SIM91, 2: SIM91, 3: SIM91, 4: SIM90, 5: SIM90},
     "B04": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
-    "B06": {0: SIM0},
+    "B06": {0: SIM92},
 }
 
 SIM_NBA_LOOKUP = {
