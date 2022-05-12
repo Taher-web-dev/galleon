@@ -215,7 +215,7 @@ def get_mw_sim_status(backend_sim_status: dict) -> MiddlewareSimStatus:
         return MiddlewareSimStatus(code=SIM99["code"], message=SIM99["message"])
 
 
-def get_nba(msisdn: str, sim_nba: MiddlewareSimStatus, usim_status: dict) -> Nba:
+def get_nba(msisdn: str, mw_sim_status: MiddlewareSimStatus, usim_status: dict) -> Nba:
     """
     Provides NBA for the MSISDN. Covers:
     - 4G call to action for legacy SIM users
@@ -236,8 +236,8 @@ def get_nba(msisdn: str, sim_nba: MiddlewareSimStatus, usim_status: dict) -> Nba
     nba: dict = {}
 
     # if we get a SIM status NBA that isn't normal, use it
-    if sim_nba.code != 1:
-        nba = Nba(**SIM_NBA_LOOKUP[sim_nba.code])
+    if mw_sim_status.code != 1:
+        nba = Nba(**SIM_NBA_LOOKUP[mw_sim_status.code])
 
     # otherwise, if SIM not 4G eligible then use this one
     elif usim_status["sim_compatible_4G"] == 0:
