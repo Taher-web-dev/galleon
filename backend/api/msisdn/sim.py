@@ -7,20 +7,12 @@ from .cms import eligible_primary_offerings, SIM_STATUS_LOOKUP, USIM_NBA, SIM99,
 from .zend import zend_sim
 
 
-class SimEligibility(BaseModel):
-    code: int
-    message: str
-
-    class Config:
-        schema_extra = {"example": {"code": 0, "message": "Prepaid B2C Mobile"}}
-
-
 class MiddlewareSimStatus(BaseModel):
     code: int
     message: str
 
     class Config:
-        schema_extra = {"example": {"code": 0, "message": "Normal, no NBA"}}
+        schema_extra = {"example": {"code": 1, "message": "Normal"}}
 
 
 class Nba(BaseModel):
@@ -58,7 +50,6 @@ class Sim(BaseModel):
     subscriber_type: int
 
     # our injected info
-    app_eligibility: SimEligibility
     is_eligible: bool
     mw_sim_status: MiddlewareSimStatus
     sim_compatible_4G: bool
@@ -80,7 +71,6 @@ class Sim(BaseModel):
                 "customer_type": "Individual",
                 "subscriber_type": 0,
                 # injected info
-                "app_eligibility": {"code": 0, "message": "Prepaid B2C Mobile"},
                 "is_eligible": True,
                 "mw_sim_status": {"code": 1, "message": "Normal"},
                 "sim_compatible_4G": True,
@@ -116,8 +106,6 @@ def get_sim_details(msisdn: str) -> Sim:
     }  # Hardcoded until the service is available
 
     # assess app eligibility
-    app_eligibility = check_app_eligibility(backend_sim_status)
-
     mw_sim_status = get_mw_sim_status(backend_sim_status)
 
     nba = get_nba(msisdn, mw_sim_status, usim_status)
@@ -133,59 +121,13 @@ def get_sim_details(msisdn: str) -> Sim:
         customer_type=backend_sim_status["customer_type"],
         subscriber_type=backend_sim_status["subscriber_type"],
         # injected info
-        app_eligibility=app_eligibility,
-        is_eligible=True if app_eligibility["code"] == 0 else False,
+        is_eligible=True if (mw_sim_status["code"] < 50 and mw_sim_status["code"] > 0) else False,
         mw_sim_status=mw_sim_status,
         sim_compatible_4G=usim_status["sim_compatible_4G"],
         nba=nba,
         # user info
         associated_with_user=False,
     )
-
-
-def check_app_eligibility(backend_sim_status: dict, mw_sim_status: MiddlewareSimStatus) -> dict:
-    """
-    Given raw backend sim_status response and a sim_nba,
-    confirm eligiblity & handling on the app
-
-    TODO should we raise as errors not return?
-    """
-    # starting point
-    app_eligibility = SimEligibility(code=9999, message="Generic ineligibility")
-
-    # handle for missing critical data points
-    if (
-        "primary_offering_id" not in backend_sim_status
-        or "customer_type" not in backend_sim_status
-        or "subscriber_type" not in backend_sim_status
-    ):
-        return SimEligibility(code=9001, message="Incomplete backend response")
-
-    # handle for datapoint validity
-    if backend_sim_status["primary_offering_id"] not in eligible_primary_offerings:
-        return SimEligibility(code=9002, message="Ineligible primary offering")
-    if backend_sim_status["customer_type"] != "Individual":
-        return SimEligibility(code=9003, message="Ineligible customer type")
-    if backend_sim_status["subscriber_type"] != 0:
-        return SimEligibility(code=9004, message="Ineligible subscriber type")
-
-    # handle for sim-specific issues
-    if mw_sim_status.code == 90:
-        return SimEligibility(code=9007, message="Blocked SIM card - call support")
-
-    if mw_sim_status.code == 0:
-        return SimEligibility(code=9008, message="Inactive SIM, please activate")
-
-    if mw_sim_status.code == 99:
-        return SimEligibility(
-            code=9999, message="Unknown SIM configuration, please investigate"
-        )
-
-    # handle for our one specific eligibility (a bit redundant but later will make sense with postpaid)
-    if backend_sim_status["subscriber_type"] == 0:
-        return SimEligibility(code=0, message="Prepaid B2C Mobile")
-
-    return app_eligibility
 
 
 def get_mw_sim_status(backend_sim_status: dict) -> MiddlewareSimStatus:
@@ -196,8 +138,7 @@ def get_mw_sim_status(backend_sim_status: dict) -> MiddlewareSimStatus:
     sim_status: dict should contain crm_status_code & cbs_status_code from Zain backend.
 
     Example response:
-    {"code": 0, "message": "Normal, no NBA"}
-    {"code": 1, "message": "Restricted, recharge!"}
+    {"code": 1, "message": "Normal"}
     """
     if (
         "crm_status_code" in backend_sim_status

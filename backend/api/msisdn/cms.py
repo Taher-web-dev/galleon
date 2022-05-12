@@ -1,14 +1,14 @@
 SIM0 = {"code": 0, "message": "Activate"}
 SIM1 = {"code": 1, "message": "Normal"}
 SIM2 = {"code": 2, "message": "Recharge"}
-SIM3 = {"code": 3, "message": "Support"}  # PLACEHOLDER, NOT USED
+SIM50 = {"code": 50, "message": "Disconnected"}
 SIM90 = {"code": 90, "message": "Critical Support"}
 SIM99 = {"code": 99, "message": "Critical Support & Log"}
 
 SIM_STATUS_LOOKUP = {
     "B01": {1: SIM1, 2: SIM2, 3: SIM2, 4: SIM90, 5: SIM90},
-    "B02": {1: SIM90, 4: SIM90},
-    "B03": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
+    "B02": {1: SIM50, 4: SIM90},
+    "B03": {0: SIM50, 1: SIM50, 2: SIM50, 3: SIM50, 4: SIM90, 5: SIM90},
     "B04": {1: SIM90, 2: SIM90, 3: SIM90, 4: SIM90, 5: SIM90},
     "B06": {0: SIM0},
 }
