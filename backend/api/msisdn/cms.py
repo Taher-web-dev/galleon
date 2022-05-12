@@ -1,7 +1,7 @@
 SIM0 = {"code": 0, "message": "Activate"}
 SIM1 = {"code": 1, "message": "Normal"}
 SIM2 = {"code": 2, "message": "Recharge"}
-SIM3 = {"code": 3, "message": "Support"}  # PLACEHOLDER
+SIM3 = {"code": 3, "message": "Support"}  # PLACEHOLDER, NOT USED
 SIM90 = {"code": 90, "message": "Critical Support"}
 SIM99 = {"code": 99, "message": "Critical Support & Log"}
 
@@ -13,7 +13,7 @@ SIM_STATUS_LOOKUP = {
     "B06": {0: SIM0},
 }
 
-sim_nbas = {
+SIM_NBA_LOOKUP = {
     0: {
         "href": "",
         "message_en": "",
@@ -69,6 +69,18 @@ sim_nbas = {
         "href_text_kd": "",
     },
 }
+
+
+USIM_NBA = {
+    "href": "",
+    "message_en": "",
+    "message_ar": "",
+    "message_kd": "",
+    "href_text_en": "",
+    "href_text_ar": "",
+    "href_text_kd": "",
+}
+
 
 eligible_primary_offerings: list[int] = [
     100100,

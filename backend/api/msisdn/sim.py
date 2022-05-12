@@ -82,7 +82,7 @@ class Sim(BaseModel):
                 # injected info
                 "app_eligibility": {"code": 0, "message": "Prepaid B2C Mobile"},
                 "is_eligible": True,
-                "mw_sim_status": {"code": 0, "message": "Normal, no NBA"},
+                "mw_sim_status": {"code": 1, "message": "Normal"},
                 "sim_compatible_4G": True,
                 "nba": {
                     "href": "https://apps.iq.zain.com/zain-fi",
