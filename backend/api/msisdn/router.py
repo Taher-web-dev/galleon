@@ -22,14 +22,14 @@ async def retrieve_status(msisdn : str, session_msisdn = Depends(JWTBearer())) -
     assert msisdn == session_msisdn
     return get_sim_details(msisdn)
 
-@router.get('/subscriptions/{msisdn}', response_model = list[Subscription])
-async def retrieve_subscriptions(msisdn : str, session_msisdn = Depends(JWTBearer())) -> list[Subscription]:
+@router.get('/subscriptions', response_model = list[Subscription])
+async def retrieve_subscriptions(msisdn : str = Body(..., embed=True), session_msisdn = Depends(JWTBearer())) -> list[Subscription]:
     """ Retrieve subscriptions list """
     assert msisdn == session_msisdn
     return get_subscriptions(msisdn)
 
-@router.get('/wallet/{msisdn}', response_model = Wallet)
-async def retrieve_wallet(msisdn : str, session_msisdn = Depends(JWTBearer())):
+@router.get('/wallet', response_model = Wallet)
+async def retrieve_wallet(msisdn : str = Body(..., embed=True), session_msisdn = Depends(JWTBearer())):
     """ Retrieve customer wallet's details (balance and load) """
     assert msisdn == session_msisdn
     return get_wallet(msisdn)

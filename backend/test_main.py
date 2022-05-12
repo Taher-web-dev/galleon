@@ -75,14 +75,20 @@ def test_delete():
     # print(json.dumps(response.json()))
 
 def test_wallet():
-    headers = {"Authorization": "Bearer " + access_token}
-    response = client.get(f"/api/msisdn/wallet/{msisdn}", headers = headers)
+    headers = {
+        "Authorization": "Bearer " + access_token,
+        "Content-Type": "application/json"
+    }
+    response = client.get(f"/api/msisdn/wallet", json={"msisdn": msisdn}, headers = headers)
     assert response.status_code == status.HTTP_200_OK
     # print(json.dumps(response.json()))
 
 def test_subscriptions():
-    headers = {"Authorization": "Bearer " + access_token}
-    response = client.get(f"/api/msisdn/subscriptions/{msisdn}", headers = headers)
+    headers = {
+        "Authorization": "Bearer " + access_token,
+        "Content-Type": "application/json"
+    }
+    response = client.get("/api/msisdn/subscriptions", json={"msisdn": msisdn}, headers = headers)
     assert response.status_code == status.HTTP_200_OK
     #print(json.dumps(response.json()))
 
@@ -129,7 +135,7 @@ if __name__ == "__main__":
     test_login_user()
     #test_get_profile()
     #test_update_profile()
-    #test_sim_status()
+    test_sim_status()
     #test_wallet()
     #test_subscriptions()
     #test_request_otp() 

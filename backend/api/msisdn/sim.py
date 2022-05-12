@@ -121,7 +121,7 @@ def get_sim_details(msisdn: str) -> Sim:
         customer_type=backend_sim_status["customer_type"],
         subscriber_type=backend_sim_status["subscriber_type"],
         # injected info
-        is_eligible=True if mw_sim_status["code"] < 90 else False,
+        is_eligible=True if mw_sim_status.code < 90 else False,
         mw_sim_status=mw_sim_status,
         sim_compatible_4G=usim_status["sim_compatible_4G"],
         nba=nba,
