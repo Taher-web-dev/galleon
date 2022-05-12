@@ -57,7 +57,7 @@ def test_redeem_registration_gift():
         "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json"
     }
-    response = client.post("/api/msisdn/redeem-registration-gift", headers = headers, json={"msisdn": msisdn})
+    response = client.post("/api/number/redeem-registration-gift", headers = headers, json={"msisdn": msisdn})
     print(json.dumps(response.json()))
     assert response.status_code == status.HTTP_200_OK
 
@@ -79,7 +79,7 @@ def test_wallet():
         "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json"
     }
-    response = client.get(f"/api/msisdn/wallet", json={"msisdn": msisdn}, headers = headers)
+    response = client.get(f"/api/number/wallet", json={"msisdn": msisdn}, headers = headers)
     assert response.status_code == status.HTTP_200_OK
     # print(json.dumps(response.json()))
 
@@ -88,7 +88,7 @@ def test_subscriptions():
         "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json"
     }
-    response = client.get("/api/msisdn/subscriptions", json={"msisdn": msisdn}, headers = headers)
+    response = client.get("/api/number/subscriptions", json={"msisdn": msisdn}, headers = headers)
     assert response.status_code == status.HTTP_200_OK
     #print(json.dumps(response.json()))
 
@@ -97,13 +97,13 @@ def test_charge_voucher():
         "Authorization": "Bearer " + access_token, 
         "Content-Type": "application/json"
     }
-    response = client.post("/api/msisdn/charge-voucher", headers = headers, json={'msisdn': msisdn, 'pincode': 1111})
+    response = client.post("/api/number/charge-voucher", headers = headers, json={'msisdn': msisdn, 'pincode': 1111})
     assert response.status_code == status.HTTP_200_OK, response.json()
     # print(json.dumps(response.json()))
 
 def test_sim_status():
     headers = {"Authorization": "Bearer " + access_token}
-    response = client.get(f"/api/msisdn/status/{msisdn}", headers = headers)
+    response = client.get(f"/api/number/status/{msisdn}", headers = headers)
     assert response.status_code == status.HTTP_200_OK
 
 code: str

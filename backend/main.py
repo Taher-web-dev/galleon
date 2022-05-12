@@ -12,7 +12,7 @@ from utils.settings import settings
 #from api.debug.router import router as debug
 from api.user.router import router as user
 from api.otp.router import router as otp
-from api.msisdn.router import router as msisdn
+from api.number.router import router as number
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -76,7 +76,7 @@ async def middle(request: Request, call_next):
 # app.include_router(debug, prefix='/debug')
 app.include_router(user, prefix='/api/user')
 app.include_router(otp,  prefix='/api/otp')
-app.include_router(msisdn,  prefix='/api/msisdn')
+app.include_router(number,  prefix='/api/number')
 
 
 if __name__ == "__main__":

@@ -9,10 +9,10 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
-from api.msisdn.tests import test as msisdn 
+from api.number.tests import test as number 
 
 #bss_response = bss()
-print(json.dumps(msisdn(), indent=2, sort_keys=True, default=str))
+print(json.dumps(number(), indent=2, sort_keys=True, default=str))
 #report = [ {"bss": bss_response}, ]
 #for one in report:
 #    name = next(iter(one))
