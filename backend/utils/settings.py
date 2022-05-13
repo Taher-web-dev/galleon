@@ -14,16 +14,15 @@ class Settings(BaseSettings):
     slack_notify: bool = False
     listening_host: str = "0.0.0.0"
     listening_port: int = 8080
-    registration_gift_offer_id : str = "7841631859"
+    registration_gift_offer_id : str = "2111742"
     zend_api: str = ""
+    mock_zain_api: bool = False
     
     api_key: str = ""
 
     database_url: str = ""
 
 
-    freegeoip_api: str = ""
-    mocked_com_api: str = ""
 
     class Config:
         """ Load config """

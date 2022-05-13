@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Body
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
+from ..number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.error import Error
 from typing import Any
@@ -23,8 +24,9 @@ async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str,Any]:
     db.add(otp)
     db.commit()
     db.refresh(otp)
+    response = zend_send_sms(msisdn, f"Your otp code is {code}")
     slack_notify(msisdn, code)
-    return {}
+    return response
 
 
 @router.post('/confirm', response_model=dict[str,Any])
@@ -39,7 +41,7 @@ async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, A
             otp.confirmation = gen_alphanumeric()
             db.commit()
             db.refresh(otp)
-            return {"confirmation": otp.confirmation}
+            return {"status": "success", "confirmation": otp.confirmation}
     return Error().dict()
 
 
@@ -48,5 +50,5 @@ async def api_verify(msisdn: str = Body(...), confirmation: str = Body(...)) -> 
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
     if otp and otp.confirmation and otp.confirmation == confirmation:
-        return {}
+        return {"status": "success"}
     return Error().dict()

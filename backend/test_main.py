@@ -131,18 +131,18 @@ def test_verify_otp():
     #print(json.dumps(response.json()))
 
 if __name__ == "__main__":
-    test_create_user()
-    test_login_user()
+    #test_create_user()
+    #test_login_user()
     #test_get_profile()
     #test_update_profile()
-    test_sim_status()
+    #test_sim_status()
     #test_wallet()
     #test_subscriptions()
-    #test_request_otp() 
+    test_request_otp() 
     #sleep(2)
-    #test_confirm_otp() 
-    #test_verify_otp() 
-    test_redeem_registration_gift()
-    test_delete()
+    test_confirm_otp() 
+    test_verify_otp() 
+    #test_redeem_registration_gift()
+    #test_delete()
     pass
 
