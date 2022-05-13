@@ -39,6 +39,9 @@ async def app_startup():
     logger.info("Starting")
     Base.metadata.create_all(bind=engine)
 
+@app.on_event("shutdown")
+async def app_shutdown():
+    logger.info("Application shutdown")
 
 @app.middleware("http")
 async def middle(request: Request, call_next):
@@ -73,7 +76,6 @@ async def middle(request: Request, call_next):
     return response
 
 
-# app.include_router(debug, prefix='/debug')
 app.include_router(user, prefix='/api/user')
 app.include_router(otp,  prefix='/api/otp')
 app.include_router(number,  prefix='/api/number')

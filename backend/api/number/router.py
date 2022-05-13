@@ -16,8 +16,8 @@ from utils.settings import settings
 
 router = APIRouter()
 
-@router.get('/status/{msisdn}', response_model=Sim)
-async def retrieve_status(msisdn : str, session_msisdn = Depends(JWTBearer())) -> Sim:
+@router.get('/status', response_model=Sim)
+async def retrieve_status(msisdn : str = Body(..., embed=True), session_msisdn = Depends(JWTBearer())) -> Sim:
     """ Retrieve SIM status """
     assert msisdn == session_msisdn
     return get_sim_details(msisdn)
