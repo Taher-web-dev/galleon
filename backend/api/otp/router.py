@@ -9,16 +9,17 @@ from typing import Any
 
 router = APIRouter()
 
-@router.post('/request', response_model=dict[str, Any])
-async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str,Any]: 
-    """ Request new Otp """
+
+@router.post("/request", response_model=dict[str, Any])
+async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str, Any]:
+    """Request new Otp"""
 
     # If a prior otp exists, delete it.
-    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp:
         db.delete(otp)
         db.commit()
-    
+
     code = gen_numeric()
     otp = Otp(msisdn=msisdn, code=code)
     db.add(otp)
@@ -29,11 +30,11 @@ async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str,Any]:
     return response
 
 
-@router.post('/confirm', response_model=dict[str,Any])
+@router.post("/confirm", response_model=dict[str, Any])
 async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, Any]:
-    """ Confirm Otp """
-    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
-    if otp: 
+    """Confirm Otp"""
+    otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
+    if otp:
         otp.tries += 1
         db.commit()
         db.refresh(otp)
@@ -45,10 +46,12 @@ async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, A
     return Error().dict()
 
 
-@router.post('/verify', response_model=dict[str,Any])
-async def api_verify(msisdn: str = Body(...), confirmation: str = Body(...)) -> dict[str,Any]:
+@router.post("/verify", response_model=dict[str, Any])
+async def api_verify(
+    msisdn: str = Body(...), confirmation: str = Body(...)
+) -> dict[str, Any]:
     """Verify otp status (internal use)"""
-    otp = db.query(Otp).filter(Otp.msisdn==msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp and otp.confirmation and otp.confirmation == confirmation:
         return {"status": "success"}
     return Error().dict()
