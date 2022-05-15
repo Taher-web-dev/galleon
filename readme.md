@@ -9,6 +9,7 @@ A thin-wrapper that implements basic business logic and invokes respective zain 
 - git
 - python 3
 - pip
+- jq
 
 Optional:
 
@@ -19,18 +20,28 @@ Optional:
 #### Local / Direct Setup
 
 ```
-pip install -r backend/requirements.txt
-
-# Create logs folder (path can be configured in sample.env)
-mkdir ../logs/
-
+# Go inside the project folder
 cd backend 
 
-# Install pytest
-pip install -r backend/requirements-dev.txt 
+# Install required modules
+pip install -r requirements.txt
+pip install -r requirements-dev.txt 
 
-cp sample.env secrets.env
+# Create logs folder (path can be configured in sample.env)
+mkdir /logs
+
+
+# Install pytest
+pip install -r requirements-dev.txt 
+
+# Environment setup
+cp sameple.env secrets.env
+create your DB
+Add your DB credentials in secrets.env at "DATABASE_URL"
 source env.sh
+
+# To run and migrate the DB tables:
+python main.py
 
 # Unit test
 python tests.py
@@ -38,10 +49,6 @@ python tests.py
 # pytest
 pytest -v
 
-# To run:
-python main.py
-# or 
-./run.sh
 
 # Invoke sample apis using curl
 ./curl.sh
