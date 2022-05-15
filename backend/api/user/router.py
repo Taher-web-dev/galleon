@@ -6,8 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy import union
-from utils.jwt import decode_jwt, sign_jwt
+from utils.jwt import decode_jwt, sign_jwt, generate_refresh_token
 from utils.db import db, User
 from utils.error import Error
 
@@ -129,10 +128,11 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     if user and password == user.password:
         token = sign_jwt({"msisdn": msisdn})
         access_token = token["access_token"]
-        user.refresh_token = token["refresh_token"]
+        refresh_token = generate_refresh_token({"msisdn": msisdn})
+        user.refresh_token = refresh_token
         db.commit()
         
-        return {"status": "success", "refresh_token": user.refresh_token, "access_token": access_token}
+        return {"status": "success", "refresh_token": refresh_token, "access_token": access_token}
     
     return Error().dict()
 
