@@ -38,8 +38,8 @@ class User(Base):
     refresh_token   = Column(String, nullable=True)
     is_active       = Column(Boolean(), default=True)
     profile_pic_url = Column(String, nullable=True)
-    updated_at      = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
-    created_at      = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+    updated_at      = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+    created_at      = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
     @property
     def serialize(self) -> dict:
