@@ -10,6 +10,7 @@ A thin-wrapper that implements basic business logic and invokes respective zain 
 - python >= 3.9
 - pip
 - jq
+- postgresql
 
 Optional:
 
@@ -27,7 +28,7 @@ cd backend
 pip install -r requirements.txt
 
 # Create logs folder (path can be configured in sample.env)
-mkdir /logs
+mkdir ./logs
 
 # Install pytest
 pip install -r requirements-dev.txt 
@@ -40,6 +41,8 @@ source env.sh
 
 # To run and migrate the DB tables:
 python main.py
+# or
+./run.sh
 
 # Unit test
 python tests.py
