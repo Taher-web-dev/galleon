@@ -34,7 +34,7 @@ mkdir ./logs
 pip install -r requirements-dev.txt 
 
 # Environment setup
-cp sameple.env secrets.env
+cp sample.env secrets.env
 create your DB
 Add your DB credentials in secrets.env at "DATABASE_URL"
 source env.sh

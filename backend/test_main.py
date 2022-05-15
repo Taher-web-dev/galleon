@@ -103,7 +103,7 @@ def test_charge_voucher():
 
 def test_sim_status():
     headers = {"Authorization": "Bearer " + access_token}
-    response = client.get(f"/api/number/status/{msisdn}", headers = headers)
+    response = client.get(f"/api/number/status", headers = headers, json={"msisdn": msisdn})
     assert response.status_code == status.HTTP_200_OK
 
 code: str
