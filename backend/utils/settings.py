@@ -2,8 +2,6 @@
 
 import os
 from pydantic import BaseSettings  # BaseModel,
-from dotenv import load_dotenv
-from pathlib import Path
 
 
 class Settings(BaseSettings):
