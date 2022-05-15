@@ -7,7 +7,7 @@ A thin-wrapper that implements basic business logic and invokes respective zain 
 #### Requirements
 
 - git
-- python 3
+- python >= 3.9
 - pip
 
 Optional:
@@ -56,7 +56,7 @@ podman build -t galleon-middleware .
 
 # Run 
 podman run --name galleon-middleware --rm \
-  -p 127.0.0.1:8080:8080/tcp \
+  -p 0.0.0.0:8080:8080/tcp \
   -it galleon-middleware \
   /home/backend/run.sh
   
