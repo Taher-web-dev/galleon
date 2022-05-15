@@ -128,7 +128,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     if user and password == user.password:
         token = sign_jwt({"msisdn": msisdn})
         access_token = token["access_token"]
-        refresh_token = generate_refresh_token({"msisdn": msisdn})
+        refresh_token = generate_refresh_token({"msisdn": msisdn})["refresh_token"]
         user.refresh_token = refresh_token
         db.commit()
         
