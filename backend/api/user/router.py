@@ -51,13 +51,13 @@ class UserRetrieve(BaseModel):
 
 
 def generate_unauth_error():
-    return {"status":"failed", "detail": "Not authenticated"}
+    return {"status": "failed", "detail": "Not authenticated"}
 
 
-@router.post('/create', response_model=dict[str,Any])
-async def create_user(new_user: UserCreate) -> dict[str,Any]:
-    """ Register a new user """
-    user = db.query(User).filter(User.msisdn==new_user.msisdn).first()
+@router.post("/create", response_model=dict[str, Any])
+async def create_user(new_user: UserCreate) -> dict[str, Any]:
+    """Register a new user"""
+    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
         return Error(message="Customer already exists").dict()
 
@@ -75,18 +75,23 @@ async def create_user(new_user: UserCreate) -> dict[str,Any]:
 
     return {"user_id": user.id}
 
-@router.get('/profile', response_model=Union[UserRetrieve, Any], response_model_exclude_none=True)
-async def get_profile(payload = Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
-    """ Get user profile """
+
+@router.get(
+    "/profile",
+    response_model=Union[UserRetrieve, Any],
+    response_model_exclude_none=True,
+)
+async def get_profile(payload=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
+    """Get user profile"""
     if payload == None:
         return generate_unauth_error()
-    
+
     msisdn = payload["msisdn"]
-    
-    user = db.query(User).filter(User.msisdn==msisdn).first()
+
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     if not user.refresh_token:
-         return generate_unauth_error()
-     
+        return generate_unauth_error()
+
     return UserRetrieve(
         status="success",
         id=user.id,
@@ -96,18 +101,20 @@ async def get_profile(payload = Depends(JWTBearer())) -> Union[UserRetrieve, Any
     )
 
 
-@router.patch('/profile')
-async def update_profile(user_profile: Union[UserUpdate, Any], payload = Depends(JWTBearer())):
-    """ Update user profile """
+@router.patch("/profile")
+async def update_profile(
+    user_profile: Union[UserUpdate, Any], payload=Depends(JWTBearer())
+):
+    """Update user profile"""
     if payload == None:
         return generate_unauth_error()
-    
+
     msisdn = payload["msisdn"]
-    
-    user = db.query(User).filter(User.msisdn==msisdn).first()
+
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     if not user.refresh_token:
-         return generate_unauth_error()
-     
+        return generate_unauth_error()
+
     if user_profile.name:
         user.name = user_profile.name
     if user_profile.password:
@@ -118,8 +125,9 @@ async def update_profile(user_profile: Union[UserUpdate, Any], payload = Depends
         user.profile_pic_url = user_profile.profile_pic_url
     db.commit()
     db.refresh(user)
-    
-    return {"status":"success"}
+
+    return {"status": "success"}
+
 
 @router.post("/login")
 async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
@@ -131,54 +139,64 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
         refresh_token = generate_refresh_token({"msisdn": msisdn})["refresh_token"]
         user.refresh_token = refresh_token
         db.commit()
-        
-        return {"status": "success", "refresh_token": refresh_token, "access_token": access_token}
-    
+
+        return {
+            "status": "success",
+            "refresh_token": refresh_token,
+            "access_token": access_token,
+        }
+
     return Error().dict()
 
-@router.post('/logout')
-async def logout(payload = Depends(JWTBearer())):
-    """ Logout (aka delete refresh token) """
+
+@router.post("/logout")
+async def logout(payload=Depends(JWTBearer())):
+    """Logout (aka delete refresh token)"""
     if payload == None:
         return generate_unauth_error()
-    
+
     msisdn = payload["msisdn"]
-    
-    user = db.query(User).filter(User.msisdn==msisdn).first()
+
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
         user.refresh_token = None
         db.commit()
-        
-    return {"status":"success"}
+
+    return {"status": "success"}
+
 
 @router.post("/token")
 async def gen_access_token(refresh_token: Optional[str] = Header(None)):
     """Generate access token from provided refresh token"""
 
-@router.post('/token')
-async def gen_access_token(refresh_token : Optional[str] = Header(default=None)):
-    """ Generate access token from provided refresh token """
+
+@router.post("/token")
+async def gen_access_token(refresh_token: Optional[str] = Header(default=None)):
+    """Generate access token from provided refresh token"""
     if refresh_token is not None:
         data = decode_jwt(refresh_token)
         if "msisdn" in data:
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == "msisdn").first()
             if user is not None:
-                return {"status": "success", "access_token" : sign_jwt({"msisdn": msisdn})}
-            
+                return {
+                    "status": "success",
+                    "access_token": sign_jwt({"msisdn": msisdn}),
+                }
+
     return {"status": "failed", "code": 99}
 
 
-@router.post('/delete')
-async def delete(payload = Depends(JWTBearer())):
-    """ Delete user """
+@router.post("/delete")
+async def delete(payload=Depends(JWTBearer())):
+    """Delete user"""
     if payload == None:
         return generate_unauth_error()
-    
+
     msisdn = payload["msisdn"]
-    user = db.query(User).filter(User.msisdn==msisdn).first()
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
     db.delete(user)
     db.commit()
-    
+
     return {"status": "success"}
