@@ -7,11 +7,14 @@ import jwt
 def sign_jwt(data: dict, expires: int = 600) -> Dict[str, str]:
     payload = {
         "data": data,
-        "expires": time() + expires 
+        "expires": time() + expires
     }
-    token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    access_token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    payload['grant_type'] = "refresh"
+    payload['expires'] = time() + 86400 # one day
+    refresh_token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
-    return {"token": token}
+    return {"access_token": access_token, "refresh_token": refresh_token}
 
 
 def decode_jwt(token: str) -> dict:
