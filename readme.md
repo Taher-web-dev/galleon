@@ -25,11 +25,9 @@ cd backend
 
 # Install required modules
 pip install -r requirements.txt
-pip install -r requirements-dev.txt 
 
 # Create logs folder (path can be configured in sample.env)
 mkdir /logs
-
 
 # Install pytest
 pip install -r requirements-dev.txt 
