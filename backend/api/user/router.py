@@ -169,10 +169,6 @@ async def logout(payload=Depends(JWTBearer())):
 async def gen_access_token(refresh_token: Optional[str] = Header(None)):
     """Generate access token from provided refresh token"""
 
-
-@router.post("/token")
-async def gen_access_token(refresh_token: Optional[str] = Header(default=None)):
-    """Generate access token from provided refresh token"""
     if refresh_token is not None:
         data = decode_jwt(refresh_token)
         if "msisdn" in data:
