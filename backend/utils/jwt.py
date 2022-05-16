@@ -11,7 +11,7 @@ def sign_jwt(data: dict, expires: int = 600) -> Dict[str, str]:
         payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
     )
 
-    return {"access_token": access_token}
+    return access_token
 
 
 def generate_refresh_token(data: dict, expires: int = 8600) -> Dict[str, str]:
@@ -20,7 +20,7 @@ def generate_refresh_token(data: dict, expires: int = 8600) -> Dict[str, str]:
         payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
     )
 
-    return {"refresh_token": refresh_token}
+    return refresh_token
 
 
 def decode_jwt(token: str) -> dict:
