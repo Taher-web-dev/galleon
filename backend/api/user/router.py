@@ -83,7 +83,6 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
 )
 async def get_profile(payload=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
     """Get user profile"""
-    print(payload)
     if not bool(payload):
         return generate_unauth_error()
 
