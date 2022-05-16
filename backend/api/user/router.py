@@ -1,7 +1,7 @@
 """ User management apis """
 
 from typing import Union
-from fastapi import APIRouter, Body, Header
+from fastapi import APIRouter, Body, Header, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
@@ -16,11 +16,14 @@ class JWTBearer(HTTPBearer):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        credentials: Optional[HTTPAuthorizationCredentials] = await super(
-            JWTBearer, self
-        ).__call__(request)
-        if credentials and credentials.scheme == "Bearer":
-            return decode_jwt(credentials.credentials)["msisdn"]
+        try:
+            credentials: Optional[HTTPAuthorizationCredentials] = await super(
+                JWTBearer, self
+            ).__call__(request)
+            if credentials and credentials.scheme == "Bearer":
+                return decode_jwt(credentials.credentials)["msisdn"]
+        except:
+            raise HTTPException(status_code=404, detail="Not authenticated")
 
 
 router = APIRouter()
@@ -74,7 +77,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
 
 @router.get(
     "/profile",
-    response_model=Union[UserRetrieve, Any],
+    response_model=UserRetrieve,
     response_model_exclude_none=True,
 )
 async def get_profile(msisdn=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
