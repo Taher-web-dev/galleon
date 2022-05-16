@@ -140,12 +140,10 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
 @router.post("/logout")
 async def logout(msisdn=Depends(JWTBearer())):
     """Logout (aka delete refresh token)"""
-
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
         user.refresh_token = None
         db.commit()
-
     return {"status": "success"}
 
 
@@ -170,10 +168,8 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
 @router.post("/delete")
 async def delete(msisdn=Depends(JWTBearer())):
     """Delete user"""
-
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
     db.delete(user)
     db.commit()
-
     return {"status": "success"}
