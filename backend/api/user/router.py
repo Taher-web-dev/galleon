@@ -1,7 +1,6 @@
 """ User management apis """
 
 from fastapi import APIRouter, Body, Header, HTTPException
-from typing import Union
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
@@ -80,11 +79,9 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     response_model=UserRetrieve,
     response_model_exclude_none=True,
 )
-async def get_profile(msisdn=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
+async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
     """Get user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    if not user.refresh_token:
-        return Error(message="Not authenticated").dict()
 
     return UserRetrieve(
         status="success",
@@ -96,13 +93,9 @@ async def get_profile(msisdn=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
 
 
 @router.patch("/profile")
-async def update_profile(
-    user_profile: Union[UserUpdate, Any], msisdn=Depends(JWTBearer())
-):
+async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    if not user.refresh_token:
-        return Error(message="Not authenticated").dict()
 
     if user_profile.name:
         user.name = user_profile.name
