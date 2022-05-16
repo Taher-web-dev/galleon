@@ -7,7 +7,6 @@ from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
-from utils.error import Error
 
 
 class JWTBearer(HTTPBearer):
@@ -22,7 +21,7 @@ class JWTBearer(HTTPBearer):
             if credentials and credentials.scheme == "Bearer":
                 return decode_jwt(credentials.credentials)["msisdn"]
         except:
-            raise HTTPException(status_code=404, detail="Not authenticated")
+            raise HTTPException(status_code=401, detail="Not authenticated")
 
 
 router = APIRouter()
@@ -57,7 +56,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        return Error(message="Customer already exists").dict()
+        raise HTTPException(status_code=403, detail="Customer already exists").dict()
 
     user = User(
         msisdn=new_user.msisdn,
@@ -116,11 +115,9 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
-        access_token = sign_jwt({"msisdn": msisdn})["token"]
-        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)[
-            "token"
-        ]
-        user.refresh_token = refresh_token
+        access_token = sign_jwt({"msisdn": msisdn})
+        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
+        user.refresh_token = refresh_token["token"]
         db.commit()
 
         return {
@@ -129,7 +126,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
             "access_token": access_token,
         }
 
-    return Error().dict()
+    raise HTTPException(status_code=401, detail="Wrong credentials.").dict()
 
 
 @router.post("/logout")
@@ -157,7 +154,10 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
                     "access_token": sign_jwt({"msisdn": msisdn}),
                 }
 
-    return {"status": "failed", "code": 99}
+    raise HTTPException(
+        status_code=401,
+        detail={"message": "failed", "code": "99"},
+    )
 
 
 @router.post("/delete")
