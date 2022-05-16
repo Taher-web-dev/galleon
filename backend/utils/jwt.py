@@ -9,7 +9,7 @@ def sign_jwt(data: dict, expires: int = 600) -> Dict[str, str]:
     payload = {"data": data, "expires": time() + expires}
     token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
-    return token
+    return {"token": token}
 
 
 def decode_jwt(token: str) -> dict:

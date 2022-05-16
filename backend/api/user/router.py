@@ -116,8 +116,10 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
-        access_token = sign_jwt({"msisdn": msisdn})
-        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
+        access_token = sign_jwt({"msisdn": msisdn})["token"]
+        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)[
+            "token"
+        ]
         user.refresh_token = refresh_token
         db.commit()
 
