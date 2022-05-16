@@ -83,7 +83,8 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
 )
 async def get_profile(payload=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
     """Get user profile"""
-    if payload == None:
+    print(payload)
+    if not bool(payload):
         return generate_unauth_error()
 
     msisdn = payload["msisdn"]
@@ -106,7 +107,7 @@ async def update_profile(
     user_profile: Union[UserUpdate, Any], payload=Depends(JWTBearer())
 ):
     """Update user profile"""
-    if payload == None:
+    if not bool(payload):
         return generate_unauth_error()
 
     msisdn = payload["msisdn"]
@@ -151,7 +152,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
 @router.post("/logout")
 async def logout(payload=Depends(JWTBearer())):
     """Logout (aka delete refresh token)"""
-    if payload == None:
+    if not bool(payload):
         return generate_unauth_error()
 
     msisdn = payload["msisdn"]
@@ -185,7 +186,7 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
 @router.post("/delete")
 async def delete(payload=Depends(JWTBearer())):
     """Delete user"""
-    if payload == None:
+    if not bool(payload):
         return generate_unauth_error()
 
     msisdn = payload["msisdn"]
