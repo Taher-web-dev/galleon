@@ -1,6 +1,6 @@
 """ User management apis """
 
-from fastapi import APIRouter, Body, Header, HTTPException
+from fastapi import APIRouter, Body, Header, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
@@ -21,7 +21,9 @@ class JWTBearer(HTTPBearer):
             if credentials and credentials.scheme == "Bearer":
                 return decode_jwt(credentials.credentials)["msisdn"]
         except:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+            )
 
 
 router = APIRouter()
@@ -56,7 +58,9 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        raise HTTPException(status_code=403, detail="Customer already exists").dict()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
+        ).dict()
 
     user = User(
         msisdn=new_user.msisdn,
@@ -126,7 +130,9 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
             "access_token": access_token,
         }
 
-    raise HTTPException(status_code=401, detail="Wrong credentials.").dict()
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
+    ).dict()
 
 
 @router.post("/logout")
@@ -155,7 +161,7 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
                 }
 
     raise HTTPException(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail={"message": "failed", "code": "99"},
     )
 
