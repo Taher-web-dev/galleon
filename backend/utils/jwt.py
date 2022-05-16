@@ -14,15 +14,6 @@ def sign_jwt(data: dict, expires: int = 600) -> Dict[str, str]:
     return access_token
 
 
-def generate_refresh_token(data: dict, expires: int = 8600) -> Dict[str, str]:
-    payload = {"data": data, "expires": time() + expires, "grant_type": "refresh"}
-    refresh_token = jwt.encode(
-        payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
-    )
-
-    return refresh_token
-
-
 def decode_jwt(token: str) -> dict:
     try:
         decoded_token = jwt.decode(

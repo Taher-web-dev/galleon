@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from utils.jwt import decode_jwt, sign_jwt, generate_refresh_token
+from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
 from utils.error import Error
 
@@ -20,7 +20,7 @@ class JWTBearer(HTTPBearer):
             JWTBearer, self
         ).__call__(request)
         if credentials and credentials.scheme == "Bearer":
-            return decode_jwt(credentials.credentials)
+            return decode_jwt(credentials.credentials)["msisdn"]
 
 
 router = APIRouter()
@@ -50,10 +50,6 @@ class UserRetrieve(BaseModel):
     profile_pic_url: Optional[str]
 
 
-def generate_unauth_error():
-    return {"status": "failed", "detail": "Not authenticated"}
-
-
 @router.post("/create", response_model=dict[str, Any])
 async def create_user(new_user: UserCreate) -> dict[str, Any]:
     """Register a new user"""
@@ -81,16 +77,11 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     response_model=Union[UserRetrieve, Any],
     response_model_exclude_none=True,
 )
-async def get_profile(payload=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
+async def get_profile(msisdn=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
     """Get user profile"""
-    if not bool(payload):
-        return generate_unauth_error()
-
-    msisdn = payload["msisdn"]
-
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if not user.refresh_token:
-        return generate_unauth_error()
+        return Error(message="Not authenticated").dict()
 
     return UserRetrieve(
         status="success",
@@ -103,17 +94,12 @@ async def get_profile(payload=Depends(JWTBearer())) -> Union[UserRetrieve, Any]:
 
 @router.patch("/profile")
 async def update_profile(
-    user_profile: Union[UserUpdate, Any], payload=Depends(JWTBearer())
+    user_profile: Union[UserUpdate, Any], msisdn=Depends(JWTBearer())
 ):
     """Update user profile"""
-    if not bool(payload):
-        return generate_unauth_error()
-
-    msisdn = payload["msisdn"]
-
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if not user.refresh_token:
-        return generate_unauth_error()
+        return Error(message="Not authenticated").dict()
 
     if user_profile.name:
         user.name = user_profile.name
@@ -135,7 +121,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
         access_token = sign_jwt({"msisdn": msisdn})
-        refresh_token = generate_refresh_token({"msisdn": msisdn})
+        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
         user.refresh_token = refresh_token
         db.commit()
 
@@ -149,12 +135,8 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
 
 
 @router.post("/logout")
-async def logout(payload=Depends(JWTBearer())):
+async def logout(msisdn=Depends(JWTBearer())):
     """Logout (aka delete refresh token)"""
-    if not bool(payload):
-        return generate_unauth_error()
-
-    msisdn = payload["msisdn"]
 
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
@@ -183,12 +165,9 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
 
 
 @router.post("/delete")
-async def delete(payload=Depends(JWTBearer())):
+async def delete(msisdn=Depends(JWTBearer())):
     """Delete user"""
-    if not bool(payload):
-        return generate_unauth_error()
 
-    msisdn = payload["msisdn"]
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
     db.delete(user)
