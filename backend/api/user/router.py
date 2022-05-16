@@ -36,14 +36,14 @@ class UserCreate(BaseModel):
     msisdn: constr(regex=rgx.STRING)
     password: constr(regex=rgx.PASSWORD)
     profile_pic_url : Optional[constr(regex=rgx.URL)]
-    email: Optional[constr(regex=rgx.EMAIL)] # String on Email format
+    email: Optional[constr(regex=rgx.EMAIL)]
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
-    profile_pic_url: Optional[str]
+    name: Optional[constr(regex=rgx.TITLE)]
+    email: Optional[constr(regex=rgx.EMAIL)]
+    password: Optional[constr(regex=rgx.PASSWORD)]
+    profile_pic_url: Optional[constr(regex=rgx.URL)]
 
 
 class UserRetrieve(BaseModel):
