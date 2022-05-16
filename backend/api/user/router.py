@@ -1,7 +1,7 @@
 """ User management apis """
 
-from typing import Union
 from fastapi import APIRouter, Body, Header, HTTPException
+from typing import Union
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
