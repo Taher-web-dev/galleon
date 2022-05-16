@@ -1,13 +1,14 @@
 """ User management apis """
 
 from fastapi import APIRouter, Body, Header
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 from typing import Optional, Any
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
 from utils.error import Error
+import utils.regex as rgx
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
@@ -21,12 +22,12 @@ class JWTBearer(HTTPBearer):
 router = APIRouter()
 
 class UserCreate(BaseModel):
-    otp_confirmation : str
-    name: str
-    msisdn: str
-    password: str
-    profile_pic_url : Optional[str]
-    email: Optional[str]
+    otp_confirmation : constr(regex=rgx.STRING)
+    name: constr(regex=rgx.TITLE)
+    msisdn: constr(regex=rgx.STRING)
+    password: constr(regex=rgx.PASSWORD)
+    profile_pic_url : Optional[constr(regex=rgx.URL)]
+    email: Optional[constr(regex=rgx.EMAIL)] # String on Email format
 
 class UserUpdate(BaseModel):
     name: Optional[str]
