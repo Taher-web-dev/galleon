@@ -1,3 +1,13 @@
 [flake8]
-exclude = .git,__pycache__
-ignore = E501,E722
+select = BLK
+exclude =
+    .git,
+    migrations,
+    __pycache__,
+    templates,
+    dist,
+    build,
+    venv,
+    .venv,
+    .env,
+    env

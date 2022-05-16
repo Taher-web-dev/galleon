@@ -1,3 +1,1 @@
-
-
-some : str = "TRY THIS"
+some: str = "TRY THIS"

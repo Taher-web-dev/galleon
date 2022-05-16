@@ -8,9 +8,5 @@ class Error(BaseModel):
 
     class Config:
         schema_extra = {
-            "example": {
-                "status": "error",
-                "code": 99,
-                "message": "Api error message"
-            }
+            "example": {"status": "error", "code": 99, "message": "Api error message"}
         }

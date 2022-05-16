@@ -1,8 +1,11 @@
 from pydantic.main import BaseModel
-from typing import Any
-import json
 
-from .cms import eligible_primary_offerings, SIM_STATUS_LOOKUP, USIM_NBA, SIM99, SIM_NBA_LOOKUP
+from .cms import (
+    SIM_STATUS_LOOKUP,
+    USIM_NBA,
+    SIM99,
+    SIM_NBA_LOOKUP,
+)
 
 from .zend import zend_sim
 
@@ -18,10 +21,10 @@ class MiddlewareSimStatus(BaseModel):
 class Nba(BaseModel):
     href: str
     message_en: str
-    message_kd: str
+    message_ar: str
     message_kd: str
     href_text_en: str
-    href_text_kd: str
+    href_text_ar: str
     href_text_kd: str
 
     class Config:
@@ -174,19 +177,17 @@ def get_nba(msisdn: str, mw_sim_status: MiddlewareSimStatus, usim_status: dict) 
         - Zain-Fi app download link [link to external webpage]
     """
     # blank slate
-    nba: dict = {}
+    # nba: dict = {}
 
     # if we get a SIM status NBA that isn't normal, use it
     if mw_sim_status.code != 1:
-        nba = Nba(**SIM_NBA_LOOKUP[mw_sim_status.code])
+        return Nba(**SIM_NBA_LOOKUP[mw_sim_status.code])
 
     # otherwise, if SIM not 4G eligible then use this one
     elif usim_status["sim_compatible_4G"] == 0:
-        nba = Nba(**USIM_NBA)
+        return Nba(**USIM_NBA)
 
     # TODO this is where we'll put step 3 logic later incl. offers (which could be driven by MSISDN)
-    else:
-        pass
 
     # for now, returning the basic object because we will need deep-links or discussion with FE
     # for certain actions and they can be added later
