@@ -44,6 +44,8 @@ Add your DB credentials in secrets.env at "DATABASE_URL"
 
 `source env.sh`
 
+Note: You will need to repeat this command every time you change the environment variables or every new terminal session.
+
 #### To run and migrate the DB tables
 
 `python main.py`
@@ -54,7 +56,7 @@ Add your DB credentials in secrets.env at "DATABASE_URL"
 
 #### Unit test
 
-python tests.py
+`python tests.py`
 
 #### pytest
 
