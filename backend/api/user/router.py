@@ -1,13 +1,12 @@
 """ User management apis """
 
-from fastapi import APIRouter, Body, Header
+from fastapi import APIRouter, Body, Header, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
-from utils.error import Error
 
 
 class JWTBearer(HTTPBearer):
@@ -15,11 +14,16 @@ class JWTBearer(HTTPBearer):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        credentials: Optional[HTTPAuthorizationCredentials] = await super(
-            JWTBearer, self
-        ).__call__(request)
-        if credentials and credentials.scheme == "Bearer":
-            return decode_jwt(credentials.credentials)["msisdn"]
+        try:
+            credentials: Optional[HTTPAuthorizationCredentials] = await super(
+                JWTBearer, self
+            ).__call__(request)
+            if credentials and credentials.scheme == "Bearer":
+                return decode_jwt(credentials.credentials)["msisdn"]
+        except:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+            )
 
 
 router = APIRouter()
@@ -54,7 +58,9 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        return Error(message="Customer already exists").dict()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
+        ).dict()
 
     user = User(
         msisdn=new_user.msisdn,
@@ -71,10 +77,15 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     return {"user_id": user.id}
 
 
-@router.get("/profile", response_model=UserRetrieve, response_model_exclude_none=True)
+@router.get(
+    "/profile",
+    response_model=UserRetrieve,
+    response_model_exclude_none=True,
+)
 async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
     """Get user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
+
     return UserRetrieve(
         status="success",
         id=user.id,
@@ -88,6 +99,7 @@ async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
 async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
+
     if user_profile.name:
         user.name = user_profile.name
     if user_profile.password:
@@ -98,6 +110,7 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
         user.profile_pic_url = user_profile.profile_pic_url
     db.commit()
     db.refresh(user)
+
     return {"status": "success"}
 
 
@@ -106,19 +119,28 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
-        token = sign_jwt({"msisdn": msisdn})
-        user.refresh_token = token["token"]
+        access_token = sign_jwt({"msisdn": msisdn})
+        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
+        user.refresh_token = refresh_token["token"]
         db.commit()
-        return {"status": "success", "refresh_token": token, "access_token": token}
-    return Error().dict()
+
+        return {
+            "status": "success",
+            "refresh_token": refresh_token,
+            "access_token": access_token,
+        }
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
+    ).dict()
 
 
 @router.post("/logout")
-async def logtout(msisdn=Depends(JWTBearer())):
+async def logout(msisdn=Depends(JWTBearer())):
     """Logout (aka delete refresh token)"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
-        user.refresh_token = ""
+        user.refresh_token = None
         db.commit()
     return {"status": "success"}
 
@@ -137,7 +159,11 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
                     "status": "success",
                     "access_token": sign_jwt({"msisdn": msisdn}),
                 }
-    return {"status": "failed", "code": 99}
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={"message": "failed", "code": "99"},
+    )
 
 
 @router.post("/delete")
