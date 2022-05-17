@@ -5,7 +5,6 @@ class SimStatusHandler:
     # NOT NORMAL BUT CAN ACCESS WITH WARNING
     WARN_RECHARGE = "WARN_RECHARGE"
     WARN_MUST_RECONNECT = "WARN_MUST_RECONNECT"
-    WARN_NOT_4G_COMPATIBLE = "WARN_NOT_4G_COMPATIBLE"
 
     # CANNOT ACCESS - GENERIC BUT KNOWN
     BLOCK_CRITICAL_SUPPORT = "BLOCK_CRITICAL_SUPPORT"
@@ -49,6 +48,9 @@ class SimStatusHandler:
         "B06": {0: BLOCK_MUST_ACTIVATE},
     }
 
+    # Other warnings not tied to SIM status itself
+    WARN_NOT_4G_COMPATIBLE = "WARN_NOT_4G_COMPATIBLE"
+
     SIM_NBA_LOOKUP = {
         WARN_RECHARGE: {
             "href": "",
@@ -69,6 +71,8 @@ class SimStatusHandler:
             "href_text_kd": "",
         },
     }
+
+
 
 
 eligible_primary_offerings: list[int] = [
