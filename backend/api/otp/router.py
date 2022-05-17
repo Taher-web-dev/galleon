@@ -6,7 +6,7 @@ from ..number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.error import Error
 from typing import Any
-from utils.regex import DIGITS as RGX_DIGITS
+from utils.regex import DIGITS as RGX_DIGITS, STRING as RGX_STRING
 
 router = APIRouter()
 
@@ -49,7 +49,7 @@ async def confirm(msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..
 
 @router.post("/verify", response_model=dict[str, Any])
 async def api_verify(
-    msisdn: str = Body(..., regex=RGX_DIGITS), confirmation: str = Body(..., regex=RGX_DIGITS)
+    msisdn: str = Body(..., regex=RGX_DIGITS), confirmation: str = Body(..., regex=RGX_STRING)
 ) -> dict[str, Any]:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
