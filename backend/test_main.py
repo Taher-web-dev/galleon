@@ -9,7 +9,7 @@ client = TestClient(app)
 
 msisdn: str = "7841631859"
 name: str = "Some one"
-password: str = "hi"
+password: str = "hiBiggerPass"
 confirmation: str = "123"
 user: User = User()
 
@@ -62,11 +62,11 @@ def test_get_profile():
 def test_update_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.patch(
-        "/api/user/profile", json={"password": "...."}, headers=headers
+        "/api/user/profile", json={"password": "........"}, headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    assert user.password == "...."
+    assert user.password == "........"
     # print(response.json())
 
 
