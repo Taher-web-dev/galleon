@@ -3,5 +3,5 @@ TITLE=r'^(\w{0,25}\s?\w{0,25}){1,3}$' # String consists of only letters, digits,
 DESC=r'^(\w*\s?\w*){1,50}$' # Long string consists of only letters, digits, and spaces
 STRING=r'^\w{1,50}$' # Only digits and letters between 1 and 50
 DIGITS=r'^\d{1,50}$' # Only digits between 1 and 50
-PASSWORD=r'^[\w@#$%^&+=\-]{8,}$' # Password format, at least 8 chars
+PASSWORD=r'^[\w.@#$%^&+=\-]{8,}$' # Password format, at least 8 chars
 EMAIL=r'^[\w\-?_?\w]*@[\w\-?_?\w]*\.\w*$' # Email format
