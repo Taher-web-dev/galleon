@@ -32,4 +32,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+# Uncomment this when you have a problem running the app to see if you have a problem with the env file
 # print(settings.dict())

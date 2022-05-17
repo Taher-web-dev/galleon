@@ -1,21 +1,8 @@
 from pydantic.main import BaseModel
 
-from .cms import (
-    SIM_STATUS_LOOKUP,
-    USIM_NBA,
-    SIM99,
-    SIM_NBA_LOOKUP,
-)
+from . import cms
 
 from .zend import zend_sim
-
-
-class MiddlewareSimStatus(BaseModel):
-    code: int
-    message: str
-
-    class Config:
-        schema_extra = {"example": {"code": 1, "message": "Normal"}}
 
 
 class Nba(BaseModel):
@@ -53,9 +40,8 @@ class Sim(BaseModel):
     subscriber_type: int
 
     # our injected info
-    is_eligible: bool
-    mw_sim_status: MiddlewareSimStatus
-    sim_compatible_4G: bool
+    unified_sim_status: str
+    is_4g_compatible: bool
     nba: Nba
 
     # TODO discuss - what does this do & should we include user name here?
@@ -74,9 +60,8 @@ class Sim(BaseModel):
                 "customer_type": "Individual",
                 "subscriber_type": 0,
                 # injected info
-                "is_eligible": True,
-                "mw_sim_status": {"code": 1, "message": "Normal"},
-                "sim_compatible_4G": True,
+                "unified_sim_status": "NORMAL",
+                "is_4g_compatible": True,
                 "nba": {
                     "href": "https://apps.iq.zain.com/zain-fi",
                     "message_en": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
@@ -100,18 +85,13 @@ def get_sim_details(msisdn: str) -> Sim:
 
     TODO Add WeWebit USIM service - prod. env only
     """
-    # fetch SIM status
+    # fetch SIM status & USIM status (hardcode USIM in UAT)
     backend_sim_status = zend_sim(msisdn)
+    usim_status = {"is_4g_compatible": True}
 
-    # fetch USIM status
-    usim_status = {
-        "sim_compatible_4G": True
-    }  # Hardcoded until the service is available
-
-    # assess app eligibility
-    mw_sim_status = get_mw_sim_status(backend_sim_status)
-
-    nba = get_nba(msisdn, mw_sim_status, usim_status)
+    # get details
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
+    nba = get_nba(msisdn, unified_sim_status, usim_status)
 
     return Sim(
         # backend response - mainly for debug
@@ -124,42 +104,52 @@ def get_sim_details(msisdn: str) -> Sim:
         customer_type=backend_sim_status["customer_type"],
         subscriber_type=backend_sim_status["subscriber_type"],
         # injected info
-        is_eligible=True if mw_sim_status.code < 90 else False,
-        mw_sim_status=mw_sim_status,
-        sim_compatible_4G=usim_status["sim_compatible_4G"],
+        unified_sim_status=unified_sim_status,
+        is_4g_compatible=usim_status["is_4g_compatible"],
         nba=nba,
         # user info
-        associated_with_user=False,
+        associated_with_user=False,  # FIXME
     )
 
 
-def get_mw_sim_status(backend_sim_status: dict) -> MiddlewareSimStatus:
+def get_unified_sim_status(backend_sim_status: dict) -> str:
     """
-    Based on provided sim_status (with CRM and CBS code keys),
+    Based on provided sim_status (with customer/subscriber type, etc. CRM and CBS code keys),
     we return the next best action for the SIM e.g., to recharge.
 
     sim_status: dict should contain crm_status_code & cbs_status_code from Zain backend.
 
-    Example response:
-    {"code": 1, "message": "Normal"}
+    Responses fit into "NORMAL", "WARN_X" and "BLOCK_Y" taxonomy.
+
+    Illustrative responses:
+    "NORMAL" vs. "WARN_RECHARGE" vs. "BLOCK_DISCONNECTED"
     """
+    # first check fundamental SIM-level issues
+    if backend_sim_status["subscriber_type"] != 0:
+        return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
+
+    if backend_sim_status["customer_type"] != "Individual":
+        return cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
+
+    if backend_sim_status["primary_offering_id"] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
+        return cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
+
+    # now SIM-lifecycle issues - handling only prepaid for now
     if (
         "crm_status_code" in backend_sim_status
-        and backend_sim_status["crm_status_code"] in SIM_STATUS_LOOKUP
+        and backend_sim_status["crm_status_code"] in cms.SIM_NBA_LOOKUP
         and "cbs_status_code" in backend_sim_status
         and backend_sim_status["cbs_status_code"]
-        in SIM_STATUS_LOOKUP[backend_sim_status["crm_status_code"]]
+        in cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]]
     ):
-        mw_sim_status = SIM_STATUS_LOOKUP[backend_sim_status["crm_status_code"]][
+        return cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]][
             backend_sim_status["cbs_status_code"]
         ]
-        return MiddlewareSimStatus(**mw_sim_status)
     else:
-        # TODO log this & ideally post to Slack or the CMS (later)
-        return MiddlewareSimStatus(code=SIM99["code"], message=SIM99["message"])
+        return cms.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
 
 
-def get_nba(msisdn: str, mw_sim_status: MiddlewareSimStatus, usim_status: dict) -> Nba:
+def get_nba(msisdn: str, unified_sim_status: str, usim_status: dict) -> Nba:
     """
     Provides NBA for the MSISDN. Covers:
     - 4G call to action for legacy SIM users
@@ -179,13 +169,13 @@ def get_nba(msisdn: str, mw_sim_status: MiddlewareSimStatus, usim_status: dict) 
     # blank slate
     # nba: dict = {}
 
-    # if we get a SIM status NBA that isn't normal, use it
-    if mw_sim_status.code != 1:
-        return Nba(**SIM_NBA_LOOKUP[mw_sim_status.code])
+    # if we get a SIM status NBA that isn't normal, use it [we know it isn't NORMAL or BLOCK_X]
+    if unified_sim_status != "NORMAL" and unified_sim_status in cms.SIM_NBA_LOOKUP:
+        return Nba(**cms.SIM_NBA_LOOKUP[unified_sim_status])
 
     # otherwise, if SIM not 4G eligible then use this one
-    elif usim_status["sim_compatible_4G"] == 0:
-        return Nba(**USIM_NBA)
+    elif usim_status["is_4g_compatible"] == 0:
+        return Nba(**cms.SIM_NBA_LOOKUP[cms.WARN_NOT_4G_COMPATIBLE])
 
     # TODO this is where we'll put step 3 logic later incl. offers (which could be driven by MSISDN)
 
