@@ -60,7 +60,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     if user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
-        ).dict()
+        )
 
     user = User(
         msisdn=new_user.msisdn,
@@ -132,7 +132,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
-    ).dict()
+    )
 
 
 @router.post("/logout")
