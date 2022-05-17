@@ -113,7 +113,7 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
 
 
 @router.post("/login")
-async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
+async def login(msisdn: str = Body(..., regex=rgx.DIGITS), password: str = Body(..., regex=rgx.PASSWORD)) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
