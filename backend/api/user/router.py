@@ -6,7 +6,6 @@ from typing import Optional, Any
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
-from utils.error import Error
 import utils.regex as rgx
 
 
@@ -61,7 +60,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     if user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
-        ).dict()
+        )
 
     user = User(
         msisdn=new_user.msisdn,
@@ -133,7 +132,7 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
-    ).dict()
+    )
 
 
 @router.post("/logout")
