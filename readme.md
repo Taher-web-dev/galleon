@@ -22,16 +22,16 @@ Optional:
 
 ```
 # Go inside the project folder
-cd backend 
+cd backend
 
 # Install required modules
-pip install -r requirements.txt
+pip install --user -r requirements.txt
 
 # Create logs folder (path can be configured in sample.env)
 mkdir ./logs
 
 # Install pytest
-pip install -r requirements-dev.txt 
+pip install --user -r requirements-dev.txt
 
 # Environment setup
 cp sample.env secrets.env
@@ -62,12 +62,12 @@ pytest -v
 podman rmi galleon-middleware
 podman build -t galleon-middleware .
 
-# Run 
+# Run
 podman run --name galleon-middleware --rm \
   -p 0.0.0.0:8080:8080/tcp \
   -it galleon-middleware \
   /home/backend/run.sh
-  
+ 
 # Command line access inside the container
 podman exec -it galleon-middleware ash
 
