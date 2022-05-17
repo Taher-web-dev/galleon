@@ -3,7 +3,7 @@ from pydantic.main import BaseModel
 from typing import Union, Optional, Any
 from utils.error import Error
 
-from .cms import negcred_lookup
+from .cms import NEGCRED_LOOKUP
 from .zend import zend_balance, zend_subcriptions
 
 
@@ -36,8 +36,8 @@ def get_wallet(msisdn: str) -> Union[Wallet, Error]:
 
         loan = WalletEntry(value=None, expiry=None)
         for sub in raw_subscriptions:
-            if sub["id"] in negcred_lookup:
-                loan.value = negcred_lookup[sub["id"]]
+            if sub["id"] in NEGCRED_LOOKUP:
+                loan.value = NEGCRED_LOOKUP[sub["id"]]
                 loan.expiry = sub["cycle_end"]  # expiry_time timestamp?
                 break
 
