@@ -11,7 +11,7 @@ msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hi"
 confirmation: str = "123"
-user: User = None
+user: User = User()
 
 
 def test_create_user():
@@ -87,7 +87,7 @@ def test_logout():
     response = client.post("/api/user/logout", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
-    assert user.refresh_token == ""
+    assert user.refresh_token is None
 
 
 def test_delete():
