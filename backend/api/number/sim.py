@@ -4,6 +4,7 @@ from . import cms
 
 from .zend import zend_sim
 
+
 class Nba(BaseModel):
     href: str
     message_en: str
@@ -107,7 +108,7 @@ def get_sim_details(msisdn: str) -> Sim:
         is_4g_compatible=usim_status["is_4g_compatible"],
         nba=nba,
         # user info
-        associated_with_user=False, # FIXME
+        associated_with_user=False,  # FIXME
     )
 
 
@@ -124,13 +125,13 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
     "NORMAL" vs. "WARN_RECHARGE" vs. "BLOCK_DISCONNECTED"
     """
     # first check fundamental SIM-level issues
-    if backend_sim_status['subscriber_type'] != 0:
+    if backend_sim_status["subscriber_type"] != 0:
         return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
-    
-    if backend_sim_status['customer_type'] != "Individual":
+
+    if backend_sim_status["customer_type"] != "Individual":
         return cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
 
-    if backend_sim_status['primary_offering_id'] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
+    if backend_sim_status["primary_offering_id"] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
         return cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
 
     # now SIM-lifecycle issues - handling only prepaid for now
@@ -141,7 +142,9 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
         and backend_sim_status["cbs_status_code"]
         in cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]]
     ):
-        return cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]][backend_sim_status["cbs_status_code"]]
+        return cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]][
+            backend_sim_status["cbs_status_code"]
+        ]
     else:
         return cms.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
 

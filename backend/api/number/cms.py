@@ -72,8 +72,6 @@ SIM_NBA_LOOKUP = {
 }
 
 
-
-
 ELIGIBLE_PRIMARY_OFFERINGS: list[int] = [
     100100,
     100163,
