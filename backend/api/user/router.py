@@ -1,14 +1,13 @@
 """ User management apis """
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
-from typing import Optional, Any
+from typing import Optional, Any, Annotated
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
 from utils.error import Error
 import utils.regex as rgx
-
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
@@ -31,19 +30,18 @@ router = APIRouter()
 
 
 class UserCreate(BaseModel):
-    otp_confirmation : constr(regex=rgx.STRING)
-    name: constr(regex=rgx.TITLE)
-    msisdn: constr(regex=rgx.STRING)
-    password: constr(regex=rgx.PASSWORD)
-    profile_pic_url : Optional[constr(regex=rgx.URL)]
-    email: Optional[constr(regex=rgx.EMAIL)]
+    name: str = Field(..., regex=rgx.TITLE)
+    msisdn: str = Field(..., regex=rgx.DIGITS)
+    password: str = Field(..., regex=rgx.PASSWORD)
+    profile_pic_url : str = Field(None, regex=rgx.URL)
+    email: str = Field(None, regex=rgx.EMAIL)
 
 
 class UserUpdate(BaseModel):
-    name: Optional[constr(regex=rgx.TITLE)]
-    email: Optional[constr(regex=rgx.EMAIL)]
-    password: Optional[constr(regex=rgx.PASSWORD)]
-    profile_pic_url: Optional[constr(regex=rgx.URL)]
+    name: str = Field(None, regex=rgx.TITLE)
+    password: str = Field(None, regex=rgx.PASSWORD)
+    profile_pic_url : str = Field(None, regex=rgx.URL)
+    email: str = Field(None, regex=rgx.EMAIL)
 
 
 class UserRetrieve(BaseModel):
