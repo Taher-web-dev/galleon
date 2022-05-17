@@ -1,16 +1,8 @@
 from pydantic.main import BaseModel
 
-from .cms import (
-    SimStatusHandler,
-    eligible_primary_offerings,
-    WARN_NOT_4G_COMPATIBLE,
-    USIM_NBA
-)
+from . import cms
 
 from .zend import zend_sim
-
-sim_handler = SimStatusHandler()
-
 
 class Nba(BaseModel):
     href: str
@@ -133,25 +125,25 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
     """
     # first check fundamental SIM-level issues
     if backend_sim_status['subscriber_type'] != 0:
-        return sim_handler.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
+        return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
     
     if backend_sim_status['customer_type'] != "Individual":
-        return sim_handler.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
+        return cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
 
-    if backend_sim_status['primary_offering_id'] not in eligible_primary_offerings:
-        return sim_handler.BLOCK_INELIGIBLE_PRIMARY_OFFERING
+    if backend_sim_status['primary_offering_id'] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
+        return cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
 
     # now SIM-lifecycle issues - handling only prepaid for now
     if (
         "crm_status_code" in backend_sim_status
-        and backend_sim_status["crm_status_code"] in sim_handler.SIM_NBA_LOOKUP
+        and backend_sim_status["crm_status_code"] in cms.SIM_NBA_LOOKUP
         and "cbs_status_code" in backend_sim_status
         and backend_sim_status["cbs_status_code"]
-        in sim_handler.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]]
+        in cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]]
     ):
-        return sim_handler.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"][backend_sim_status["cbs_status_code"]]]
+        return cms.SIM_NBA_LOOKUP[backend_sim_status["crm_status_code"]][backend_sim_status["cbs_status_code"]]
     else:
-        return sim_handler.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
+        return cms.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
 
 
 def get_nba(msisdn: str, unified_sim_status: str, usim_status: dict) -> Nba:
@@ -175,12 +167,12 @@ def get_nba(msisdn: str, unified_sim_status: str, usim_status: dict) -> Nba:
     # nba: dict = {}
 
     # if we get a SIM status NBA that isn't normal, use it [we know it isn't NORMAL or BLOCK_X]
-    if unified_sim_status != "NORMAL":
-        return Nba(**sim_handler.SIM_NBA_LOOKUP[unified_sim_status])
+    if unified_sim_status != "NORMAL" and unified_sim_status in cms.SIM_NBA_LOOKUP:
+        return Nba(**cms.SIM_NBA_LOOKUP[unified_sim_status])
 
     # otherwise, if SIM not 4G eligible then use this one
     elif usim_status["is_4g_compatible"] == 0:
-        return Nba(**sim_handler.SIM_NBA_LOOKUP[WARN_NOT_4G_COMPATIBLE])
+        return Nba(**cms.SIM_NBA_LOOKUP[cms.WARN_NOT_4G_COMPATIBLE])
 
     # TODO this is where we'll put step 3 logic later incl. offers (which could be driven by MSISDN)
 

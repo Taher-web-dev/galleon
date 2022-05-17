@@ -1,81 +1,80 @@
-class SimStatusHandler:
-    # NORMAL
-    NORMAL = "NORMAL"
+# NORMAL
+NORMAL = "NORMAL"
 
-    # NOT NORMAL BUT CAN ACCESS WITH WARNING
-    WARN_RECHARGE = "WARN_RECHARGE"
-    WARN_MUST_RECONNECT = "WARN_MUST_RECONNECT"
+# NOT NORMAL BUT CAN ACCESS WITH WARNING
+WARN_RECHARGE = "WARN_RECHARGE"
+WARN_MUST_RECONNECT = "WARN_MUST_RECONNECT"
 
-    # CANNOT ACCESS - GENERIC BUT KNOWN
-    BLOCK_CRITICAL_SUPPORT = "BLOCK_CRITICAL_SUPPORT"
+# CANNOT ACCESS - GENERIC BUT KNOWN
+BLOCK_CRITICAL_SUPPORT = "BLOCK_CRITICAL_SUPPORT"
 
-    # CANNOT ACCESS - SPECIFIC TO SIM PROFILE ITSELF
-    BLOCK_UNSUPPORTED_CUSTOMER_TYPE = "BLOCK_UNSUPPORTED_CUSTOMER_TYPE"
-    BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE = "BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE"
-    BLOCK_INELIGIBLE_PRIMARY_OFFERING = "BLOCK_INELIGIBLE_PRIMARY_OFFERING"
+# CANNOT ACCESS - SPECIFIC TO SIM PROFILE ITSELF
+BLOCK_UNSUPPORTED_CUSTOMER_TYPE = "BLOCK_UNSUPPORTED_CUSTOMER_TYPE"
+BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE = "BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE"
+BLOCK_INELIGIBLE_PRIMARY_OFFERING = "BLOCK_INELIGIBLE_PRIMARY_OFFERING"
 
-    # CANNOT ACCESS - SPECIFIC TO SIM LIFECYCLE STATUS (FROM LOOKUP)
-    BLOCK_MUST_ACTIVATE = "BLOCK_MUST_ACTIVATE"
-    BLOCK_DISCONNECTED = "BLOCK_DISCONNECTED"
+# CANNOT ACCESS - SPECIFIC TO SIM LIFECYCLE STATUS (FROM LOOKUP)
+BLOCK_MUST_ACTIVATE = "BLOCK_MUST_ACTIVATE"
+BLOCK_DISCONNECTED = "BLOCK_DISCONNECTED"
 
-    # CANNOT ACCESS - UNKNOWN SIM STATUS COMBINATION
-    BLOCK_UNKNOWN_SIM_STATUS_COMBINATION = "BLOCK_UNKNOWN_SIM_STATUS_COMBINATION"
+# CANNOT ACCESS - UNKNOWN SIM STATUS COMBINATION
+BLOCK_UNKNOWN_SIM_STATUS_COMBINATION = "BLOCK_UNKNOWN_SIM_STATUS_COMBINATION"
 
-    SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE = {
-        "B01": {
-            1: NORMAL,
-            2: WARN_RECHARGE,
-            3: WARN_RECHARGE,
-            4: BLOCK_DISCONNECTED,
-            5: BLOCK_CRITICAL_SUPPORT,
-        },
-        "B02": {1: BLOCK_DISCONNECTED, 4: BLOCK_CRITICAL_SUPPORT},
-        "B03": {
-            0: BLOCK_DISCONNECTED,
-            1: BLOCK_DISCONNECTED,
-            2: BLOCK_DISCONNECTED,
-            3: BLOCK_DISCONNECTED,
-            4: BLOCK_CRITICAL_SUPPORT,
-            5: BLOCK_CRITICAL_SUPPORT,
-        },
-        "B04": {
-            1: BLOCK_CRITICAL_SUPPORT,
-            2: BLOCK_CRITICAL_SUPPORT,
-            3: BLOCK_CRITICAL_SUPPORT,
-            4: BLOCK_CRITICAL_SUPPORT,
-            5: BLOCK_CRITICAL_SUPPORT,
-        },
-        "B06": {0: BLOCK_MUST_ACTIVATE},
-    }
+SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE = {
+    "B01": {
+        1: NORMAL,
+        2: WARN_RECHARGE,
+        3: WARN_RECHARGE,
+        4: BLOCK_DISCONNECTED,
+        5: BLOCK_CRITICAL_SUPPORT,
+    },
+    "B02": {1: BLOCK_DISCONNECTED, 4: BLOCK_CRITICAL_SUPPORT},
+    "B03": {
+        0: BLOCK_DISCONNECTED,
+        1: BLOCK_DISCONNECTED,
+        2: BLOCK_DISCONNECTED,
+        3: BLOCK_DISCONNECTED,
+        4: BLOCK_CRITICAL_SUPPORT,
+        5: BLOCK_CRITICAL_SUPPORT,
+    },
+    "B04": {
+        1: BLOCK_CRITICAL_SUPPORT,
+        2: BLOCK_CRITICAL_SUPPORT,
+        3: BLOCK_CRITICAL_SUPPORT,
+        4: BLOCK_CRITICAL_SUPPORT,
+        5: BLOCK_CRITICAL_SUPPORT,
+    },
+    "B06": {0: BLOCK_MUST_ACTIVATE},
+}
 
-    # Other warnings not tied to SIM status itself
-    WARN_NOT_4G_COMPATIBLE = "WARN_NOT_4G_COMPATIBLE"
+# Other warnings not tied to SIM status itself
+WARN_NOT_4G_COMPATIBLE = "WARN_NOT_4G_COMPATIBLE"
 
-    SIM_NBA_LOOKUP = {
-        WARN_RECHARGE: {
-            "href": "",
-            "message_en": "",
-            "message_ar": "",
-            "message_kd": "",
-            "href_text_en": "",
-            "href_text_ar": "",
-            "href_text_kd": "",
-        },
-        WARN_NOT_4G_COMPATIBLE: {
-            "href": "",
-            "message_en": "",
-            "message_ar": "",
-            "message_kd": "",
-            "href_text_en": "",
-            "href_text_ar": "",
-            "href_text_kd": "",
-        },
-    }
-
+SIM_NBA_LOOKUP = {
+    WARN_RECHARGE: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+    WARN_NOT_4G_COMPATIBLE: {
+        "href": "",
+        "message_en": "",
+        "message_ar": "",
+        "message_kd": "",
+        "href_text_en": "",
+        "href_text_ar": "",
+        "href_text_kd": "",
+    },
+}
 
 
 
-eligible_primary_offerings: list[int] = [
+
+ELIGIBLE_PRIMARY_OFFERINGS: list[int] = [
     100100,
     100163,
     100133,
@@ -103,7 +102,7 @@ eligible_primary_offerings: list[int] = [
 ]
 
 # using CBS ID
-negcred_lookup: dict[int, int] = {
+NEGCRED_LOOKUP: dict[int, int] = {
     2086106: 2000,
     2086107: 4000,
     2086108: 6000,
