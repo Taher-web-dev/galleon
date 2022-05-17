@@ -15,9 +15,11 @@ from api.user.router import router as user
 from api.otp.router import router as otp
 from api.number.router import router as number
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from utils.db import engine, Base
+from starlette.concurrency import iterate_in_threadpool
+import json
 
 Base.metadata.create_all(bind=engine)
 
@@ -57,10 +59,17 @@ async def app_shutdown():
     logger.info("Application shutdown")
 
 
+async def capture_body(request: Request):
+    request.state.request_body = {}
+    if request.headers.get("content-type") == "application/json":
+        request.state.request_body = await request.json()
+
+
 @app.middleware("http")
 async def middle(request: Request, call_next):
     """Wrapper function to manage errors and logging"""
     start_time = time.time()
+    response_body: str = ""
     # The api_key is enforced only if it set to none-empty value
     if not settings.api_key or (
         "key" in request.query_params
@@ -68,6 +77,10 @@ async def middle(request: Request, call_next):
     ):
         try:
             response = await call_next(request)
+            raw_response = [section async for section in response.body_iterator]
+            response.body_iterator = iterate_in_threadpool(iter(raw_response))
+            response_body = json.loads(b"".join(raw_response))
+
         except:
             stack = []
             ex = sys.exc_info()[1]
@@ -102,6 +115,7 @@ async def middle(request: Request, call_next):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+
     logger.info(
         "Processed",
         extra={
@@ -109,6 +123,15 @@ async def middle(request: Request, call_next):
                 "duration": 1000 * (time.time() - start_time),
                 "verb": request.method,
                 "path": str(request.url.path),
+                "response": {
+                    "headers": dict(response.headers.items()),
+                    "body": response_body,
+                },
+                "request": {
+                    "headers": dict(request.headers.items()),
+                    "query_params": dict(request.query_params.items()),
+                    "body": request.state.request_body,
+                },
                 "http_status": response.status_code,
             }
         },
@@ -116,9 +139,9 @@ async def middle(request: Request, call_next):
     return response
 
 
-app.include_router(user, prefix="/api/user")
-app.include_router(otp, prefix="/api/otp")
-app.include_router(number, prefix="/api/number")
+app.include_router(user, prefix="/api/user", dependencies=[Depends(capture_body)])
+app.include_router(otp, prefix="/api/otp", dependencies=[Depends(capture_body)])
+app.include_router(number, prefix="/api/number", dependencies=[Depends(capture_body)])
 
 
 if __name__ == "__main__":
