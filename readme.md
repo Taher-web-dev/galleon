@@ -1,10 +1,10 @@
-## Galleon Middleware
+# Galleon Middleware
 
-A thin-wrapper that implements basic business logic and invokes respective zain backend api end points.
+A thin-wrapper that implements basic business logic and invokes respective zain-backend api endpoints.
 
-### Install / usage
+## Install / usage
 
-#### Requirements
+### Requirements
 
 - git
 - python >= 3.9
@@ -17,61 +17,71 @@ Optional:
 - podman
 - gzip
 
+### Local / Direct Setup
 
-#### Local / Direct Setup
+#### Go inside the project folder
 
-```
-# Go inside the project folder
-cd backend
+`cd backend`
 
-# Install required modules
-pip install --user -r requirements.txt
+#### Install required modules
 
-# Create logs folder (path can be configured in sample.env)
-mkdir ./logs
+`pip install --user -r requirements.txt`
 
-# Install pytest
-pip install --user -r requirements-dev.txt
+#### Create logs folder (path can be configured in sample.env)
 
-# Environment setup
-cp sample.env secrets.env
-create your DB
+`mkdir ./logs`
+
+#### Install pytest
+
+`pip install --user -r requirements-dev.txt`
+
+#### Environment setup
+
+`cp sample.env secrets.env`
+
+create your DB (we're using postgresql)
 Add your DB credentials in secrets.env at "DATABASE_URL"
-source env.sh
 
-# To run and migrate the DB tables:
-python main.py
-# or
-./run.sh
+`source env.sh`
 
-# Unit test
+#### To run and migrate the DB tables
+
+`python main.py`
+
+#### or
+
+`./run.sh`
+
+#### Unit test
+
 python tests.py
 
-# pytest
-pytest -v
+#### pytest
 
+`pytest -v`
 
-# Invoke sample apis using curl
-./curl.sh
-```
+#### Invoke sample apis using curl
+
+`./curl.sh`
 
 #### Using Podman/Container
 
-```
+```plain
 # Build
 podman rmi galleon-middleware
 podman build -t galleon-middleware .
 
 # Run
-podman run --name galleon-middleware --rm \
-  -p 0.0.0.0:8080:8080/tcp \
+ podman run --name galleon-middleware --rm \
+  -e DATABASE_URL="postgresql://db-user:db-pass@server-ip/db-name" \
+  -p 127.0.0.1:8080:8080/tcp \
   -it galleon-middleware \
   /home/backend/run.sh
- 
+
 # Command line access inside the container
 podman exec -it galleon-middleware ash
 
-# The image can be saved to a file for off-line deployement
+# The image can be saved to a file for off-line deployment
 podman save --quiet galleon-middleware | gzip > galleon-middleware.tar.gz
 
 # Then loaded at the target system
@@ -87,5 +97,3 @@ podman logs --follow --tail 0 galleon-middleware | jq
 # Watch app logs
 tail -n 0 -f ./logs/x-ljson.log | jq
 ```
-
-
