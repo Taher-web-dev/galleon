@@ -50,6 +50,11 @@ class UserRetrieve(BaseModel):
     email: Optional[str]
     profile_pic_url: Optional[str]
 
+class LoginOut(BaseModel):
+    status: str
+    refresh_token: dict
+    access_token: dict
+
 
 @router.post("/create", response_model=dict[str, Any])
 async def create_user(new_user: UserCreate) -> dict[str, Any]:
@@ -93,7 +98,7 @@ async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
     )
 
 
-@router.patch("/profile")
+@router.patch("/profile", response_model=UserRetrieve)
 async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -109,10 +114,16 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     db.commit()
     db.refresh(user)
 
-    return {"status": "success"}
+    return UserRetrieve(
+        status="success",
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        profile_pic_url=user.profile_pic_url,
+    )
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginOut)
 async def login(msisdn: str = Body(..., regex=rgx.DIGITS), password: str = Body(..., regex=rgx.PASSWORD)) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -122,11 +133,11 @@ async def login(msisdn: str = Body(..., regex=rgx.DIGITS), password: str = Body(
         user.refresh_token = refresh_token["token"]
         db.commit()
 
-        return {
-            "status": "success",
-            "refresh_token": refresh_token,
-            "access_token": access_token,
-        }
+        return LoginOut(
+            status="success",
+            refresh_token=refresh_token,
+            access_token=access_token
+        )
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
