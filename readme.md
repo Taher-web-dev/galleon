@@ -100,15 +100,38 @@ podman logs --follow --tail 0 galleon-middleware | jq
 tail -n 0 -f ./logs/x-ljson.log | jq
 ```
 
+#### Setup Postgresql database
+
+##### Fedora
+
+```
+# Install Postgresql
+sudo dnf install python3-sqlalchemy+postgresql postgresql-server postgresql
+sudo postgresql-setup  --initdb
+echo 'host all all 127.0.0.1/32 md5'  | sudo tee -a /var/lib/pgsql/data/pg_hba.conf
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
+
+# Create database and user
+sudo su - postgres
+createuser -d -P galleon # enter a password, which will be used later to access this account
+createdb  -O galleon galleon
+psql -c 'grant all privileges on database galleon to galleon;'
+exit
+```
 
 #### Git pre-commit hook
 
 ```
-echo '#!/usr/bin/env bash
-black .
-flake8
-export BACKEND_ENV=backend/secrets.env
-export LOG_PATH=backend/logs
-pytest -v' > .git/hooks/pre-commit
-chmod a+x .git/hooks/pre-commit
+cp pre-commit > .git/hooks/pre-commit
 ```
+
+Note: Postgresql password can be stored in `~/.pgpass` like this:
+
+```
+#hostname:port:database:username:password
+127.0.0.1:5432:galleon:galleon:MYPASS
+```
+
+
+
