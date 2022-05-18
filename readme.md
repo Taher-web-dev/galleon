@@ -108,7 +108,7 @@ tail -n 0 -f ./logs/x-ljson.log | jq
 # Install Postgresql
 sudo dnf install python3-sqlalchemy+postgresql postgresql-server postgresql
 sudo postgresql-setup  --initdb
-echo 'host all all 127.0.0.1/32 md5'  | sudo tee -a /var/lib/pgsql/data/pg_hba.conf
+sed -i '1s/^/host all all 127.0.0.1\/32 md5\n/' /var/lib/pgsql/data/pg_hba.conf
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
 
