@@ -99,3 +99,16 @@ podman logs --follow --tail 0 galleon-middleware | jq
 # Watch app logs
 tail -n 0 -f ./logs/x-ljson.log | jq
 ```
+
+
+#### Git pre-commit hook
+
+```
+echo '#!/usr/bin/env bash
+black .
+flake8
+export BACKEND_ENV=backend/secrets.env
+export LOG_PATH=backend/logs
+pytest -v' > .git/hooks/pre-commit
+chmod a+x .git/hooks/pre-commit
+```
