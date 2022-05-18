@@ -101,11 +101,15 @@ async def create_user(new_user: UserCreate) -> CreateUser:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        return JSONResponse(status_code=403, content=UserExistsErr().dict())
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN, content=UserExistsErr().dict()
+        )
 
     otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
-        return JSONResponse(status_code=403, content=InvalidOTPErr().dict())
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT, content=InvalidOTPErr().dict()
+        )
 
     user = User(
         msisdn=new_user.msisdn,
