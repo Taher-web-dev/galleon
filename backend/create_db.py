@@ -5,14 +5,14 @@ from utils.db import User, Otp, engine, Base, db
 Base.metadata.create_all(bind=engine)
 
 msisdn = "905070704747"
-# user = User(name="Ali baba", email="Hello6", msisdn=msisdn, password="World")
-# db.add(user)
+user = User(name="Ali baba", email="Hello6", msisdn=msisdn, password="World")
+db.add(user)
 
-# otp = Otp(msisdn=msisdn, code="1234")
-# db.add(otp)
+otp = Otp(msisdn=msisdn, code="1234")
+db.add(otp)
 
-# db.commit()
-# db.refresh(user)
+db.commit()
+db.refresh(user)
 
 otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
 otp.tries += 1

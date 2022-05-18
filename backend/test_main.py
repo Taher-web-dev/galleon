@@ -12,24 +12,31 @@ msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hiBiggerPass"
 confirmation: str = "123"
-user: User = User()
+user: User = None
 
 
 def test_create_user():
     response = client.post(
         "/api/user/create",
         json={
-            "name": name,
             "msisdn": msisdn,
+            "name": name,
             "password": password,
             "otp_confirmation": confirmation,
         },
     )
-    # print(response.json())
+    print(response.json())
     assert response.status_code == 200
     global user
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
+    assert response.json() == {
+        "id": user.id,
+        "msisdn": user.msisdn,
+        "name": name,
+        "email": user.email,
+        "profile_pic_url": user.profile_pic_url,
+    }
 
 
 access_token: str = ""
@@ -57,7 +64,7 @@ def test_get_profile():
     response = client.get("/api/user/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    assert user.id == response.json()["id"]
+    assert response.json()["id"] == user.id
 
 
 def test_update_profile():
@@ -178,15 +185,15 @@ def test_verify_otp():
 
 if __name__ == "__main__":
     test_create_user()
-    test_login_user()
-    test_get_profile()
-    test_update_profile()
-    test_sim_status()
-    test_wallet()
-    test_subscriptions()
-    test_request_otp()
-    time.sleep(2)
-    test_confirm_otp()
-    test_verify_otp()
-    test_redeem_registration_gift()
-    test_delete()
+    # test_login_user()
+    # test_get_profile()
+    # test_update_profile()
+    # test_sim_status()
+    # test_wallet()
+    # test_subscriptions()
+    # test_request_otp()
+    # time.sleep(2)
+    # test_confirm_otp()
+    # test_verify_otp()
+    # test_redeem_registration_gift()
+    # test_delete()

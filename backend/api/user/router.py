@@ -4,8 +4,9 @@ from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
 from typing import Optional, Any, Annotated
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse
 from utils.jwt import decode_jwt, sign_jwt
-from utils.db import db, User
+from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 
@@ -31,11 +32,12 @@ router = APIRouter()
 
 
 class UserCreate(BaseModel):
-    name: str = Field(..., regex=rgx.TITLE)
     msisdn: str = Field(..., regex=rgx.DIGITS)
+    name: str = Field(..., regex=rgx.TITLE)
     password: str = Field(..., regex=rgx.PASSWORD)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
     email: str = Field(None, regex=rgx.EMAIL)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
+    otp_confirmation: str  # = Field(..., regex=rgx.STRING)
 
 
 class UserUpdate(BaseModel):
@@ -59,14 +61,51 @@ class LoginOut(BaseModel):
     access_token: dict
 
 
-@router.post("/create", response_model=dict[str, Any])
-async def create_user(new_user: UserCreate) -> dict[str, Any]:
+class UserExistsErr(BaseModel):
+    status: str = "error"
+    code: int = 201
+    message: str = "Sorry the msisdn is already registered."
+
+
+class InvalidOTPErr(BaseModel):
+    status: str = "error"
+    code: int = 202
+    message: str = "The confirmation provided is not valid please try again."
+
+
+class CreateUser(BaseModel):
+    """Create User Response Model"""
+
+    id: int
+    msisdn: str
+    name: str
+    email: Optional[str]
+    profile_pic_url: Optional[str]
+
+
+@router.post(
+    "/create",
+    response_model=CreateUser,
+    responses={
+        403: {
+            "model": UserExistsErr,
+            "description": "User already exists.",
+        },
+        409: {
+            "model": InvalidOTPErr,
+            "description": "Invalid Otp Confirmation.",
+        },
+    },
+)
+async def create_user(new_user: UserCreate) -> CreateUser:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
-        )
+        return JSONResponse(status_code=403, content=UserExistsErr().dict())
+
+    otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
+    if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
+        return JSONResponse(status_code=403, content=InvalidOTPErr().dict())
 
     user = User(
         msisdn=new_user.msisdn,
@@ -80,7 +119,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     db.commit()
     db.refresh(user)
 
-    return {"user_id": user.id}
+    return CreateUser(**user.serialize)
 
 
 @router.get(
