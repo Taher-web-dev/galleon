@@ -12,7 +12,9 @@ router = APIRouter()
 
 
 @router.post("/request", response_model=dict[str, Any])
-async def send_otp(msisdn: str = Body(..., embed=True, regex=RGX_DIGITS)) -> dict[str, Any]:
+async def send_otp(
+    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS)
+) -> dict[str, Any]:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -32,7 +34,9 @@ async def send_otp(msisdn: str = Body(..., embed=True, regex=RGX_DIGITS)) -> dic
 
 
 @router.post("/confirm", response_model=dict[str, Any])
-async def confirm(msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..., regex=RGX_DIGITS)) -> dict[str, Any]:
+async def confirm(
+    msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..., regex=RGX_DIGITS)
+) -> dict[str, Any]:
     """Confirm Otp"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp:
@@ -49,7 +53,8 @@ async def confirm(msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..
 
 @router.post("/verify", response_model=dict[str, Any])
 async def api_verify(
-    msisdn: str = Body(..., regex=RGX_DIGITS), confirmation: str = Body(..., regex=RGX_STRING)
+    msisdn: str = Body(..., regex=RGX_DIGITS),
+    confirmation: str = Body(..., regex=RGX_STRING),
 ) -> dict[str, Any]:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()

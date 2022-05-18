@@ -70,7 +70,7 @@ async def middle(request: Request, call_next):
     """Wrapper function to manage errors and logging"""
     if request.url._url.endswith("/docs") or request.url._url.endswith("/openapi.json"):
         return await call_next(request)
-    
+
     start_time = time.time()
     response_body: str = ""
     # The api_key is enforced only if it set to none-empty value

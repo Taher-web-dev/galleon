@@ -8,6 +8,7 @@ from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
 import utils.regex as rgx
 
+
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
@@ -32,14 +33,14 @@ class UserCreate(BaseModel):
     name: str = Field(..., regex=rgx.TITLE)
     msisdn: str = Field(..., regex=rgx.DIGITS)
     password: str = Field(..., regex=rgx.PASSWORD)
-    profile_pic_url : str = Field(None, regex=rgx.URL)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
     email: str = Field(None, regex=rgx.EMAIL)
 
 
 class UserUpdate(BaseModel):
     name: str = Field(None, regex=rgx.TITLE)
     password: str = Field(None, regex=rgx.PASSWORD)
-    profile_pic_url : str = Field(None, regex=rgx.URL)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
     email: str = Field(None, regex=rgx.EMAIL)
 
 
@@ -49,6 +50,7 @@ class UserRetrieve(BaseModel):
     name: Optional[str]
     email: Optional[str]
     profile_pic_url: Optional[str]
+
 
 class LoginOut(BaseModel):
     status: str
@@ -124,7 +126,10 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
 
 
 @router.post("/login", response_model=LoginOut)
-async def login(msisdn: str = Body(..., regex=rgx.DIGITS), password: str = Body(..., regex=rgx.PASSWORD)) -> dict:
+async def login(
+    msisdn: str = Body(..., regex=rgx.DIGITS),
+    password: str = Body(..., regex=rgx.PASSWORD),
+) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and password == user.password:
@@ -134,9 +139,7 @@ async def login(msisdn: str = Body(..., regex=rgx.DIGITS), password: str = Body(
         db.commit()
 
         return LoginOut(
-            status="success",
-            refresh_token=refresh_token,
-            access_token=access_token
+            status="success", refresh_token=refresh_token, access_token=access_token
         )
 
     raise HTTPException(

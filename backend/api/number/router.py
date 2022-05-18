@@ -47,7 +47,8 @@ async def retrieve_wallet(
 
 @router.post("/redeem-registration-gift")
 async def api_registration_gift(
-    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS), session_msisdn=Depends(JWTBearer())
+    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS),
+    session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
     return change_supplementary_offering(
@@ -57,7 +58,9 @@ async def api_registration_gift(
 
 @router.post("/charge-voucher")
 async def api_charge_voucher(
-    msisdn: str = Body(..., regex=RGX_DIGITS), pincode: str = Body(..., regex=RGX_DIGITS), session_msisdn=Depends(JWTBearer())
+    msisdn: str = Body(..., regex=RGX_DIGITS),
+    pincode: str = Body(..., regex=RGX_DIGITS),
+    session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
     return recharge_voucher(msisdn, pincode)
