@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Any
 from enum import Enum
+from fastapi import status
 
 
 class Status(str, Enum):
@@ -12,6 +13,16 @@ class Error(BaseModel):
     type: str
     code: int
     message: str
+
+
+class ApiException(Exception):
+    status_code: int
+    error: Error
+
+    def __init__(self, status_code, error: Error):
+        super().__init__(status_code)
+        self.status_code = status_code
+        self.error = error
 
 
 class ApiResponse(BaseModel):
