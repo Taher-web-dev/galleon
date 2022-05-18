@@ -16,7 +16,6 @@ INVALID_CREDENTIALS_ERROR = Error(
     code=203,
     message="Invalid credentials",
 )
-
 INVALID_TOKEN_ERROR = Error(
     type="auth",
     code=204,
