@@ -26,16 +26,25 @@ db.commit()
 
 
 def test_create_user():
-    response = client.post(
-        "/api/user/create",
-        json={
-            "msisdn": msisdn,
-            "name": name,
-            "password": password,
-            "otp_confirmation": confirmation,
-        },
-    )
-    print(response.json())
+    endpoint = "/api/user/create"
+    request_data = {
+        "msisdn": msisdn,
+        "name": name,
+        "password": password,
+        "otp_confirmation": "wrongConfirmation",
+    }
+
+    # wrong confirmation
+    response = client.post(endpoint, json=request_data)
+    # print(response.json())
+    assert response.status_code == 409
+    assert response.json()["status"] == "error"
+    assert response.json()["code"] == 202
+
+    # correct confirmation
+    request_data["otp_confirmation"] = confirmation
+    response = client.post(endpoint, json=request_data)
+    # print(response.json())
     assert response.status_code == 200
     global user
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -47,6 +56,12 @@ def test_create_user():
         "email": user.email,
         "profile_pic_url": user.profile_pic_url,
     }
+
+    # create user again
+    response = client.post(endpoint, json=request_data)
+    assert response.status_code == 403
+    assert response.json()["status"] == "error"
+    assert response.json()["code"] == 201
 
 
 access_token: str = ""
