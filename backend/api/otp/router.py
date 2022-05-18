@@ -28,9 +28,9 @@ async def send_otp(
     db.add(otp)
     db.commit()
     db.refresh(otp)
-    response = zend_send_sms(msisdn, f"Your otp code is {code}")
+    zend_send_sms(msisdn, f"Your otp code is {code}")
     slack_notify(msisdn, code)
-    return response
+    return {"status": "success"}
 
 
 @router.post("/confirm", response_model=dict[str, Any])
