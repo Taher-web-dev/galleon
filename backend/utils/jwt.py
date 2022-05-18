@@ -1,17 +1,34 @@
-from time import time
-from typing import Dict
-from .settings import settings
-
 import jwt
+from time import time
+from typing import Optional
+from fastapi import Request, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from utils.settings import settings
+from utils.api_responses import ApiException, Error
+
+
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request) -> Optional[str]:
+        try:
+            credentials: Optional[HTTPAuthorizationCredentials] = await super(
+                JWTBearer, self
+            ).__call__(request)
+            if credentials and credentials.scheme == "Bearer":
+                return decode_jwt(credentials.credentials)["msisdn"]
+        except:
+            raise ApiException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                error=Error(type="jwtauth", code=10, message="Not authenticated"),
+            )
 
 
 def sign_jwt(data: dict, expires: int = 600) -> str:
     payload = {"data": data, "expires": time() + expires}
-    token: str = jwt.encode(
-        payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
-    )
-
-    return token
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def decode_jwt(token: str) -> dict:

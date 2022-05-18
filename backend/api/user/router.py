@@ -1,111 +1,28 @@
 """ User management apis """
 
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, Body, Header, status, Request, Depends
+from fastapi import APIRouter, Body, Header, status, Depends
 from typing import Optional
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
-from utils.api_responses import Status, ApiResponse, Error, ApiException
-
-
-class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True):
-        super(JWTBearer, self).__init__(auto_error=auto_error)
-
-    async def __call__(self, request: Request) -> Optional[str]:
-        try:
-            credentials: Optional[HTTPAuthorizationCredentials] = await super(
-                JWTBearer, self
-            ).__call__(request)
-            if credentials and credentials.scheme == "Bearer":
-                return decode_jwt(credentials.credentials)["msisdn"]
-        except:
-            raise ApiException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                error=Error(type="jwtauth", code=10, message="Not authenticated"),
-            )
+from utils.jwt import JWTBearer
+from utils.api_responses import Status, ApiResponse, ApiException
+from api.user.request_models import UserCreateRequest, UserUpdateRequest
+from api.user.response_models import (
+    USER_EXISTS_ERROR,
+    INVALID_OTP_ERROR,
+    INVALID_TOKEN_ERROR,
+    INVALID_CREDENTIALS_ERROR,
+    UserExistsErrorResponse,
+    InvalidOtpErrorResponse,
+    InvalidTokenErrorResponse,
+    InvalidCredentialsErrorResponse,
+    UserProfile,
+)
 
 
 router = APIRouter()
-
-
-class UserProfile(BaseModel):
-    id: int
-    name: str
-    msisdn: str = Field(..., regex=rgx.MSISDN)
-    email: str | None = None
-    password: str | None = None
-    profile_pic_url: str | None = None
-
-
-class UserCreateRequest(BaseModel):
-    msisdn: str = Field(..., regex=rgx.DIGITS)
-    name: str = Field(..., regex=rgx.TITLE)
-    password: str = Field(..., regex=rgx.PASSWORD)
-    email: str = Field(None, regex=rgx.EMAIL)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
-    otp_confirmation: str = Field(..., regex=rgx.STRING)
-
-
-class UserUpdateRequest(BaseModel):
-    name: str = Field(None, regex=rgx.TITLE)
-    password: str = Field(None, regex=rgx.PASSWORD)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
-    email: str = Field(None, regex=rgx.EMAIL)
-
-
-USER_EXISTS_ERROR = Error(
-    type="user", code=201, message="Sorry the msisdn is already registered."
-)
-INVALID_OTP_ERROR = Error(
-    type="otp",
-    code=202,
-    message="The confirmation provided is not valid please try again.",
-)
-INVALID_CREDENTIALS_ERROR = Error(
-    type="auth",
-    code=203,
-    message="Invalid credentials",
-)
-
-INVALID_TOKEN_ERROR = Error(
-    type="auth",
-    code=204,
-    message="Invalid token",
-)
-
-
-class UserExistsErrorResponse(ApiResponse):
-    status: Status = Status.failed
-    errors: list[Error] = [USER_EXISTS_ERROR]
-
-
-class InvalidOtpErrorResponse(ApiResponse):
-    status: Status = Status.failed
-    errors: list[Error] = [INVALID_OTP_ERROR]
-
-
-class InvalidTokenErrorResponse(ApiResponse):
-    status: Status = Status.failed
-    errors: list[Error] = [INVALID_TOKEN_ERROR]
-
-
-class InvalidCredentialsErrorResponse(ApiResponse):
-    status: Status = Status.failed
-    errors: list[Error] = [INVALID_CREDENTIALS_ERROR]
-
-
-class CreateUser(BaseModel):
-    """Create User Response Model"""
-
-    id: int
-    msisdn: str
-    name: str
-    email: Optional[str]
-    profile_pic_url: Optional[str]
 
 
 @router.post(

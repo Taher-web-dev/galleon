@@ -45,4 +45,4 @@ def get_wallet(msisdn: str) -> Union[Wallet, Error]:
         balance = WalletEntry(value=amount, expiry=str(raw_balance["validity"]))
         return Wallet(balance=balance, loan=loan)
     except JSONDecodeError:
-        return Error(type="walled", code=10, message="Invalid wallet op")
+        return Error(type="wallet", code=10, message="Invalid wallet op")

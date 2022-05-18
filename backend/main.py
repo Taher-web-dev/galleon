@@ -101,7 +101,8 @@ async def middle(request: Request, call_next):
                     ApiResponse(status=Status.failed, errors=[ex.error])
                 ),
             )
-        except:
+
+        except Exception:
             ex = sys.exc_info()[1]
             if ex:
                 stack = [
@@ -131,7 +132,7 @@ async def middle(request: Request, call_next):
                 ApiResponse(
                     status=Status.failed,
                     errors=[
-                        Error(type="bad request", code=100, message="invalid request")
+                        Error(type="bad request", code=100, message="Invalid request.")
                     ],
                 )
             ),
