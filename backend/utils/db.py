@@ -64,8 +64,10 @@ class User(Base):
     def serialize(self) -> dict:
         """Return in serializeable format"""
         return {
-            "name": self.name,
+            "id": self.id,
             "msisdn": self.msisdn,
+            "name": self.name,
+            "email": self.email,
             "profile_pic_url": self.profile_pic_url,
         }
 

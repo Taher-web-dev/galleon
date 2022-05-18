@@ -4,8 +4,9 @@ from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
 from typing import Optional
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse
 from utils.jwt import decode_jwt, sign_jwt
-from utils.db import db, User
+from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.api_responses import Status, ApiResponse
@@ -44,12 +45,15 @@ class UserProfileResponse(ApiResponse):
     data: UserProfile
 
 
-class UserCreateRequest(BaseModel):
-    name: str = Field(..., regex=rgx.TITLE)
+# class UserCreateRequest(BaseModel):
+#     name: str = Field(..., regex=rgx.TITLE)
+class UserCreate(BaseModel):
     msisdn: str = Field(..., regex=rgx.DIGITS)
+    name: str = Field(..., regex=rgx.TITLE)
     password: str = Field(..., regex=rgx.PASSWORD)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
     email: str = Field(None, regex=rgx.EMAIL)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
+    otp_confirmation: str = Field(..., regex=rgx.STRING)
 
 
 class UserUpdateRequest(BaseModel):
@@ -59,13 +63,70 @@ class UserUpdateRequest(BaseModel):
     email: str = Field(None, regex=rgx.EMAIL)
 
 
-@router.post("/create", response_model=ApiResponse, response_model_exclude_none=True)
-async def create_user(new_user: UserCreateRequest) -> ApiResponse:
+# @router.post("/create", response_model=ApiResponse, response_model_exclude_none=True)
+# async def create_user(new_user: UserCreateRequest) -> ApiResponse:
+class UserRetrieve(BaseModel):
+    id: int
+    status: str
+    name: Optional[str]
+    email: Optional[str]
+    profile_pic_url: Optional[str]
+
+
+class LoginOut(BaseModel):
+    status: str
+    refresh_token: dict
+    access_token: dict
+
+
+class UserExistsErr(BaseModel):
+    status: str = "error"
+    code: int = 201
+    message: str = "Sorry the msisdn is already registered."
+
+
+class InvalidOTPErr(BaseModel):
+    status: str = "error"
+    code: int = 202
+    message: str = "The confirmation provided is not valid please try again."
+
+
+class CreateUser(BaseModel):
+    """Create User Response Model"""
+
+    id: int
+    msisdn: str
+    name: str
+    email: Optional[str]
+    profile_pic_url: Optional[str]
+
+
+@router.post(
+    "/create",
+    response_model=CreateUser,
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": UserExistsErr,
+            "description": "User already exists.",
+        },
+        status.HTTP_409_CONFLICT: {
+            "model": InvalidOTPErr,
+            "description": "Invalid OTP Confirmation.",
+        },
+    },
+)
+async def create_user(new_user: UserCreate) -> CreateUser:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Customer already exists"
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN, content=UserExistsErr().dict()
+        )
+
+    otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
+    if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT, content=InvalidOTPErr().dict()
         )
 
     user = User(
@@ -79,7 +140,8 @@ async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     db.add(user)
     db.commit()
     db.refresh(user)
-    return ApiResponse(status=Status.success, data={"id": user.id})
+    # return ApiResponse(status=Status.success, data={"id": user.id})
+    return CreateUser(**user.serialize)
 
 
 @router.get(
