@@ -6,6 +6,7 @@ from typing import Optional, Any, Annotated
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
+from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 
 
@@ -70,7 +71,7 @@ async def create_user(new_user: UserCreate) -> dict[str, Any]:
     user = User(
         msisdn=new_user.msisdn,
         name=new_user.name,
-        password=new_user.password,
+        password=hash_password(new_user.password),
         email=new_user.email,
         profile_pic_url=new_user.profile_pic_url,
     )
@@ -108,7 +109,7 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     if user_profile.name:
         user.name = user_profile.name
     if user_profile.password:
-        user.password = user_profile.password
+        user.password = hash_password(user_profile.password)
     if user_profile.email:
         user.email = user_profile.email
     if user_profile.profile_pic_url:
@@ -132,7 +133,7 @@ async def login(
 ) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    if user and password == user.password:
+    if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
         refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
         user.refresh_token = refresh_token["token"]
