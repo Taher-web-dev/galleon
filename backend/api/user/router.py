@@ -14,12 +14,9 @@ from api.user.response_models import (
     INVALID_OTP_ERROR,
     INVALID_TOKEN_ERROR,
     INVALID_CREDENTIALS_ERROR,
-    UserExistsErrorResponse,
-    InvalidOtpErrorResponse,
-    InvalidTokenErrorResponse,
-    InvalidCredentialsErrorResponse,
     UserProfile,
 )
+import api.user.additional_responses as additional_responses
 
 
 router = APIRouter()
@@ -29,16 +26,7 @@ router = APIRouter()
     "/create",
     response_model=ApiResponse,
     response_model_exclude_none=True,
-    responses={
-        status.HTTP_403_FORBIDDEN: {
-            "model": UserExistsErrorResponse,
-            "description": "User already exists.",
-        },
-        status.HTTP_409_CONFLICT: {
-            "model": InvalidOtpErrorResponse,
-            "description": "Invalid OTP Confirmation.",
-        },
-    },
+    responses=additional_responses.create_user,
 )
 async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     """Register a new user"""
@@ -128,12 +116,7 @@ async def update_profile(
     "/login",
     response_model=ApiResponse,
     response_model_exclude_none=True,
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {
-            "model": InvalidCredentialsErrorResponse,
-            "description": "Invalid credentials",
-        },
-    },
+    responses=additional_responses.login,
 )
 async def login(
     msisdn: str = Body(..., regex=rgx.DIGITS),
@@ -174,12 +157,7 @@ async def logout(msisdn=Depends(JWTBearer())) -> ApiResponse:
     "/token",
     response_model=ApiResponse,
     response_model_exclude_none=True,
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {
-            "model": InvalidTokenErrorResponse,
-            "description": "Invalid token.",
-        },
-    },
+    responses=additional_responses.token,
 )
 async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiResponse:
     """Generate access token from provided refresh token"""
