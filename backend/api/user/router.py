@@ -1,13 +1,13 @@
 """ User management apis """
 
-from fastapi import APIRouter, Body, Header, HTTPException, status
-from pydantic import BaseModel
-from typing import Optional, Any
-from fastapi import Request, Depends
+from pydantic import BaseModel, Field
+from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
+from typing import Optional, Any, Annotated
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User
 from utils.password_hashing import verify_password, get_password_hash
+import utils.regex as rgx
 
 
 class JWTBearer(HTTPBearer):
@@ -31,19 +31,18 @@ router = APIRouter()
 
 
 class UserCreate(BaseModel):
-    otp_confirmation: str
-    name: str
-    msisdn: str
-    password: str
-    profile_pic_url: Optional[str]
-    email: Optional[str]
+    name: str = Field(..., regex=rgx.TITLE)
+    msisdn: str = Field(..., regex=rgx.DIGITS)
+    password: str = Field(..., regex=rgx.PASSWORD)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
+    email: str = Field(None, regex=rgx.EMAIL)
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
-    profile_pic_url: Optional[str]
+    name: str = Field(None, regex=rgx.TITLE)
+    password: str = Field(None, regex=rgx.PASSWORD)
+    profile_pic_url: str = Field(None, regex=rgx.URL)
+    email: str = Field(None, regex=rgx.EMAIL)
 
 
 class UserRetrieve(BaseModel):
@@ -52,6 +51,12 @@ class UserRetrieve(BaseModel):
     name: Optional[str]
     email: Optional[str]
     profile_pic_url: Optional[str]
+
+
+class LoginOut(BaseModel):
+    status: str
+    refresh_token: dict
+    access_token: dict
 
 
 @router.post("/create", response_model=dict[str, Any])
@@ -96,7 +101,7 @@ async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
     )
 
 
-@router.patch("/profile")
+@router.patch("/profile", response_model=UserRetrieve)
 async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -112,11 +117,20 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     db.commit()
     db.refresh(user)
 
-    return {"status": "success"}
+    return UserRetrieve(
+        status="success",
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        profile_pic_url=user.profile_pic_url,
+    )
 
 
-@router.post("/login")
-async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
+@router.post("/login", response_model=LoginOut)
+async def login(
+    msisdn: str = Body(..., regex=rgx.DIGITS),
+    password: str = Body(..., regex=rgx.PASSWORD),
+) -> dict:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
@@ -125,11 +139,9 @@ async def login(msisdn: str = Body(...), password: str = Body(...)) -> dict:
         user.refresh_token = refresh_token["token"]
         db.commit()
 
-        return {
-            "status": "success",
-            "refresh_token": refresh_token,
-            "access_token": access_token,
-        }
+        return LoginOut(
+            status="success", refresh_token=refresh_token, access_token=access_token
+        )
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."

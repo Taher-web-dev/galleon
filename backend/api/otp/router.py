@@ -6,12 +6,15 @@ from ..number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.error import Error
 from typing import Any
+from utils.regex import DIGITS as RGX_DIGITS, STRING as RGX_STRING
 
 router = APIRouter()
 
 
 @router.post("/request", response_model=dict[str, Any])
-async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str, Any]:
+async def send_otp(
+    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS)
+) -> dict[str, Any]:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -31,7 +34,9 @@ async def send_otp(msisdn: str = Body(..., embed=True)) -> dict[str, Any]:
 
 
 @router.post("/confirm", response_model=dict[str, Any])
-async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, Any]:
+async def confirm(
+    msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..., regex=RGX_DIGITS)
+) -> dict[str, Any]:
     """Confirm Otp"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp:
@@ -48,7 +53,8 @@ async def confirm(msisdn: str = Body(...), code: str = Body(...)) -> dict[str, A
 
 @router.post("/verify", response_model=dict[str, Any])
 async def api_verify(
-    msisdn: str = Body(...), confirmation: str = Body(...)
+    msisdn: str = Body(..., regex=RGX_DIGITS),
+    confirmation: str = Body(..., regex=RGX_STRING),
 ) -> dict[str, Any]:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()

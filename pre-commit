@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+no_color='\033[0m'
+
+echo -e "\n${yellow}Executing pre-commit hook${no_color}\n"
+
+black .
+if ! flake8; then
+  echo "\n${red}Flake8 Check failed!${no_color}"
+  exit 1
+fi
+
+psql -h 127.0.0.1 -U galleon galleon -c 'delete from users; delete from otp;'
+export BACKEND_ENV=backend/secrets.env
+export LOG_PATH=backend/logs
+if ! pytest -v; then
+  echo -e "\n${red}Pytest failed${no_color}"
+  exit 1
+fi
+
+echo -e "\n${green}All pre-commit checks are good${no_color}"

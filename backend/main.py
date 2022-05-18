@@ -33,7 +33,7 @@ app = FastAPI(
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 log_handler = logging.handlers.RotatingFileHandler(
-    filename=settings.log_path + "/x-ljson.log", maxBytes=5000000, backupCount=10
+    filename=f"{settings.log_path}/x-ljson.log", maxBytes=5000000, backupCount=10
 )
 logger.addHandler(log_handler)
 json_logging.init_fastapi(enable_json=True)
@@ -70,7 +70,7 @@ async def middle(request: Request, call_next):
     """Wrapper function to manage errors and logging"""
     if request.url._url.endswith("/docs") or request.url._url.endswith("/openapi.json"):
         return await call_next(request)
-    
+
     start_time = time.time()
     response_body: str = ""
     # The api_key is enforced only if it set to none-empty value
@@ -84,23 +84,19 @@ async def middle(request: Request, call_next):
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
             response_body = json.loads(b"".join(raw_response))
 
-        except:
-            stack = []
+        except Exception:
             ex = sys.exc_info()[1]
             if ex:
-                for frame, lineno in traceback.walk_tb(ex.__traceback__):
-                    # Exclude log entries inside python libraries
-                    if "site-packages" not in frame.f_code.co_filename:
-                        stack.append(
-                            {
-                                "file": frame.f_code.co_filename,
-                                "function": frame.f_code.co_name,
-                                "line": lineno,
-                            }
-                        )
+                stack = [
+                    {
+                        "file": frame.f_code.co_filename,
+                        "function": frame.f_code.co_name,
+                        "line": lineno,
+                    }
+                    for frame, lineno in traceback.walk_tb(ex.__traceback__)
+                    if "site-packages" not in frame.f_code.co_filename
+                ]
                 logger.error(str(ex), extra={"props": {"stack": stack}})
-                # print(str(ex))
-                # print(stack)
             response = JSONResponse(
                 status_code=500,
                 content={
