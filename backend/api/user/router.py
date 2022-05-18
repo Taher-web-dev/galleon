@@ -9,7 +9,7 @@ from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
-from utils.api_responses import Status, ApiResponse
+from utils.api_responses import Status, ApiResponse, Error
 
 
 class JWTBearer(HTTPBearer):
@@ -45,9 +45,7 @@ class UserProfileResponse(ApiResponse):
     data: UserProfile
 
 
-# class UserCreateRequest(BaseModel):
-#     name: str = Field(..., regex=rgx.TITLE)
-class UserCreate(BaseModel):
+class UserCreateRequest(BaseModel):
     msisdn: str = Field(..., regex=rgx.DIGITS)
     name: str = Field(..., regex=rgx.TITLE)
     password: str = Field(..., regex=rgx.PASSWORD)
@@ -63,8 +61,6 @@ class UserUpdateRequest(BaseModel):
     email: str = Field(None, regex=rgx.EMAIL)
 
 
-# @router.post("/create", response_model=ApiResponse, response_model_exclude_none=True)
-# async def create_user(new_user: UserCreateRequest) -> ApiResponse:
 class UserRetrieve(BaseModel):
     id: int
     status: str
@@ -73,20 +69,20 @@ class UserRetrieve(BaseModel):
     profile_pic_url: Optional[str]
 
 
-class LoginOut(BaseModel):
+class LoginOut(Error):
     status: str
     refresh_token: dict
     access_token: dict
 
 
-class UserExistsErr(BaseModel):
-    status: str = "error"
+class UserExistsErr(Error):
+    type: str = "error"  # TODO define a better error type here
     code: int = 201
     message: str = "Sorry the msisdn is already registered."
 
 
-class InvalidOTPErr(BaseModel):
-    status: str = "error"
+class InvalidOTPErr(Error):
+    type: str = "error"  # TODO define a better error type here
     code: int = 202
     message: str = "The confirmation provided is not valid please try again."
 
@@ -103,30 +99,37 @@ class CreateUser(BaseModel):
 
 @router.post(
     "/create",
-    response_model=CreateUser,
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
     responses={
         status.HTTP_403_FORBIDDEN: {
-            "model": UserExistsErr,
+            "model": ApiResponse(status=Status.failed, errors=[UserExistsErr().dict()]),
             "description": "User already exists.",
         },
         status.HTTP_409_CONFLICT: {
-            "model": InvalidOTPErr,
+            "model": ApiResponse(status=Status.failed, errors=[InvalidOTPErr().dict()]),
             "description": "Invalid OTP Confirmation.",
         },
     },
 )
-async def create_user(new_user: UserCreate) -> CreateUser:
+async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     """Register a new user"""
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
         return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content=UserExistsErr().dict()
+            status_code=status.HTTP_403_FORBIDDEN,
+            content=ApiResponse(
+                status=Status.failed, errors=[UserExistsErr().dict()]
+            ).dict(),
         )
 
     otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
         return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT, content=InvalidOTPErr().dict()
+            status_code=status.HTTP_409_CONFLICT,
+            content=ApiResponse(
+                status=Status.failed, errors=[InvalidOTPErr().dict()]
+            ).dict(),
         )
 
     user = User(
@@ -140,8 +143,7 @@ async def create_user(new_user: UserCreate) -> CreateUser:
     db.add(user)
     db.commit()
     db.refresh(user)
-    # return ApiResponse(status=Status.success, data={"id": user.id})
-    return CreateUser(**user.serialize)
+    return ApiResponse(status=Status.success, data=CreateUser(**user.serialize).dict())
 
 
 @router.get(
