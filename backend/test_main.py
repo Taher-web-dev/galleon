@@ -42,11 +42,12 @@ def test_login_user():
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
+    print(data)
     global access_token
     global refresh_token
     # implicit assertion of access_token and refresh_token
-    access_token = data["access_token"]["token"]
-    refresh_token = data["refresh_token"]["token"]
+    access_token = data["data"]["access_token"]
+    refresh_token = data["data"]["refresh_token"]
     # print(token)
     # print(response.json())
 
@@ -57,7 +58,7 @@ def test_get_profile():
     response = client.get("/api/user/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    assert user.id == response.json()["id"]
+    assert user.id == response.json()["data"]["id"]
 
 
 def test_update_profile():
@@ -165,7 +166,7 @@ def test_confirm_otp():
     response = client.post("/api/otp/confirm", json={"msisdn": msisdn, "code": code})
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    confirmation = response.json()["confirmation"]
+    confirmation = response.json()["data"]["confirmation"]
 
 
 def test_verify_otp():
@@ -179,6 +180,7 @@ def test_verify_otp():
 if __name__ == "__main__":
     test_create_user()
     test_login_user()
+    """
     test_get_profile()
     test_update_profile()
     test_sim_status()
@@ -190,3 +192,4 @@ if __name__ == "__main__":
     test_verify_otp()
     test_redeem_registration_gift()
     test_delete()
+    """

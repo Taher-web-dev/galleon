@@ -61,8 +61,8 @@ async def app_shutdown():
 
 async def capture_body(request: Request):
     request.state.request_body = {}
-    if request.headers.get("content-type") == "application/json":
-        request.state.request_body = await request.json()
+    #if request.headers.get("content-type") == "application/json":
+    #    request.state.request_body = await request.json()
 
 
 @app.middleware("http")

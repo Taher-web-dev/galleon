@@ -5,11 +5,13 @@ from .settings import settings
 import jwt
 
 
-def sign_jwt(data: dict, expires: int = 600) -> Dict[str, str]:
+def sign_jwt(data: dict, expires: int = 600) -> str:
     payload = {"data": data, "expires": time() + expires}
-    token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    token: str = jwt.encode(
+        payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
+    )
 
-    return {"token": token}
+    return token
 
 
 def decode_jwt(token: str) -> dict:

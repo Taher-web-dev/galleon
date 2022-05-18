@@ -4,7 +4,7 @@ from utils.jwt import sign_jwt, decode_jwt
 def test_jwt():
     data = {"name": "hello"}
     token = sign_jwt(data)
-    clear = decode_jwt(token["token"])
+    clear = decode_jwt(token)
     assert clear == data
 
 
