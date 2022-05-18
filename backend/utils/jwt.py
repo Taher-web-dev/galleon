@@ -18,7 +18,7 @@ def decode_jwt(token: str) -> dict:
             token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
         return decoded_token["data"] if decoded_token["expires"] >= time() else None
-    except:
+    except Exception:
         return {}
 
 
@@ -27,4 +27,4 @@ if __name__ == "__main__":
     import binascii
 
     # Generate secret
-    print(str(binascii.hexlify(os.urandom(24))))
+    print(binascii.hexlify(os.urandom(24)))
