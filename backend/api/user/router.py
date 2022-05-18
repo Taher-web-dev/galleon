@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
-from typing import Optional
+from typing import List, Optional
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from utils.jwt import decode_jwt, sign_jwt
@@ -81,10 +81,20 @@ class UserExistsErr(Error):
     message: str = "Sorry the msisdn is already registered."
 
 
+class UserExistsResponse(ApiResponse):
+    status = Status.failed
+    errors: List[UserExistsErr] = [UserExistsErr().dict()]
+
+
 class InvalidOTPErr(Error):
     type: str = "error"  # TODO define a better error type here
     code: int = 202
     message: str = "The confirmation provided is not valid please try again."
+
+
+class InvalidOTPResponse(ApiResponse):
+    status = Status.failed
+    errors: List[InvalidOTPErr] = [InvalidOTPErr().dict()]
 
 
 class CreateUser(BaseModel):
@@ -103,11 +113,11 @@ class CreateUser(BaseModel):
     response_model_exclude_none=True,
     responses={
         status.HTTP_403_FORBIDDEN: {
-            "model": ApiResponse(status=Status.failed, errors=[UserExistsErr().dict()]),
+            "model": UserExistsResponse,
             "description": "User already exists.",
         },
         status.HTTP_409_CONFLICT: {
-            "model": ApiResponse(status=Status.failed, errors=[InvalidOTPErr().dict()]),
+            "model": InvalidOTPResponse,
             "description": "Invalid OTP Confirmation.",
         },
     },

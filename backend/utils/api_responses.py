@@ -16,7 +16,7 @@ class Error(BaseModel):
 
 class ApiResponse(BaseModel):
     status: Status
-    errors: dict[str, Any] | list[Error] | None = None
+    errors: list[Error] | None = None
     data: dict[str, Any] | BaseModel | None = None
 
     class Config:
