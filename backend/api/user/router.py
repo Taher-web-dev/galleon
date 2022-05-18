@@ -109,7 +109,7 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     if user_profile.name:
         user.name = user_profile.name
     if user_profile.password:
-        user.password = user_profile.password
+        user.password = get_password_hash(user_profile.password)
     if user_profile.email:
         user.email = user_profile.email
     if user_profile.profile_pic_url:

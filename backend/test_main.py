@@ -1,6 +1,7 @@
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
+from utils.password_hashing import verify_password
 from main import app
 from utils.db import db, Otp, User
 
@@ -66,7 +67,7 @@ def test_update_profile():
     )
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    assert user.password == "........"
+    assert verify_password("........", user.password)
     # print(response.json())
 
 

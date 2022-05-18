@@ -9,4 +9,4 @@ PyJWT
 requests-mock
 SQLAlchemy
 psycopg2
-passlib[bcrypt]
+passlib[bcrypt]==1.7.4
