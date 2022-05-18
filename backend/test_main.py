@@ -26,6 +26,12 @@ db.commit()
 
 
 def test_create_user():
+    # delete user if exists
+    if existing_user := db.query(User).filter(User.msisdn == msisdn).first():
+        db.delete(existing_user)
+        db.commit()
+
+    #
     endpoint = "/api/user/create"
     request_data = {
         "msisdn": msisdn,
@@ -38,8 +44,8 @@ def test_create_user():
     response = client.post(endpoint, json=request_data)
     # print(response.json())
     assert response.status_code == 409
-    assert response.json()["status"] == "error"
-    assert response.json()["code"] == 202
+    assert response.json()["status"] == "failed"
+    assert response.json()["errors"][0]["code"] == 202
 
     # correct confirmation
     request_data["otp_confirmation"] = confirmation
@@ -49,19 +55,20 @@ def test_create_user():
     global user
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
-    assert response.json() == {
+    assert response.json()["data"] == {
         "id": user.id,
         "msisdn": user.msisdn,
         "name": name,
-        "email": user.email,
-        "profile_pic_url": user.profile_pic_url,
+        # "email": user.email,
+        # "profile_pic_url": user.profile_pic_url,
     }
 
     # create user again
     response = client.post(endpoint, json=request_data)
+    # print(response.json())
     assert response.status_code == 403
-    assert response.json()["status"] == "error"
-    assert response.json()["code"] == 201
+    assert response.json()["status"] == "failed"
+    assert response.json()["errors"][0]["code"] == 201
 
 
 access_token: str = ""
@@ -74,11 +81,12 @@ def test_login_user():
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
+    print(data)
     global access_token
     global refresh_token
     # implicit assertion of access_token and refresh_token
-    access_token = data["access_token"]["token"]
-    refresh_token = data["refresh_token"]["token"]
+    access_token = data["data"]["access_token"]
+    refresh_token = data["data"]["refresh_token"]
     # print(token)
     # print(response.json())
 
@@ -89,7 +97,8 @@ def test_get_profile():
     response = client.get("/api/user/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    assert response.json()["id"] == user.id
+    assert response.json()["data"]["id"] == user.id
+    # assert response.json()["id"] == user.id
 
 
 def test_update_profile():
@@ -197,7 +206,7 @@ def test_confirm_otp():
     response = client.post("/api/otp/confirm", json={"msisdn": msisdn, "code": code})
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    confirmation = response.json()["confirmation"]
+    confirmation = response.json()["data"]["confirmation"]
 
 
 def test_verify_otp():
@@ -210,6 +219,7 @@ def test_verify_otp():
 
 if __name__ == "__main__":
     test_create_user()
+    """
     test_login_user()
     test_get_profile()
     test_update_profile()
@@ -222,3 +232,4 @@ if __name__ == "__main__":
     test_verify_otp()
     test_redeem_registration_gift()
     test_delete()
+    """

@@ -1,114 +1,46 @@
 """ User management apis """
 
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, Body, Header, HTTPException, status, Request, Depends
-from typing import Optional, Any, Annotated
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Body, Header, status, Depends
+from typing import Optional
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
-
-
-class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True):
-        super(JWTBearer, self).__init__(auto_error=auto_error)
-
-    async def __call__(self, request: Request) -> Optional[str]:
-        try:
-            credentials: Optional[HTTPAuthorizationCredentials] = await super(
-                JWTBearer, self
-            ).__call__(request)
-            if credentials and credentials.scheme == "Bearer":
-                return decode_jwt(credentials.credentials)["msisdn"]
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
-            )
+from utils.jwt import JWTBearer
+from utils.api_responses import Status, ApiResponse, ApiException
+from api.user.request_models import UserCreateRequest, UserUpdateRequest
+from api.user.response_models import (
+    USER_EXISTS_ERROR,
+    INVALID_OTP_ERROR,
+    INVALID_TOKEN_ERROR,
+    INVALID_CREDENTIALS_ERROR,
+    UserProfile,
+)
+import api.user.additional_responses as additional_responses
 
 
 router = APIRouter()
 
 
-class UserCreate(BaseModel):
-    msisdn: str = Field(..., regex=rgx.DIGITS)
-    name: str = Field(..., regex=rgx.TITLE)
-    password: str = Field(..., regex=rgx.PASSWORD)
-    email: str = Field(None, regex=rgx.EMAIL)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
-    otp_confirmation: str = Field(..., regex=rgx.STRING)
-
-
-class UserUpdate(BaseModel):
-    name: str = Field(None, regex=rgx.TITLE)
-    password: str = Field(None, regex=rgx.PASSWORD)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
-    email: str = Field(None, regex=rgx.EMAIL)
-
-
-class UserRetrieve(BaseModel):
-    id: int
-    status: str
-    name: Optional[str]
-    email: Optional[str]
-    profile_pic_url: Optional[str]
-
-
-class LoginOut(BaseModel):
-    status: str
-    refresh_token: dict
-    access_token: dict
-
-
-class UserExistsErr(BaseModel):
-    status: str = "error"
-    code: int = 201
-    message: str = "Sorry the msisdn is already registered."
-
-
-class InvalidOTPErr(BaseModel):
-    status: str = "error"
-    code: int = 202
-    message: str = "The confirmation provided is not valid please try again."
-
-
-class CreateUser(BaseModel):
-    """Create User Response Model"""
-
-    id: int
-    msisdn: str
-    name: str
-    email: Optional[str]
-    profile_pic_url: Optional[str]
-
-
 @router.post(
     "/create",
-    response_model=CreateUser,
-    responses={
-        status.HTTP_403_FORBIDDEN: {
-            "model": UserExistsErr,
-            "description": "User already exists.",
-        },
-        status.HTTP_409_CONFLICT: {
-            "model": InvalidOTPErr,
-            "description": "Invalid OTP Confirmation.",
-        },
-    },
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=additional_responses.create_user,
 )
-async def create_user(new_user: UserCreate) -> CreateUser:
+async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     """Register a new user"""
+
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content=UserExistsErr().dict()
+        raise ApiException(
+            status_code=status.HTTP_403_FORBIDDEN, error=USER_EXISTS_ERROR
         )
 
     otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT, content=InvalidOTPErr().dict()
+        raise ApiException(
+            status_code=status.HTTP_409_CONFLICT, error=INVALID_OTP_ERROR
         )
 
     user = User(
@@ -121,31 +53,39 @@ async def create_user(new_user: UserCreate) -> CreateUser:
 
     db.add(user)
     db.commit()
-    db.refresh(user)
-
-    return CreateUser(**user.serialize)
-
-
-@router.get(
-    "/profile",
-    response_model=UserRetrieve,
-    response_model_exclude_none=True,
-)
-async def get_profile(msisdn=Depends(JWTBearer())) -> UserRetrieve:
-    """Get user profile"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
-
-    return UserRetrieve(
-        status="success",
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        profile_pic_url=user.profile_pic_url,
+    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
+    return ApiResponse(
+        status=Status.success,
+        data=UserProfile(
+            id=user.id,
+            name=user.name,
+            msisdn=user.msisdn,
+            email=user.email,
+            profile_pic_url=user.profile_pic_url,
+        ),
     )
 
 
-@router.patch("/profile", response_model=UserRetrieve)
-async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
+@router.get("/profile", response_model=ApiResponse, response_model_exclude_none=True)
+async def get_user_profile(msisdn=Depends(JWTBearer())) -> ApiResponse:
+    """Get user profile"""
+    user = db.query(User).filter(User.msisdn == msisdn).first()
+    return ApiResponse(
+        status=Status.success,
+        data=UserProfile(
+            id=user.id,
+            msisdn=msisdn,
+            name=user.name,
+            email=user.email,
+            profile_pic_url=user.profile_pic_url,
+        ),
+    )
+
+
+@router.patch("/profile", response_model=ApiResponse, response_model_exclude_none=True)
+async def update_profile(
+    user_profile: UserUpdateRequest, msisdn=Depends(JWTBearer())
+) -> ApiResponse:
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
 
@@ -160,49 +100,66 @@ async def update_profile(user_profile: UserUpdate, msisdn=Depends(JWTBearer())):
     db.commit()
     db.refresh(user)
 
-    return UserRetrieve(
-        status="success",
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        profile_pic_url=user.profile_pic_url,
+    return ApiResponse(
+        status=Status.success,
+        data=UserProfile(
+            id=user.id,
+            msisdn=msisdn,
+            name=user.name,
+            email=user.email,
+            profile_pic_url=user.profile_pic_url,
+        ),
     )
 
 
-@router.post("/login", response_model=LoginOut)
+@router.post(
+    "/login",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=additional_responses.login,
+)
 async def login(
     msisdn: str = Body(..., regex=rgx.DIGITS),
     password: str = Body(..., regex=rgx.PASSWORD),
-) -> dict:
+) -> ApiResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
         refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
-        user.refresh_token = refresh_token["token"]
+        user.refresh_token = refresh_token
         db.commit()
-
-        return LoginOut(
-            status="success", refresh_token=refresh_token, access_token=access_token
+        return ApiResponse(
+            status=Status.success,
+            data={"refresh_token": refresh_token, "access_token": access_token},
         )
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong credentials."
+    raise ApiException(
+        status_code=status.HTTP_401_UNAUTHORIZED, error=INVALID_CREDENTIALS_ERROR
     )
 
 
-@router.post("/logout")
-async def logout(msisdn=Depends(JWTBearer())):
+@router.post(
+    "/logout",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+)
+async def logout(msisdn=Depends(JWTBearer())) -> ApiResponse:
     """Logout (aka delete refresh token)"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
         user.refresh_token = None
         db.commit()
-    return {"status": "success"}
+    return ApiResponse(status=Status.success)
 
 
-@router.post("/token")
-async def gen_access_token(refresh_token: Optional[str] = Header(None)):
+@router.post(
+    "/token",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=additional_responses.token,
+)
+async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiResponse:
     """Generate access token from provided refresh token"""
 
     if refresh_token is not None:
@@ -211,22 +168,25 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)):
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == "msisdn").first()
             if user is not None:
-                return {
-                    "status": "success",
-                    "access_token": sign_jwt({"msisdn": msisdn}),
-                }
+                return ApiResponse(
+                    status=Status.success,
+                    data={
+                        "refresh_token": refresh_token,
+                        "access_token": sign_jwt({"msisdn": msisdn}),
+                    },
+                )
 
-    raise HTTPException(
+    raise ApiException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail={"message": "failed", "code": "99"},
+        error=INVALID_TOKEN_ERROR,
     )
 
 
-@router.post("/delete")
-async def delete(msisdn=Depends(JWTBearer())):
+@router.post("/delete", response_model=ApiResponse, response_model_exclude_none=True)
+async def delete(msisdn=Depends(JWTBearer())) -> ApiResponse:
     """Delete user"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
     db.delete(user)
     db.commit()
-    return {"status": "success"}
+    return ApiResponse(status=Status.success)

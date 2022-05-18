@@ -11,7 +11,7 @@ from .balance import get_wallet, Wallet
 from .sim import get_sim_details, Sim
 from .subscriptions import get_subscriptions, Subscription
 from .zend import recharge_voucher, change_supplementary_offering
-from ..user.router import JWTBearer
+from utils.jwt import JWTBearer
 from utils.settings import settings
 from utils.regex import DIGITS as RGX_DIGITS
 

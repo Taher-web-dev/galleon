@@ -1,7 +1,7 @@
 from json.decoder import JSONDecodeError
 from pydantic.main import BaseModel
 from typing import Union, Optional, Any
-from utils.error import Error
+from utils.api_responses import Error
 
 from .cms import NEGCRED_LOOKUP
 from .zend import zend_balance, zend_subcriptions
@@ -45,4 +45,4 @@ def get_wallet(msisdn: str) -> Union[Wallet, Error]:
         balance = WalletEntry(value=amount, expiry=str(raw_balance["validity"]))
         return Wallet(balance=balance, loan=loan)
     except JSONDecodeError:
-        return Error()
+        return Error(type="wallet", code=10, message="Invalid wallet op")

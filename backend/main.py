@@ -15,11 +15,13 @@ from api.user.router import router as user
 from api.otp.router import router as otp
 from api.number.router import router as number
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from utils.db import engine, Base
 from starlette.concurrency import iterate_in_threadpool
 import json
+from utils.api_responses import ApiResponse, Error, Status, ApiException
+from fastapi.encoders import jsonable_encoder
 
 Base.metadata.create_all(bind=engine)
 
@@ -61,8 +63,16 @@ async def app_shutdown():
 
 async def capture_body(request: Request):
     request.state.request_body = {}
-    if request.headers.get("content-type") == "application/json":
+    if (
+        request.method == "POST"
+        and request.headers.get("content-type") == "application/json"
+    ):
         request.state.request_body = await request.json()
+
+
+@app.exception_handler(HTTPException)
+async def my_exception_handler(_, exception):
+    return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
 
 @app.middleware("http")
@@ -84,6 +94,14 @@ async def middle(request: Request, call_next):
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
             response_body = json.loads(b"".join(raw_response))
 
+        except ApiException as ex:
+            response = JSONResponse(
+                status_code=ex.status_code,
+                content=jsonable_encoder(
+                    ApiResponse(status=Status.failed, errors=[ex.error])
+                ),
+            )
+
         except Exception:
             ex = sys.exc_info()[1]
             if ex:
@@ -98,18 +116,26 @@ async def middle(request: Request, call_next):
                 ]
                 logger.error(str(ex), extra={"props": {"stack": stack}})
             response = JSONResponse(
-                status_code=500,
-                content={
-                    "status": "error",
-                    "code": 99,
-                    "message": "Internal error",
-                    "debug": {"description": str(ex)},
-                },
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content=jsonable_encoder(
+                    ApiResponse(
+                        status=Status.failed,
+                        errors=[Error(type="internal", code=99, message=str(ex))],
+                    )
+                ),
             )
+
     else:
         response = JSONResponse(
-            status_code=400,
-            content={"status": "error", "code": 100, "message": "Invalid request"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=jsonable_encoder(
+                ApiResponse(
+                    status=Status.failed,
+                    errors=[
+                        Error(type="bad request", code=100, message="Invalid request.")
+                    ],
+                )
+            ),
         )
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
