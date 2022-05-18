@@ -11,8 +11,18 @@ client = TestClient(app)
 msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hiBiggerPass"
-confirmation: str = "123"
-user: User = None
+confirmation: str = "dummyConfirmation"
+user: User = User()
+
+
+# generate confirmation to create user
+if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
+    db.delete(otp)
+    db.commit()
+
+otp = Otp(msisdn=msisdn, code="123", confirmation=confirmation)
+db.add(otp)
+db.commit()
 
 
 def test_create_user():

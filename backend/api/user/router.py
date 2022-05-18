@@ -37,7 +37,7 @@ class UserCreate(BaseModel):
     password: str = Field(..., regex=rgx.PASSWORD)
     email: str = Field(None, regex=rgx.EMAIL)
     profile_pic_url: str = Field(None, regex=rgx.URL)
-    otp_confirmation: str  # = Field(..., regex=rgx.STRING)
+    otp_confirmation: str = Field(..., regex=rgx.STRING)
 
 
 class UserUpdate(BaseModel):
