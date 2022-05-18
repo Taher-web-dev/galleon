@@ -87,11 +87,11 @@ class CreateUser(BaseModel):
     "/create",
     response_model=CreateUser,
     responses={
-        403: {
+        status.HTTP_403_FORBIDDEN: {
             "model": UserExistsErr,
             "description": "User already exists.",
         },
-        409: {
+        status.HTTP_409_CONFLICT: {
             "model": InvalidOTPErr,
             "description": "Invalid OTP Confirmation.",
         },
