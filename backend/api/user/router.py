@@ -93,7 +93,7 @@ class CreateUser(BaseModel):
         },
         409: {
             "model": InvalidOTPErr,
-            "description": "Invalid Otp Confirmation.",
+            "description": "Invalid OTP Confirmation.",
         },
     },
 )
