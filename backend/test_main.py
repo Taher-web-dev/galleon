@@ -11,25 +11,57 @@ client = TestClient(app)
 msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hiBiggerPass"
-confirmation: str = "123"
+confirmation: str = "dummyConfirmation"
 user: User = User()
 
 
+# generate confirmation to create user
+if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
+    db.delete(otp)
+    db.commit()
+
+otp = Otp(msisdn=msisdn, code="123", confirmation=confirmation)
+db.add(otp)
+db.commit()
+
+
 def test_create_user():
-    response = client.post(
-        "/api/user/create",
-        json={
-            "name": name,
-            "msisdn": msisdn,
-            "password": password,
-            "otp_confirmation": confirmation,
-        },
-    )
+    endpoint = "/api/user/create"
+    request_data = {
+        "msisdn": msisdn,
+        "name": name,
+        "password": password,
+        "otp_confirmation": "wrongConfirmation",
+    }
+
+    # wrong confirmation
+    response = client.post(endpoint, json=request_data)
+    # print(response.json())
+    assert response.status_code == 409
+    assert response.json()["status"] == "error"
+    assert response.json()["code"] == 202
+
+    # correct confirmation
+    request_data["otp_confirmation"] = confirmation
+    response = client.post(endpoint, json=request_data)
     # print(response.json())
     assert response.status_code == 200
     global user
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
+    assert response.json() == {
+        "id": user.id,
+        "msisdn": user.msisdn,
+        "name": name,
+        "email": user.email,
+        "profile_pic_url": user.profile_pic_url,
+    }
+
+    # create user again
+    response = client.post(endpoint, json=request_data)
+    assert response.status_code == 403
+    assert response.json()["status"] == "error"
+    assert response.json()["code"] == 201
 
 
 access_token: str = ""
@@ -57,7 +89,7 @@ def test_get_profile():
     response = client.get("/api/user/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    assert user.id == response.json()["id"]
+    assert response.json()["id"] == user.id
 
 
 def test_update_profile():
