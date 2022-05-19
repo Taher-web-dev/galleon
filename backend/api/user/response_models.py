@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 import utils.regex as rgx
@@ -21,6 +22,16 @@ INVALID_TOKEN_ERROR = Error(
     code=204,
     message="Invalid token",
 )
+
+
+class LoginSuccessResponseBody(BaseModel):
+    refresh_token: str
+    access_token: str
+
+
+class LoginSuccessResponse(BaseModel):
+    status: Status = Status.success
+    data: LoginSuccessResponseBody
 
 
 class UserExistsErrorResponse(ApiResponse):

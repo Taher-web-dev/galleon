@@ -1,6 +1,7 @@
 from fastapi import status
 from typing import Dict, Any
 from api.user.response_models import (
+    LoginSuccessResponse,
     UserExistsErrorResponse,
     InvalidOtpErrorResponse,
     InvalidCredentialsErrorResponse,
@@ -19,6 +20,10 @@ create_user: Dict[int | str, Dict[str, Any]] = {
 }
 
 login: Dict[int | str, Dict[str, Any]] = {
+    status.HTTP_200_OK: {
+        "model": LoginSuccessResponse,
+        "description": "Successfull login",
+    },
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidCredentialsErrorResponse,
         "description": "Invalid credentials",
