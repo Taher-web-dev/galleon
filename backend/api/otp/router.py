@@ -4,13 +4,19 @@ from fastapi import APIRouter, Body
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from ..number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import ApiResponse, Error, Status
+from utils.api_responses import Status, ApiResponse, ApiException, Error
+from .additional_responses import request_otp, confirm_otp, verify_otp
 import utils.regex as rgx
 
 router = APIRouter()
 
 
-@router.post("/request", response_model=ApiResponse)
+@router.post(
+    "/request",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=request_otp,
+)
 async def send_otp(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN)
 ) -> ApiResponse:
@@ -32,7 +38,12 @@ async def send_otp(
     return ApiResponse(status=Status.success)
 
 
-@router.post("/confirm", response_model=ApiResponse, response_model_exclude_none=True)
+@router.post(
+    "/confirm",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=confirm_otp,
+)
 async def confirm(
     msisdn: str = Body(..., regex=rgx.MSISDN), code: str = Body(..., regex=rgx.DIGITS)
 ) -> ApiResponse:
@@ -55,7 +66,7 @@ async def confirm(
     )
 
 
-@router.post("/verify", response_model=ApiResponse)
+@router.post("/verify", response_model=ApiResponse, responses=verify_otp)
 async def api_verify(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     confirmation: str = Body(..., regex=rgx.STRING),
