@@ -4,7 +4,7 @@ from typing import Optional, Any
 from fastapi import status
 from utils.api_responses import ApiException, Error
 from .cms import NEGCRED_LOOKUP
-from .zend import zend_balance, zend_subcriptions
+from .zend import zend_balance, zend_subscriptions
 
 
 class WalletEntry(BaseModel):
@@ -31,7 +31,7 @@ def get_wallet(msisdn: str) -> Wallet:
     try:
         raw_balance: dict[str, Any] = zend_balance(msisdn)
         """{"amount": 100000, "validity":"20220801"}"""
-        raw_subscriptions: list[dict[str, Any]] = zend_subcriptions(msisdn)
+        raw_subscriptions: list[dict[str, Any]] = zend_subscriptions(msisdn)
         """[{"id": "123", "cyle_end": "20220426000000", "expire_time":"20370101000000"}]"""
 
         loan = WalletEntry(value=None, expiry=None)

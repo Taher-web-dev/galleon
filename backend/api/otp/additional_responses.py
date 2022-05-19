@@ -2,37 +2,33 @@ from fastapi import status
 from typing import Dict, Any
 
 from api.otp.response_models import (
-    OTPRequestErrorResponseInvalidMSISDN,
-    OTPRequestErrorResponseErrorSMS,
-    OTPRequestErrorResponseErrorSMTP,
-    OTPRequestErrorResponseInvalidOTPFormat,
-    OTPRequestErrorResponseInvalidRequestID,
-    OTPRequestErrorResponseMissmatchOTPCOnfirmation,
+    OTPInvalidMSISDNResponse,
+    OTPErrorSMSResponse,
+    OTPInvalidOTPConfirmationResponse,
+    OTPInvalidOTPFormatResponse,
+    OTPInvalidRequestIDResponse,
+    OTPMismatchOTPConfirmationResponse,
 )
 
 request_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
-        "model": OTPRequestErrorResponseInvalidMSISDN,
+        "model": OTPInvalidMSISDNResponse,
         "description": "Invalid MSISDN or Email.",
     },
     status.HTTP_503_SERVICE_UNAVAILABLE: {
-        "model": OTPRequestErrorResponseErrorSMS,
+        "model": OTPErrorSMSResponse,
         "description": "SMS GW server down or not configured.",
-    },
-    status.HTTP_503_SERVICE_UNAVAILABLE: {
-        "model": OTPRequestErrorResponseErrorSMTP,
-        "description": "SMTP GW server down or not configured.",
     },
 }
 
 confirm_otp: Dict[int | str, Dict[str, Any]] = {
     **request_otp,
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPRequestErrorResponseInvalidRequestID,
+        "model": OTPInvalidRequestIDResponse,
         "description": "Invalid OTP request Id.",
     },
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPRequestErrorResponseInvalidOTPFormat,
+        "model": OTPInvalidOTPFormatResponse,
         "description": "Invalid OTP format.",
     },
 }
@@ -40,7 +36,11 @@ confirm_otp: Dict[int | str, Dict[str, Any]] = {
 verify_otp: Dict[int | str, Dict[str, Any]] = {
     **request_otp,
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPRequestErrorResponseMissmatchOTPCOnfirmation,
-        "description": "Missmatch OTP confirmation Id",
+        "model": OTPInvalidOTPConfirmationResponse,
+        "description": "Invalid OTP confirmation Id",
+    },
+    status.HTTP_400_BAD_REQUEST: {
+        "model": OTPMismatchOTPConfirmationResponse,
+        "description": "Mismatch OTP confirmation Id",
     },
 }
