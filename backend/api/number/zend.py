@@ -115,7 +115,7 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
     return json["data"]
 
 
-def zend_subcriptions(msisdn: str) -> list[dict[str, Any]]:
+def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
             m.get(
