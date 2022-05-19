@@ -31,7 +31,7 @@ INVALID_OTP_REQUEST_FORMAT = Error(
     message="The submitted OTP format you shared is invalid format.",
 )
 
-MISSMATCH_OTP_CONFIRMATION = Error(
+OTP_MISMATCH_ERROR = Error(
     type="otp",
     code=400,
     message="Something is wrong! the OTP request you confirmation does not match the request.",
@@ -65,4 +65,4 @@ class OTPRequestErrorResponseInvalidOTPFormat(ApiResponse):
 
 class OTPRequestErrorResponseMissmatchOTPCOnfirmation(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [MISSMATCH_OTP_CONFIRMATION]
+    errors: list[Error] = [OTP_MISMATCH_ERROR]

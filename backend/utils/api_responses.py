@@ -25,8 +25,7 @@ class ApiException(Exception):
 
 
 class ApiResponse(BaseModel):
-    status: Status
-    errors: list[Error] | None = None
+    status: Status = Status.success
     data: dict[str, Any] | BaseModel | None = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
