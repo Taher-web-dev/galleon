@@ -1,4 +1,4 @@
-from .zend import zend_subcriptions
+from .zend import zend_subscriptions
 
 from pydantic.main import BaseModel
 from typing import Any
@@ -77,7 +77,7 @@ class Subscription(BaseModel):
 
 def get_subscriptions(msisdn: str) -> list[Subscription]:
     """Get subscriptions for the provided msisdn"""
-    raw_subscriptions = zend_subcriptions(msisdn)
+    raw_subscriptions = zend_subscriptions(msisdn)
     """
     [ {
       "id": 991,

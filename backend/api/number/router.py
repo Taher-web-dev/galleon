@@ -6,7 +6,6 @@ zain backend systems (aka zain-backend)
 
 from fastapi import APIRouter, Body
 from fastapi import Depends
-
 from .balance import get_wallet, Wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
@@ -14,8 +13,12 @@ from .zend import recharge_voucher, change_supplementary_offering
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
-from utils.api_responses import Status
-from .response_models import StatusResponse, SubscriptionsResponse
+from utils.api_responses import ApiResponse, Status
+from .response_models import (
+    StatusResponse,
+    SubscriptionsResponse,
+    WalletResponse,
+)
 
 router = APIRouter()
 
@@ -38,13 +41,13 @@ async def retrieve_subscriptions(
     return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
-@router.get("/wallet", response_model=Wallet)
+@router.get("/wallet", response_model=WalletResponse)
 async def retrieve_wallet(
     msisdn: str = Body(..., embed=True), session_msisdn=Depends(JWTBearer())
-):
+) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
-    return get_wallet(msisdn)
+    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
 
 
 @router.post("/redeem-registration-gift")
@@ -65,4 +68,4 @@ async def api_charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
-    return recharge_voucher(msisdn, pincode)
+    return ApiResponse(status=Status.success, data=recharge_voucher(msisdn, pincode))

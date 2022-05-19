@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 import utils.regex as rgx
@@ -24,40 +24,39 @@ INVALID_TOKEN_ERROR = Error(
 )
 
 
-class LoginSuccessResponseBody(BaseModel):
+class Tokens(BaseModel):
     refresh_token: str
     access_token: str
 
 
-class LoginSuccessResponse(BaseModel):
-    status: Status = Status.success
-    data: LoginSuccessResponseBody
+class LoginResponse(ApiResponse):
+    data: Tokens
 
 
 class UserExistsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [USER_EXISTS_ERROR]
+    error: Error = USER_EXISTS_ERROR
 
 
 class InvalidOtpErrorResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_OTP_ERROR]
+    error: Error = INVALID_OTP_ERROR
 
 
 class InvalidTokenErrorResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_TOKEN_ERROR]
+    error: Error = INVALID_TOKEN_ERROR
 
 
 class InvalidCredentialsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_CREDENTIALS_ERROR]
+    error: Error = INVALID_CREDENTIALS_ERROR
 
 
 class UserProfile(BaseModel):
     id: int
     name: str
     msisdn: str = Field(..., regex=rgx.MSISDN)
-    email: str | None = None
-    password: str | None = None
-    profile_pic_url: str | None = None
+    email: Optional[str] = Field(None, regex=rgx.EMAIL)
+    password: Optional[str] = Field(None, regex=rgx.PASSWORD)
+    profile_pic_url: Optional[str] = Field(None, regex=rgx.URL)

@@ -14,6 +14,8 @@ from api.user.response_models import (
     INVALID_OTP_ERROR,
     INVALID_TOKEN_ERROR,
     INVALID_CREDENTIALS_ERROR,
+    Tokens,
+    LoginResponse,
     UserProfile,
 )
 import api.user.additional_responses as additional_responses
@@ -33,15 +35,11 @@ async def create_user(new_user: UserCreateRequest) -> ApiResponse:
 
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        raise ApiException(
-            status_code=status.HTTP_403_FORBIDDEN, error=USER_EXISTS_ERROR
-        )
+        raise ApiException(status.HTTP_403_FORBIDDEN, USER_EXISTS_ERROR)
 
     otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
-        raise ApiException(
-            status_code=status.HTTP_409_CONFLICT, error=INVALID_OTP_ERROR
-        )
+        raise ApiException(status.HTTP_409_CONFLICT, INVALID_OTP_ERROR)
 
     user = User(
         msisdn=new_user.msisdn,
@@ -114,14 +112,14 @@ async def update_profile(
 
 @router.post(
     "/login",
-    response_model=ApiResponse,
+    response_model=LoginResponse,
     response_model_exclude_none=True,
     responses=additional_responses.login,
 )
 async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     password: str = Body(..., regex=rgx.PASSWORD),
-) -> ApiResponse:
+) -> LoginResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
@@ -129,14 +127,12 @@ async def login(
         refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
         user.refresh_token = refresh_token
         db.commit()
-        return ApiResponse(
+        return LoginResponse(
             status=Status.success,
-            data={"refresh_token": refresh_token, "access_token": access_token},
+            data=Tokens(refresh_token=refresh_token, access_token=access_token),
         )
 
-    raise ApiException(
-        status_code=status.HTTP_401_UNAUTHORIZED, error=INVALID_CREDENTIALS_ERROR
-    )
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_CREDENTIALS_ERROR)
 
 
 @router.post(
@@ -168,18 +164,13 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiRe
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == "msisdn").first()
             if user is not None:
+                access_token = sign_jwt({"msisdn": msisdn})
                 return ApiResponse(
                     status=Status.success,
-                    data={
-                        "refresh_token": refresh_token,
-                        "access_token": sign_jwt({"msisdn": msisdn}),
-                    },
+                    data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
 
-    raise ApiException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        error=INVALID_TOKEN_ERROR,
-    )
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_TOKEN_ERROR)
 
 
 @router.post("/delete", response_model=ApiResponse, response_model_exclude_none=True)
