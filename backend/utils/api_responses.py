@@ -25,7 +25,7 @@ class ApiException(Exception):
 
 
 class ApiResponse(BaseModel):
-    status: Status
+    status: Status = Status.success
     data: dict[str, Any] | BaseModel | None = None
 
     class Config:
