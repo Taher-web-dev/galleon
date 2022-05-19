@@ -18,7 +18,7 @@ class ApiException(Exception):
     status_code: int
     error: Error
 
-    def __init__(self, status_code, error: Error):
+    def __init__(self, status_code: int, error: Error):
         super().__init__(status_code)
         self.status_code = status_code
         self.error = error
@@ -26,8 +26,8 @@ class ApiException(Exception):
 
 class ApiResponse(BaseModel):
     status: Status = Status.success
-    error: Optional[Error]
-    data: dict[str, Any] | BaseModel | None = None
+    error: Optional[Error] = None
+    data: Optional[dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
