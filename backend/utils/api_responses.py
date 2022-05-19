@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any
+from typing import Any, Optional
 from enum import Enum
 
 
@@ -26,7 +26,7 @@ class ApiException(Exception):
 
 class ApiResponse(BaseModel):
     status: Status = Status.success
-    errors: list[Error] | None = None
+    error: Optional[Error]
     data: dict[str, Any] | BaseModel | None = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:

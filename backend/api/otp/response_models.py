@@ -1,3 +1,4 @@
+from typing import Optional
 from utils.api_responses import Status, ApiResponse, Error
 
 
@@ -40,29 +41,29 @@ OTP_MISMATCH_ERROR = Error(
 
 class OTPInvalidMSISDNResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_MSISDN]
+    error: Optional[Error] = INVALID_MSISDN
 
 
 class OTPErrorSMSResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [ERROR_SMS]
+    error: Optional[Error] = ERROR_SMS
 
 
 class OTPInvalidRequestIDResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_OTP_REQUEST_ID]
+    error: Optional[Error] = INVALID_OTP_REQUEST_ID
 
 
 class OTPInvalidOTPFormatResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_OTP_REQUEST_FORMAT]
+    error: Optional[Error] = INVALID_OTP_REQUEST_FORMAT
 
 
 class OTPInvalidOTPConfirmationResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [INVALID_OTP_CONFIRMATION]
+    error: Optional[Error] = INVALID_OTP_CONFIRMATION
 
 
 class OTPMismatchOTPConfirmationResponse(ApiResponse):
     status: Status = Status.failed
-    errors: list[Error] = [OTP_MISMATCH_ERROR]
+    error: Optional[Error] = OTP_MISMATCH_ERROR

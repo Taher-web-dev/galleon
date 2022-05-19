@@ -98,7 +98,7 @@ async def middle(request: Request, call_next):
             response = JSONResponse(
                 status_code=ex.status_code,
                 content=jsonable_encoder(
-                    ApiResponse(status=Status.failed, errors=[ex.error])
+                    ApiResponse(status=Status.failed, error=ex.error)
                 ),
             )
 
@@ -120,7 +120,7 @@ async def middle(request: Request, call_next):
                 content=jsonable_encoder(
                     ApiResponse(
                         status=Status.failed,
-                        errors=[Error(type="internal", code=99, message=str(ex))],
+                        error=Error(type="internal", code=99, message=str(ex)),
                     )
                 ),
             )
@@ -131,9 +131,9 @@ async def middle(request: Request, call_next):
             content=jsonable_encoder(
                 ApiResponse(
                     status=Status.failed,
-                    errors=[
-                        Error(type="bad request", code=100, message="Invalid request.")
-                    ],
+                    error=Error(
+                        type="bad request", code=100, message="Invalid request."
+                    ),
                 )
             ),
         )

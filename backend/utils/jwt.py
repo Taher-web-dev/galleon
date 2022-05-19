@@ -22,7 +22,7 @@ class JWTBearer(HTTPBearer):
         except:
             raise ApiException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                error=Error(type="jwtauth", code=10, message="Not authenticated"),
+                error=[Error(type="jwtauth", code=10, message="Not authenticated")],
             )
 
 

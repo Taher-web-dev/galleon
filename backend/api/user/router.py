@@ -178,7 +178,7 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiRe
 
     raise ApiException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        error=INVALID_TOKEN_ERROR,
+        error=[INVALID_TOKEN_ERROR],
     )
 
 
