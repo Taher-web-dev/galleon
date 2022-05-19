@@ -15,7 +15,9 @@ from api.user.router import router as user
 from api.otp.router import router as otp
 from api.number.router import router as number
 
-from fastapi import FastAPI, Request, Depends, status, HTTPException
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import JSONResponse
 from utils.db import engine, Base
 from starlette.concurrency import iterate_in_threadpool
@@ -70,7 +72,7 @@ async def capture_body(request: Request):
         request.state.request_body = await request.json()
 
 
-@app.exception_handler(HTTPException)
+@app.exception_handler(StarletteHTTPException)
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
