@@ -1,6 +1,6 @@
 from pydantic.main import BaseModel
 
-from . import cms
+from api.number import cms
 
 from .zend import zend_sim
 

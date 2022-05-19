@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Body
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
-from ..number.zend import zend_send_sms
+from api.number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.api_responses import Status, ApiResponse, Error
 from .additional_responses import request_otp, confirm_otp, verify_otp
@@ -48,8 +48,7 @@ async def confirm(
     msisdn: str = Body(..., regex=rgx.MSISDN), code: str = Body(..., regex=rgx.DIGITS)
 ) -> ApiResponse:
     """Confirm Otp"""
-    otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
-    if otp:
+    if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
         otp.tries += 1
         db.commit()
         db.refresh(otp)
