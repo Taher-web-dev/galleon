@@ -32,11 +32,11 @@ async def create_user(new_user: UserCreateRequest) -> ApiResponse:
 
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
-        raise ApiException(status.HTTP_403_FORBIDDEN, err.USER_EXISTS_ERROR)
+        raise ApiException(status.HTTP_403_FORBIDDEN, err.USER_EXISTS)
 
     otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
-        raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP_ERROR)
+        raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
     user = User(
         msisdn=new_user.msisdn,
@@ -129,7 +129,7 @@ async def login(
             data=Tokens(refresh_token=refresh_token, access_token=access_token),
         )
 
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS_ERROR)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.post(
@@ -167,7 +167,7 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiRe
                     data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
 
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_TOKEN_ERROR)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_TOKEN)
 
 
 @router.post("/delete", response_model=ApiResponse, response_model_exclude_none=True)

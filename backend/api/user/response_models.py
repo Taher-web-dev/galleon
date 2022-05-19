@@ -16,22 +16,22 @@ class LoginResponse(ApiResponse):
 
 class UserExistsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.USER_EXISTS_ERROR
+    error: Error = err.USER_EXISTS
 
 
 class InvalidOtpErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.INVALID_OTP_ERROR
+    error: Error = err.INVALID_OTP
 
 
 class InvalidTokenErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.INVALID_TOKEN_ERROR
+    error: Error = err.INVALID_TOKEN
 
 
 class InvalidCredentialsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.INVALID_CREDENTIALS_ERROR
+    error: Error = err.INVALID_CREDENTIALS
 
 
 class UserProfile(BaseModel):
