@@ -68,4 +68,4 @@ async def api_charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
-    return recharge_voucher(msisdn, pincode)
+    return ApiResponse(status=Status.success, data=recharge_voucher(msisdn, pincode))
