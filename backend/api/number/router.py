@@ -18,7 +18,7 @@ from .response_models import (
     StatusResponse,
     SubscriptionsResponse,
     WalletResponse,
-    # ChargeVoucher,
+    ChargeVoucherResponse,
 )
 
 router = APIRouter()
@@ -69,5 +69,6 @@ async def api_charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
-    # return ChargeVoucher(status=Status.success, data=recharge_voucher(msisdn, pincode))
-    return recharge_voucher(msisdn, pincode)
+    return ChargeVoucherResponse(
+        status=Status.success, data=recharge_voucher(msisdn, pincode)
+    )

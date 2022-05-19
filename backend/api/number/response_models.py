@@ -1,3 +1,4 @@
+from typing import Any, Dict, Union
 from utils.api_responses import Error
 from api.number.balance import Wallet
 from utils.api_responses import ApiResponse
@@ -14,8 +15,8 @@ class SubscriptionsResponse(ApiResponse):
 
 
 class WalletResponse(ApiResponse):
-    data: Wallet | Error
+    data: Union[Wallet, Error]
 
 
-# class ChargeVoucherResponse(ApiResponse):
-#     data: dict[str, any]
+class ChargeVoucherResponse(ApiResponse):
+    data: Dict[str, Any]
