@@ -7,7 +7,7 @@ A thin-wrapper that implements basic business logic and invokes respective zain-
 ### Requirements
 
 - git
-- python >= 3.9
+- python >= 3.10
 - pip
 - jq
 - postgresql
