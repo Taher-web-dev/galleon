@@ -15,7 +15,7 @@ class SubscriptionsResponse(ApiResponse):
 
 
 class WalletResponse(ApiResponse):
-    data: Union[Wallet, Error]
+    data: Wallet
 
 
 class ChargeVoucherResponse(ApiResponse):

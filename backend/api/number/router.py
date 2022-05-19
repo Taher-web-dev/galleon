@@ -42,10 +42,10 @@ async def retrieve_subscriptions(
     return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
-@router.get("/wallet", response_model=Wallet)
+@router.get("/wallet", response_model=WalletResponse)
 async def retrieve_wallet(
     msisdn: str = Body(..., embed=True), session_msisdn=Depends(JWTBearer())
-):
+) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
     return WalletResponse(status=Status.success, data=get_wallet(msisdn))
