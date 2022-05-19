@@ -28,5 +28,9 @@ class ApiResponse(BaseModel):
     status: Status = Status.success
     data: dict[str, Any] | BaseModel | None = None
 
+    def dict(self, *args, **kwargs) -> dict[str, Any]:
+        kwargs.pop("exclude_none")
+        return super().dict(*args, exclude_none=True, **kwargs)
+
     class Config:
         use_enum_values = True
