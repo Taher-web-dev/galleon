@@ -1,8 +1,8 @@
 from json.decoder import JSONDecodeError
 from pydantic.main import BaseModel
-from typing import Union, Optional, Any
-from utils.api_responses import Error
-
+from typing import Optional, Any
+from fastapi import status
+from utils.api_responses import ApiException, Error
 from .cms import NEGCRED_LOOKUP
 from .zend import zend_balance, zend_subscriptions
 
@@ -25,7 +25,7 @@ class Wallet(BaseModel):
         }
 
 
-def get_wallet(msisdn: str) -> Union[Wallet, Error]:
+def get_wallet(msisdn: str) -> Wallet:
     """Main wallet balance + negative credit subscription"""
 
     try:
@@ -44,5 +44,8 @@ def get_wallet(msisdn: str) -> Union[Wallet, Error]:
         amount = int(raw_balance["amount"]) // 1000  # convert from Fils to IQD
         balance = WalletEntry(value=amount, expiry=str(raw_balance["validity"]))
         return Wallet(balance=balance, loan=loan)
-    except JSONDecodeError:
-        return Error(type="wallet", code=10, message="Invalid wallet op")
+    except JSONDecodeError as ex:
+        raise ApiException(
+            status.HTTP_400_BAD_REQUEST,
+            Error(type="wallet", code=10, message="Invalid wallet op"),
+        ) from ex
