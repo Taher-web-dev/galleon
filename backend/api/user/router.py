@@ -61,7 +61,11 @@ async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     )
 
 
-@router.get("/profile", response_model=ApiResponse, response_model_exclude_none=True)
+@router.get(
+    "/profile",
+    response_model=UserProfile | ApiResponse,
+    response_model_exclude_none=True,
+)
 async def get_user_profile(msisdn=Depends(JWTBearer())) -> ApiResponse:
     """Get user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -77,7 +81,11 @@ async def get_user_profile(msisdn=Depends(JWTBearer())) -> ApiResponse:
     )
 
 
-@router.patch("/profile", response_model=ApiResponse, response_model_exclude_none=True)
+@router.patch(
+    "/profile",
+    response_model=UserUpdateRequest | ApiResponse,
+    response_model_exclude_none=True,
+)
 async def update_profile(
     user_profile: UserUpdateRequest, msisdn=Depends(JWTBearer())
 ) -> ApiResponse:
@@ -109,14 +117,14 @@ async def update_profile(
 
 @router.post(
     "/login",
-    response_model=ApiResponse,
+    response_model=Tokens | LoginResponse,
     response_model_exclude_none=True,
     responses=add_res.login,
 )
 async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     password: str = Body(..., regex=rgx.PASSWORD),
-) -> ApiResponse:
+) -> LoginResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
@@ -134,7 +142,7 @@ async def login(
 
 @router.post(
     "/logout",
-    response_model=ApiResponse,
+    response_model=Status | ApiResponse,
     response_model_exclude_none=True,
 )
 async def logout(msisdn=Depends(JWTBearer())) -> ApiResponse:
@@ -148,7 +156,7 @@ async def logout(msisdn=Depends(JWTBearer())) -> ApiResponse:
 
 @router.post(
     "/token",
-    response_model=ApiResponse,
+    response_model=Tokens | ApiResponse,
     response_model_exclude_none=True,
     responses=add_res.token,
 )
@@ -170,7 +178,9 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiRe
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_TOKEN)
 
 
-@router.post("/delete", response_model=ApiResponse, response_model_exclude_none=True)
+@router.post(
+    "/delete", response_model=Status | ApiResponse, response_model_exclude_none=True
+)
 async def delete(msisdn=Depends(JWTBearer())) -> ApiResponse:
     """Delete user"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
