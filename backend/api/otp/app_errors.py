@@ -6,7 +6,7 @@ INVALID_MSISDN = Error(
     message="Sorry the MSISDN or Email you requested the OTP to send to is invalid.",
 )
 
-ERROR_SMS = Error(
+SMS_ERROR = Error(
     type="otp",
     code=302,
     message="There are no SMS GateWay to fulfill your request.",

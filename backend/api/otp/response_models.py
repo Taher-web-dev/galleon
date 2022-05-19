@@ -8,9 +8,9 @@ class OTPInvalidMSISDNResponse(ApiResponse):
     error: Error = err.INVALID_MSISDN
 
 
-class OTPErrorSMSResponse(ApiResponse):
+class OTPSMSErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.ERROR_SMS
+    error: Error = err.SMS_ERROR
 
 
 class OTPInvalidRequestIDResponse(ApiResponse):
