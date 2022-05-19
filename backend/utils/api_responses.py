@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Any
 from enum import Enum
-from fastapi import status
 
 
 class Status(str, Enum):
@@ -29,6 +28,10 @@ class ApiResponse(BaseModel):
     status: Status
     errors: list[Error] | None = None
     data: dict[str, Any] | BaseModel | None = None
+
+    def dict(self, *args, **kwargs) -> dict[str, Any]:
+        kwargs.pop("exclude_none")
+        return super().dict(*args, exclude_none=True, **kwargs)
 
     class Config:
         use_enum_values = True
