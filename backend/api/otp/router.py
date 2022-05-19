@@ -60,7 +60,7 @@ async def confirm(
             return ApiResponse(
                 status=Status.success, data={"confirmation": otp.confirmation}
             )
-    raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH_ERROR)
+    raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH)
 
 
 @router.post(
@@ -77,4 +77,4 @@ async def api_verify(
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp and otp.confirmation and otp.confirmation == confirmation:
         return ApiResponse(status=Status.success)
-    raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH_ERROR)
+    raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH)

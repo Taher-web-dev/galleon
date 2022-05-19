@@ -30,7 +30,7 @@ INVALID_OTP_CONFIRMATION = Error(
     message="Something is wrong! the OTP request you confirmation is invalid.",
 )
 
-OTP_MISMATCH_ERROR = Error(
+OTP_MISMATCH = Error(
     type="otp",
     code=307,
     message="Something is wrong! the OTP request you confirmation does not match the request.",

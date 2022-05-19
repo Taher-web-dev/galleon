@@ -30,4 +30,4 @@ class OTPInvalidOTPConfirmationResponse(ApiResponse):
 
 class OTPMismatchOTPConfirmationResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = err.OTP_MISMATCH_ERROR
+    error: Error = err.OTP_MISMATCH
