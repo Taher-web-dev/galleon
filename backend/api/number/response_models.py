@@ -16,7 +16,3 @@ class SubscriptionsResponse(ApiResponse):
 
 class WalletResponse(ApiResponse):
     data: Union[Wallet, Error]
-
-
-class ChargeVoucherResponse(ApiResponse):
-    data: Dict[str, Any]
