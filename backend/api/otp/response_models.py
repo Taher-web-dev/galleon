@@ -13,6 +13,12 @@ ERROR_SMS = Error(
     message="There are no SMS GateWay to fulfill your request.",
 )
 
+ERROR_SMTP = Error(
+    type="otp",
+    code=503,
+    message="There are no Email SMTP to fulfill your request.",
+)
+
 INVALID_OTP_REQUEST_ID = Error(
     type="otp",
     code=400,
@@ -40,6 +46,11 @@ class OTPRequestErrorResponseInvalidMSISDN(ApiResponse):
 class OTPRequestErrorResponseErrorSMS(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [ERROR_SMS]
+
+
+class OTPRequestErrorResponseErrorSMTP(ApiResponse):
+    status: Status = Status.failed
+    errors: list[Error] = [ERROR_SMTP]
 
 
 class OTPRequestErrorResponseInvalidRequestID(ApiResponse):
