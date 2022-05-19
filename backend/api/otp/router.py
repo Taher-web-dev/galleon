@@ -7,7 +7,7 @@ from utils.db import Otp, db
 from utils.api_responses import Status, ApiResponse, ApiException
 from .additional_responses import request_otp, confirm_otp, verify_otp
 import utils.regex as rgx
-from api.otp import app_errors as err
+import api.otp.app_errors as err
 
 router = APIRouter()
 

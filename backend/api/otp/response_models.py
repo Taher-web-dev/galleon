@@ -1,6 +1,6 @@
 from utils.api_responses import Status, ApiResponse, Error
 
-from api.otp import app_errors as err
+import api.otp.app_errors as err
 
 
 class OTPInvalidMSISDNResponse(ApiResponse):
