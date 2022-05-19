@@ -119,7 +119,7 @@ async def update_profile(
     responses=additional_responses.login,
 )
 async def login(
-    msisdn: str = Body(..., regex=rgx.DIGITS),
+    msisdn: str = Body(..., regex=rgx.MSISDN),
     password: str = Body(..., regex=rgx.PASSWORD),
 ) -> ApiResponse:
     """Login and generate refresh token"""

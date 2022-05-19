@@ -5,15 +5,14 @@ from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from ..number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.api_responses import ApiResponse, Error, Status
-from typing import Any
-from utils.regex import DIGITS as RGX_DIGITS, STRING as RGX_STRING
+import utils.regex as rgx
 
 router = APIRouter()
 
 
 @router.post("/request", response_model=ApiResponse)
 async def send_otp(
-    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS)
+    msisdn: str = Body(..., embed=True, regex=rgx.MSISDN)
 ) -> ApiResponse:
     """Request new Otp"""
 
@@ -35,7 +34,7 @@ async def send_otp(
 
 @router.post("/confirm", response_model=ApiResponse, response_model_exclude_none=True)
 async def confirm(
-    msisdn: str = Body(..., regex=RGX_DIGITS), code: str = Body(..., regex=RGX_DIGITS)
+    msisdn: str = Body(..., regex=rgx.MSISDN), code: str = Body(..., regex=rgx.DIGITS)
 ) -> ApiResponse:
     """Confirm Otp"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
@@ -58,8 +57,8 @@ async def confirm(
 
 @router.post("/verify", response_model=ApiResponse)
 async def api_verify(
-    msisdn: str = Body(..., regex=RGX_DIGITS),
-    confirmation: str = Body(..., regex=RGX_STRING),
+    msisdn: str = Body(..., regex=rgx.MSISDN),
+    confirmation: str = Body(..., regex=rgx.STRING),
 ) -> ApiResponse:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()

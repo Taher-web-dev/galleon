@@ -13,7 +13,7 @@ from .subscriptions import get_subscriptions, Subscription
 from .zend import recharge_voucher, change_supplementary_offering
 from utils.jwt import JWTBearer
 from utils.settings import settings
-from utils.regex import DIGITS as RGX_DIGITS
+import utils.regex as rgx
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ async def retrieve_wallet(
 
 @router.post("/redeem-registration-gift")
 async def api_registration_gift(
-    msisdn: str = Body(..., embed=True, regex=RGX_DIGITS),
+    msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn
@@ -58,8 +58,8 @@ async def api_registration_gift(
 
 @router.post("/charge-voucher")
 async def api_charge_voucher(
-    msisdn: str = Body(..., regex=RGX_DIGITS),
-    pincode: str = Body(..., regex=RGX_DIGITS),
+    msisdn: str = Body(..., regex=rgx.MSISDN),
+    pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
 ):
     assert msisdn == session_msisdn

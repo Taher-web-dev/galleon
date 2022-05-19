@@ -3,7 +3,7 @@ import utils.regex as rgx
 
 
 class UserCreateRequest(BaseModel):
-    msisdn: str = Field(..., regex=rgx.DIGITS)
+    msisdn: str = Field(..., regex=rgx.MSISDN)
     name: str = Field(..., regex=rgx.TITLE)
     password: str = Field(..., regex=rgx.PASSWORD)
     email: str = Field(None, regex=rgx.EMAIL)
