@@ -66,7 +66,12 @@ async def confirm(
     )
 
 
-@router.post("/verify", response_model=ApiResponse, responses=verify_otp)
+@router.post(
+    "/verify",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=verify_otp,
+)
 async def api_verify(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     confirmation: str = Body(..., regex=rgx.STRING),
