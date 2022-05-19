@@ -24,13 +24,13 @@ INVALID_TOKEN_ERROR = Error(
 )
 
 
-class Login(BaseModel):
+class Tokens(BaseModel):
     refresh_token: str
     access_token: str
 
 
 class LoginResponse(ApiResponse):
-    data: Login
+    data: Tokens
 
 
 class UserExistsErrorResponse(ApiResponse):

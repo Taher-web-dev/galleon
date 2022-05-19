@@ -14,6 +14,7 @@ from api.user.response_models import (
     INVALID_OTP_ERROR,
     INVALID_TOKEN_ERROR,
     INVALID_CREDENTIALS_ERROR,
+    Tokens,
     LoginResponse,
     UserProfile,
 )
@@ -132,7 +133,7 @@ async def login(
         db.commit()
         return LoginResponse(
             status=Status.success,
-            data={"refresh_token": refresh_token, "access_token": access_token},
+            data=Tokens(refresh_token=refresh_token, access_token=access_token),
         )
 
     raise ApiException(
@@ -169,12 +170,10 @@ async def gen_access_token(refresh_token: Optional[str] = Header(None)) -> ApiRe
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == "msisdn").first()
             if user is not None:
+                access_token = sign_jwt({"msisdn": msisdn})
                 return ApiResponse(
                     status=Status.success,
-                    data={
-                        "refresh_token": refresh_token,
-                        "access_token": sign_jwt({"msisdn": msisdn}),
-                    },
+                    data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
 
     raise ApiException(
