@@ -1,7 +1,7 @@
 """ OTP api set """
 
 from fastapi import APIRouter, Body, status
-from backend.api.otp.response_models import MISSMATCH_OTP_CONFIRMATION
+from api.otp.response_models import MISSMATCH_OTP_CONFIRMATION
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from utils.db import Otp, db
