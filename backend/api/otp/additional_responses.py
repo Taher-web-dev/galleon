@@ -7,7 +7,7 @@ from api.otp.response_models import (
     OTPInvalidOTPConfirmationResponse,
     OTPInvalidOTPFormatResponse,
     OTPInvalidRequestIDResponse,
-    OTPMissmatchOTPCOnfirmationResponse,
+    OTPMismatchOTPConfirmationResponse,
 )
 
 request_otp: Dict[int | str, Dict[str, Any]] = {
@@ -40,7 +40,7 @@ verify_otp: Dict[int | str, Dict[str, Any]] = {
         "description": "Invalid OTP confirmation Id",
     },
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPMissmatchOTPCOnfirmationResponse,
-        "description": "Missmatch OTP confirmation Id",
+        "model": OTPMismatchOTPConfirmationResponse,
+        "description": "Mismatch OTP confirmation Id",
     },
 }

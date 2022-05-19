@@ -63,6 +63,6 @@ class OTPInvalidOTPConfirmationResponse(ApiResponse):
     errors: list[Error] = [INVALID_OTP_CONFIRMATION]
 
 
-class OTPMissmatchOTPCOnfirmationResponse(ApiResponse):
+class OTPMismatchOTPConfirmationResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [OTP_MISMATCH_ERROR]
