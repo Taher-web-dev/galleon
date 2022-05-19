@@ -44,8 +44,9 @@ def test_create_user():
     response = client.post(endpoint, json=request_data)
     # print(response.json())
     assert response.status_code == 409
+    print(response.json())
     assert response.json()["status"] == "failed"
-    assert response.json()["errors"][0]["code"] == 202
+    assert response.json()["error"]["code"] == 202
 
     # correct confirmation
     request_data["otp_confirmation"] = confirmation
@@ -65,10 +66,10 @@ def test_create_user():
 
     # create user again
     response = client.post(endpoint, json=request_data)
-    # print(response.json())
+    print(response.json())
     assert response.status_code == 403
     assert response.json()["status"] == "failed"
-    assert response.json()["errors"][0]["code"] == 201
+    assert response.json()["error"]["code"] == 201
 
 
 access_token: str = ""

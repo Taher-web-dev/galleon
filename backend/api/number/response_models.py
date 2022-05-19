@@ -1,4 +1,3 @@
-from typing import Any, Dict
 from api.number.balance import Wallet
 from utils.api_responses import ApiResponse
 from .sim import Sim

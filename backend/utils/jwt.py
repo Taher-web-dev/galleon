@@ -21,8 +21,8 @@ class JWTBearer(HTTPBearer):
                 return decode_jwt(credentials.credentials)["msisdn"]
         except:
             raise ApiException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                error=Error(type="jwtauth", code=10, message="Not authenticated"),
+                status.HTTP_401_UNAUTHORIZED,
+                Error(type="jwtauth", code=10, message="Not authenticated"),
             )
 
 
