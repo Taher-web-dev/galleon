@@ -9,6 +9,17 @@ class Tokens(BaseModel):
     refresh_token: str
     access_token: str
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "status": "success",
+                "data": {
+                    "refresh_token": "ey...3kc",
+                    "access_token": "ey...OLc",
+                },
+            }
+        }
+
 
 class LoginResponse(ApiResponse):
     data: Tokens
@@ -40,3 +51,17 @@ class UserProfile(BaseModel):
     msisdn: str = Field(..., regex=rgx.MSISDN)
     email: Optional[str] = Field(None, regex=rgx.EMAIL)
     profile_pic_url: Optional[str] = Field(None, regex=rgx.URL)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "status": "success",
+                "data": {
+                    "id": 1,
+                    "name": "jhone",
+                    "msisdn": "599196408674300",
+                    "email": "jhone@gmail.com",
+                    "profile_pic_url": "https://pic.com",
+                },
+            }
+        }

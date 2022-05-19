@@ -23,7 +23,7 @@ router = APIRouter()
 
 @router.post(
     "/create",
-    response_model=ApiResponse,
+    response_model=UserProfile | ApiResponse,
     response_model_exclude_none=True,
     responses=add_res.create_user,
 )
@@ -109,14 +109,14 @@ async def update_profile(
 
 @router.post(
     "/login",
-    response_model=LoginResponse,
+    response_model=ApiResponse,
     response_model_exclude_none=True,
     responses=add_res.login,
 )
 async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     password: str = Body(..., regex=rgx.PASSWORD),
-) -> LoginResponse:
+) -> ApiResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
