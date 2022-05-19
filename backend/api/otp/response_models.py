@@ -38,31 +38,31 @@ OTP_MISMATCH_ERROR = Error(
 )
 
 
-class OTPRequestErrorResponseInvalidMSISDN(ApiResponse):
+class OTPInvalidMSISDNResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [INVALID_MSISDN]
 
 
-class OTPRequestErrorResponseErrorSMS(ApiResponse):
+class OTPErrorSMSResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [ERROR_SMS]
 
 
-class OTPRequestErrorResponseInvalidRequestID(ApiResponse):
+class OTPInvalidRequestIDResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [INVALID_OTP_REQUEST_ID]
 
 
-class OTPRequestErrorResponseInvalidOTPFormat(ApiResponse):
+class OTPInvalidOTPFormatResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [INVALID_OTP_REQUEST_FORMAT]
 
 
-class OTPRequestErrorResponseInvalidOTPConfirmation(ApiResponse):
+class OTPInvalidOTPConfirmationResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [INVALID_OTP_CONFIRMATION]
 
 
-class OTPRequestErrorResponseMissmatchOTPCOnfirmation(ApiResponse):
+class OTPMissmatchOTPCOnfirmationResponse(ApiResponse):
     status: Status = Status.failed
     errors: list[Error] = [OTP_MISMATCH_ERROR]
