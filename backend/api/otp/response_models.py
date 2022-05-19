@@ -1,4 +1,3 @@
-from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 
 

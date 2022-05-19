@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from ..number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import Status, ApiResponse, ApiException, Error
+from utils.api_responses import Status, ApiResponse, Error
 from .additional_responses import request_otp, confirm_otp, verify_otp
 import utils.regex as rgx
 
