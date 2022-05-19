@@ -30,7 +30,9 @@ class ApiResponse(BaseModel):
     data: dict[str, Any] | BaseModel | None = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
+        print("kwargs", kwargs)
         kwargs.pop("exclude_none")
+        print("DICT", super().dict(*args, exclude_none=True, **kwargs))
         return super().dict(*args, exclude_none=True, **kwargs)
 
     class Config:
