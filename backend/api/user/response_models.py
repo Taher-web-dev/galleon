@@ -58,5 +58,4 @@ class UserProfile(BaseModel):
     name: str
     msisdn: str = Field(..., regex=rgx.MSISDN)
     email: Optional[str] = Field(None, regex=rgx.EMAIL)
-    password: Optional[str] = Field(None, regex=rgx.PASSWORD)
     profile_pic_url: Optional[str] = Field(None, regex=rgx.URL)
