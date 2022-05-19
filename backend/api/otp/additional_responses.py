@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from api.otp.response_models import (
     OTPInvalidMSISDNResponse,
-    OTPErrorSMSResponse,
+    OTPSMSErrorResponse,
     OTPInvalidOTPConfirmationResponse,
     OTPInvalidOTPFormatResponse,
     OTPInvalidRequestIDResponse,
@@ -16,7 +16,7 @@ request_otp: Dict[int | str, Dict[str, Any]] = {
         "description": "Invalid MSISDN or Email.",
     },
     status.HTTP_503_SERVICE_UNAVAILABLE: {
-        "model": OTPErrorSMSResponse,
+        "model": OTPSMSErrorResponse,
         "description": "SMS GW server down or not configured.",
     },
 }
