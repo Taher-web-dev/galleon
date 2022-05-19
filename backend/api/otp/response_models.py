@@ -1,10 +1,9 @@
-from pydantic import BaseModel
 from utils.api_responses import Status, ApiResponse, Error
 
 import api.otp.app_errors as err
 
 
-class ConfirmationOTP(ApiResponse):
+class OTPConfirmation(ApiResponse):
     confirmation: str
 
     class Config:
