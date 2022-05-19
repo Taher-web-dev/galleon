@@ -1,4 +1,5 @@
 from fastapi import status
+from typing import Dict, Any
 from api.user.response_models import (
     UserExistsErrorResponse,
     InvalidOtpErrorResponse,
@@ -6,7 +7,7 @@ from api.user.response_models import (
     InvalidTokenErrorResponse,
 )
 
-create_user = {
+create_user: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_403_FORBIDDEN: {
         "model": UserExistsErrorResponse,
         "description": "User already exists.",
@@ -17,14 +18,14 @@ create_user = {
     },
 }
 
-login = {
+login: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidCredentialsErrorResponse,
         "description": "Invalid credentials",
     },
 }
 
-token = {
+token: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidTokenErrorResponse,
         "description": "Invalid token.",
