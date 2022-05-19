@@ -1,10 +1,11 @@
 """ OTP api set """
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, status
+from backend.api.otp.response_models import MISSMATCH_OTP_CONFIRMATION
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from ..number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import Status, ApiResponse, Error
+from utils.api_responses import Status, ApiResponse, Error, ApiException
 from .additional_responses import request_otp, confirm_otp, verify_otp
 import utils.regex as rgx
 
@@ -60,9 +61,8 @@ async def confirm(
             return ApiResponse(
                 status=Status.success, data={"confirmation": otp.confirmation}
             )
-    return ApiResponse(
-        status=Status.failed,
-        errors=[Error(type="otp", code=99, message="Bad otp confirmation")],
+    raise ApiException(
+        status_code=status.HTTP_400_BAD_REQUEST, error=MISSMATCH_OTP_CONFIRMATION
     )
 
 
@@ -80,7 +80,6 @@ async def api_verify(
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     if otp and otp.confirmation and otp.confirmation == confirmation:
         return ApiResponse(status=Status.success)
-    return ApiResponse(
-        status=Status.failed,
-        errors=[Error(type="otp", code=99, message="Bad otp confirmation")],
+    raise ApiException(
+        status_code=status.HTTP_400_BAD_REQUEST, error=MISSMATCH_OTP_CONFIRMATION
     )
