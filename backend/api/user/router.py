@@ -13,6 +13,7 @@ from api.user.response_models import (
     Tokens,
     LoginResponse,
     UserProfile,
+    UserProfileResponse,
 )
 import api.user.additional_responses as add_res
 import api.user.app_errors as err
@@ -23,11 +24,11 @@ router = APIRouter()
 
 @router.post(
     "/create",
-    response_model=UserProfile | ApiResponse,
+    response_model=UserProfileResponse,
     response_model_exclude_none=True,
     responses=add_res.create_user,
 )
-async def create_user(new_user: UserCreateRequest) -> ApiResponse:
+async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     """Register a new user"""
 
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
@@ -49,8 +50,7 @@ async def create_user(new_user: UserCreateRequest) -> ApiResponse:
     db.add(user)
     db.commit()
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
-    return ApiResponse(
-        status=Status.success,
+    return UserProfileResponse(
         data=UserProfile(
             id=user.id,
             name=user.name,
