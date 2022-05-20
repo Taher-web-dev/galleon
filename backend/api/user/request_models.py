@@ -13,15 +13,13 @@ class UserCreateRequest(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "status": "success",
-                "data": {
+                
                     "msisdn": "12345678933",
                     "name": "Ahmed Shahwan",
                     "password": "So secret",
                     "email": "ahmed.shahwan@startappz.com",
                     "profile_pic_url": "https://example.com/fake_pic.jpg",
                     "otp_confirmation": "123456",
-                },
             }
         }
 
