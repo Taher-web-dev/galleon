@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 import utils.regex as rgx
@@ -8,6 +7,10 @@ import api.user.app_errors as err
 class Tokens(BaseModel):
     refresh_token: str
     access_token: str
+
+
+class TokensResponse(ApiResponse):
+    data: Tokens
 
     class Config:
         schema_extra = {
@@ -19,10 +22,6 @@ class Tokens(BaseModel):
                 },
             }
         }
-
-
-class LoginResponse(ApiResponse):
-    data: Tokens
 
 
 class UserExistsErrorResponse(ApiResponse):
