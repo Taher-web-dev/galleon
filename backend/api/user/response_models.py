@@ -2,26 +2,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 import utils.regex as rgx
-
-
-USER_EXISTS_ERROR = Error(
-    type="user", code=201, message="Sorry the msisdn is already registered."
-)
-INVALID_OTP_ERROR = Error(
-    type="otp",
-    code=202,
-    message="The confirmation provided is not valid please try again.",
-)
-INVALID_CREDENTIALS_ERROR = Error(
-    type="auth",
-    code=203,
-    message="Invalid credentials",
-)
-INVALID_TOKEN_ERROR = Error(
-    type="auth",
-    code=204,
-    message="Invalid token",
-)
+import api.user.app_errors as err
 
 
 class Tokens(BaseModel):
@@ -35,22 +16,22 @@ class LoginResponse(ApiResponse):
 
 class UserExistsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = USER_EXISTS_ERROR
+    error: Error = err.USER_EXISTS
 
 
 class InvalidOtpErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = INVALID_OTP_ERROR
+    error: Error = err.INVALID_OTP
 
 
 class InvalidTokenErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = INVALID_TOKEN_ERROR
+    error: Error = err.INVALID_TOKEN
 
 
 class InvalidCredentialsErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = INVALID_CREDENTIALS_ERROR
+    error: Error = err.INVALID_CREDENTIALS
 
 
 class UserProfile(BaseModel):
@@ -58,5 +39,4 @@ class UserProfile(BaseModel):
     name: str
     msisdn: str = Field(..., regex=rgx.MSISDN)
     email: Optional[str] = Field(None, regex=rgx.EMAIL)
-    password: Optional[str] = Field(None, regex=rgx.PASSWORD)
     profile_pic_url: Optional[str] = Field(None, regex=rgx.URL)
