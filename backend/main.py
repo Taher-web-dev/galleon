@@ -24,6 +24,7 @@ from starlette.concurrency import iterate_in_threadpool
 import json
 from utils.api_responses import ApiResponse, Error, Status, ApiException
 from fastapi.encoders import jsonable_encoder
+from datetime import datetime
 
 Base.metadata.create_all(bind=engine)
 
@@ -76,6 +77,17 @@ async def capture_body(request: Request):
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
+@app.get("/", include_in_schema=False, dependencies=[Depends(capture_body)])
+async def root():
+    """Micro-service card identifier"""
+    return {
+        "name": "GMW",
+        "type": "microservice",
+        "decription": "Galleon Middleware for Self-service",
+        "status": "Up and running",
+        "date" : datetime.now()
+    }
+
 
 @app.middleware("http")
 async def middle(request: Request, call_next):
@@ -104,8 +116,8 @@ async def middle(request: Request, call_next):
                 ),
             )
 
-        except Exception:
-            ex = sys.exc_info()[1]
+        except Exception as ex:
+            # ex = sys.exc_info()[1]
             if ex:
                 stack = [
                     {
