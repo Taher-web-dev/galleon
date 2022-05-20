@@ -13,20 +13,6 @@ class OTPSendRequest(BaseModel):
         }
 
 
-class OTPConfirmation(BaseModel):
-    confirmation: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "status": "success",
-                "data": {
-                    "confirmation": "O3Dxzx9llkfUdt85",
-                },
-            }
-        }
-
-
 class OTPConfirmationRequest(BaseModel):
     msisdn: str = Field(..., regex=rgx.MSISDN)
     code: str = Field(..., regex=rgx.DIGITS)
