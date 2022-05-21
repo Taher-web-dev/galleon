@@ -5,6 +5,7 @@ import time
 import traceback
 import logging
 import logging.handlers
+from sqlalchemy import null
 import uvicorn
 
 # from settings import settings
@@ -49,14 +50,6 @@ json_logging.init_request_instrument(app)
 async def app_startup():
     logger.info("Starting")
     Base.metadata.create_all(bind=engine)
-    openapi_schema = app.openapi()
-    paths = openapi_schema["paths"]
-    for path in paths:
-        for method in paths[path]:
-            responses = paths[path][method]["responses"]
-            if responses.get("422"):
-                responses.pop("422")
-    app.openapi_schema = openapi_schema
 
 
 @app.on_event("shutdown")
@@ -181,7 +174,6 @@ async def middle(request: Request, call_next):
 app.include_router(user, prefix="/api/user", dependencies=[Depends(capture_body)])
 app.include_router(otp, prefix="/api/otp", dependencies=[Depends(capture_body)])
 app.include_router(number, prefix="/api/number", dependencies=[Depends(capture_body)])
-
 
 if __name__ == "__main__":
     # uvicorn.run("main:app", reload=True)

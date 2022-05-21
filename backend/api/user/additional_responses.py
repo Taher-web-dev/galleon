@@ -6,6 +6,7 @@ from api.user.response_models import (
     InvalidOtpErrorResponse,
     InvalidCredentialsErrorResponse,
     InvalidTokenErrorResponse,
+    ValidationErrorResponse,
 )
 
 create_user: Dict[int | str, Dict[str, Any]] = {
@@ -17,6 +18,10 @@ create_user: Dict[int | str, Dict[str, Any]] = {
         "model": InvalidOtpErrorResponse,
         "description": "Invalid OTP Confirmation.",
     },
+    status.HTTP_422_UNPROCESSABLE_ENTITY: {
+        "model": ValidationErrorResponse,
+        "description": "Validation Error"
+    }
 }
 
 login: Dict[int | str, Dict[str, Any]] = {
