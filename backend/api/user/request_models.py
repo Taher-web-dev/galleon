@@ -1,31 +1,21 @@
-from pydantic import BaseModel, Field
+from doctest import Example
+import math
+from pydantic import BaseModel, Field, HttpUrl, EmailStr
+from uuid import UUID
 import utils.regex as rgx
 
 
 class UserCreateRequest(BaseModel):
-    msisdn: str = Field(..., regex=rgx.MSISDN, max_length=20)
-    name: str = Field(..., regex=rgx.TITLE, max_length=120)
-    password: str = Field(..., regex=rgx.PASSWORD, max_length=40)
-    email: str | None = Field(None, regex=rgx.EMAIL, max_length=40)
-    profile_pic_url: str | None = Field(None, regex=rgx.URL)
-    otp_confirmation: str = Field(..., regex=rgx.STRING, max_length=30)
+    msisdn: str= Field(..., regex=r'^\d{8,15}$')
+    name: str = Field(..., max_length=120, example="Ahmed Shahwan")
+    password: str = Field(..., max_length=40, example= "So secret")
+    email: EmailStr | None = Field(None, example= "ahmed.shahwan@startappz.com" )
+    profile_pic_url: HttpUrl | None = Field(None, example="https://example.com/fake_pic.jpg")
+    otp_confirmation: str = Field(..., max_length=30, example= "123456")
 
-    class Config:
-        schema_extra = {
-            "example": {
-                
-                    "msisdn": "12345678933",
-                    "name": "Ahmed Shahwan",
-                    "password": "So secret",
-                    "email": "ahmed.shahwan@startappz.com",
-                    "profile_pic_url": "https://example.com/fake_pic.jpg",
-                    "otp_confirmation": "123456",
-            }
-        }
-
-
+   
 class UserUpdateRequest(BaseModel):
-    name: str = Field(None, regex=rgx.TITLE)
-    password: str = Field(None, regex=rgx.PASSWORD)
-    profile_pic_url: str = Field(None, regex=rgx.URL)
-    email: str = Field(None, regex=rgx.EMAIL)
+    name: str = Field(None, max_length=120)
+    password: str = Field(None, max_length=40)
+    profile_pic_url: HttpUrl = Field(None)
+    email: EmailStr = Field(None)
