@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Body, Header, status, Depends
 from typing import Optional
+
+from sqlalchemy import true
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
@@ -138,7 +140,7 @@ async def login(
 )
 async def verify(
    msisdn=Depends(JWTBearer()),
-    password: str = Body(..., regex=rgx.PASSWORD),
+    password: str = Body(..., regex=rgx.PASSWORD,embed= True),
 ) -> ApiResponse:
     """Verify user password"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
