@@ -37,9 +37,7 @@ class UserProfile(BaseModel):
     id: int = Field(..., example=1)
     name: str = Field(..., example="Ahmed Shahwan")
     msisdn: str = Field(..., regex=rgx.MSISDN, max_length=20, example="12345678933")
-    email: EmailStr | None = Field(
-        None, max_length=40, example="ahmed.shahwan@startappz.com"
-    )
+    email: EmailStr | None = Field(None, example="ahmed.shahwan@startappz.com")
     profile_pic_url: HttpUrl | None = Field(
         None, example="https://example.com/fake_pic.jpg"
     )
