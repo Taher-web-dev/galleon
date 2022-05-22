@@ -45,8 +45,3 @@ class UserProfile(BaseModel):
 
 class UserProfileResponse(ApiResponse):
     data: UserProfile
-
-
-class ValidationErrorResponse(ApiResponse):
-    status: Status = Status.failed
-    error = Error(type="validation", code=422, message="Request body is not valid!")
