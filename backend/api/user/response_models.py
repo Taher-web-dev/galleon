@@ -1,7 +1,4 @@
-from doctest import Example
-from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field, HttpUrl, EmailStr
-from sqlalchemy import null
 from utils.api_responses import Status, ApiResponse, Error
 import utils.regex as rgx
 import api.user.app_errors as err
@@ -49,10 +46,8 @@ class UserProfile(BaseModel):
 class UserProfileResponse(ApiResponse):
     data: UserProfile
     status: Status = Field(Status.success, example="success")
-    error: None = Field(None, example=null)
 
 
 class ValidationErrorResponse(ApiResponse):
     status: Status = Status.failed
     error = Error(type="validation", code=422, message="Request body is not valid!")
-    data: None = Field(None, example=null)

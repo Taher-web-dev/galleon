@@ -27,7 +27,6 @@ router = APIRouter()
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
     response_model_exclude_unset=True,
-    # response_model_exclude={'error'},
     responses=add_res.create_user,
 )
 async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
