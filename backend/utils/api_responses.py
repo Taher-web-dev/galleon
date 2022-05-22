@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 from enum import Enum
 
 
@@ -27,7 +27,7 @@ class ApiException(Exception):
 class ApiResponse(BaseModel):
     status: Status = Status.success
     error: Optional[Error] = None
-    data: Optional[dict[str, Any]] | Optional[BaseModel] = None
+    data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
