@@ -15,7 +15,7 @@ from utils.settings import settings
 import utils.regex as rgx
 from utils.api_responses import ApiResponse, Status
 from .response_models import (
-    StatusResponse,
+    RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
 )
@@ -26,16 +26,16 @@ router = APIRouter()
 
 @router.get(
     "/status",
-    response_model=StatusResponse,
+    response_model=RetrieveStatusResponse,
     responses=base_response_models.not_authenticated,
 )
 async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
-) -> StatusResponse:
+) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
     assert msisdn == session_msisdn
-    return StatusResponse(status=Status.success, data=get_sim_details(msisdn))
+    return RetrieveStatusResponse(status=Status.success, data=get_sim_details(msisdn))
 
 
 @router.get(
