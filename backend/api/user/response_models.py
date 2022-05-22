@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field, HttpUrl, EmailStr
 from sqlalchemy import null
 from utils.api_responses import Status, ApiResponse, Error
-import utils.regex as rgx
+#import utils.regex as rgx
 import api.user.app_errors as err
 
 class Tokens(BaseModel):
@@ -38,7 +38,7 @@ class InvalidCredentialsErrorResponse(ApiResponse):
 class UserProfile(BaseModel):
     id: int = Field(..., example= 1)
     name: str = Field(..., example= "Ahmed Shahwan")
-    msisdn: str = Field(..., regex=rgx.MSISDN, max_length=20, example= "12345678933")
+    msisdn: str = Field(..., regex=r"^\d{8,15}$", example= "12345678933")
     email: EmailStr | None = Field(None, example="ahmed.shahwan@startappz.com")
     profile_pic_url: HttpUrl | None = Field(None, example="https://example.com/fake_pic.jpg")
 

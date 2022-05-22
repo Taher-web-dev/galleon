@@ -2,7 +2,7 @@ from doctest import Example
 import math
 from pydantic import BaseModel, Field, HttpUrl, EmailStr
 from uuid import UUID
-import utils.regex as rgx
+#import utils.regex as rgx
 
 
 class UserCreateRequest(BaseModel):
