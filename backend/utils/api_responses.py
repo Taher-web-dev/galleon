@@ -27,10 +27,3 @@ class ApiResponse(BaseModel):
     status: Status = Status.success
     error: Optional[Error] | None 
     data: Optional[dict[str, Any]] | Optional[BaseModel] | None
-
-    def dict(self, *args, **kwargs) -> dict[str, Any]:
-        kwargs.pop("exclude_none")
-        return super().dict(*args, exclude_none=True, **kwargs)
-
-    class Config:
-        use_enum_values = True
