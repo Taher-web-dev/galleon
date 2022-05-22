@@ -4,7 +4,7 @@ This is the middle-ware that connects with
 zain backend systems (aka zain-backend)
 """
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Path
 from fastapi import Depends
 from .balance import get_wallet, Wallet
 from .sim import get_sim_details
@@ -23,27 +23,27 @@ from .response_models import (
 router = APIRouter()
 
 
-@router.get("/status?msisdn={msisdn:path}", response_model=StatusResponse)
+@router.get("/status?msisdn={msisdn}", response_model=StatusResponse)
 async def retrieve_status(
-    msisdn: str, session_msisdn=Depends(JWTBearer())
+    msisdn: str = Path(regex=rgx.MSISDN), session_msisdn=Depends(JWTBearer())
 ) -> StatusResponse:
     """Retrieve SIM status"""
     assert msisdn == session_msisdn
     return StatusResponse(status=Status.success, data=get_sim_details(msisdn))
 
 
-@router.get("/subscriptions?msisdn={msisdn:path}", response_model=SubscriptionsResponse)
+@router.get("/subscriptions?msisdn={msisdn}", response_model=SubscriptionsResponse)
 async def retrieve_subscriptions(
-    msisdn: str, session_msisdn=Depends(JWTBearer())
+    msisdn: str = Path(regex=rgx.MSISDN), session_msisdn=Depends(JWTBearer())
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
     assert msisdn == session_msisdn
     return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
-@router.get("/wallet?msisdn={msisdn:path}", response_model=WalletResponse)
+@router.get("/wallet?msisdn={msisdn}", response_model=WalletResponse)
 async def retrieve_wallet(
-    msisdn: str, session_msisdn=Depends(JWTBearer())
+    msisdn: str = Path(regex=rgx.MSISDN), session_msisdn=Depends(JWTBearer())
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
