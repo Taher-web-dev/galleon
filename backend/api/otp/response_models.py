@@ -1,25 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from utils.api_responses import Status, ApiResponse, Error
 
 import api.otp.app_errors as err
 
 
 class OTPConfirmation(BaseModel):
-    confirmation: str
+    confirmation: str = Field(..., example="O3Dxzx9llkfUdt85")
 
 
 class OTPConfirmationResponse(ApiResponse):
     data: OTPConfirmation
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "status": "success",
-                "data": {
-                    "confirmation": "O3Dxzx9llkfUdt85",
-                },
-            }
-        }
 
 
 class OTPInvalidMSISDNResponse(ApiResponse):

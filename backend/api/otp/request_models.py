@@ -3,37 +3,14 @@ import utils.regex as rgx
 
 
 class OTPSendRequest(BaseModel):
-    msisdn: str = Field(..., embed=True, regex=rgx.MSISDN)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "msisdn": "599196408674300",
-            }
-        }
+    msisdn: str = Field(..., embed=True, regex=rgx.MSISDN, example="599196408674300")
 
 
 class OTPConfirmationRequest(BaseModel):
-    msisdn: str = Field(..., regex=rgx.MSISDN)
-    code: str = Field(..., regex=rgx.DIGITS)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "msisdn": "599196408674300",
-                "code": "165132",
-            }
-        }
+    msisdn: str = Field(..., regex=rgx.MSISDN, example="599196408674300")
+    code: str = Field(..., regex=rgx.DIGITS, example="165132")
 
 
 class OTPVerifyRequest(BaseModel):
-    msisdn: str = Field(..., regex=rgx.MSISDN)
-    confirmation: str = Field(..., regex=rgx.STRING)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "msisdn": "599196408674300",
-                "confirmation": "I22Q564JqsdSD",
-            }
-        }
+    msisdn: str = Field(..., regex=rgx.MSISDN, example="599196408674300")
+    confirmation: str = Field(..., regex=rgx.STRING, example="I22Q564JqsdSD")
