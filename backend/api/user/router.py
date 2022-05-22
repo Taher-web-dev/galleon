@@ -67,6 +67,7 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     "/profile",
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
+    responses=add_res.get_user_profile,
 )
 async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     """Get user profile"""
@@ -86,6 +87,7 @@ async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     "/profile",
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
+    responses=add_res.update_profile,
 )
 async def update_profile(
     user_profile: UserUpdateRequest, msisdn=Depends(JWTBearer())
@@ -143,6 +145,7 @@ async def login(
     "/logout",
     response_model=StatusResponse,
     response_model_exclude_none=True,
+    responses=add_res.logout,
 )
 async def logout(msisdn=Depends(JWTBearer())) -> StatusResponse:
     """Logout (aka delete refresh token)"""
@@ -178,7 +181,12 @@ async def gen_access_token(
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_TOKEN)
 
 
-@router.post("/delete", response_model=StatusResponse, response_model_exclude_none=True)
+@router.post(
+    "/delete",
+    response_model=StatusResponse,
+    response_model_exclude_none=True,
+    responses=add_res.delete,
+)
 async def delete(msisdn=Depends(JWTBearer())) -> StatusResponse:
     """Delete user"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
