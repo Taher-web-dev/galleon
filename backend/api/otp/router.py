@@ -13,7 +13,7 @@ from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from utils.db import Otp, db
 from utils.api_responses import ApiException, Status
-from .additional_responses import request_otp, confirm_otp, verify_otp
+from api.otp import additional_responses as add_res
 import utils.regex as rgx
 import api.otp.app_errors as err
 
@@ -24,7 +24,7 @@ router = APIRouter()
     "/request",
     response_model=StatusResponse,
     response_model_exclude_none=True,
-    responses=request_otp,
+    responses=add_res.request_otp,
 )
 async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
     """Request new Otp"""
@@ -49,7 +49,7 @@ async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
     "/confirm",
     response_model=OTPConfirmationResponse,
     response_model_exclude_none=True,
-    responses=confirm_otp,
+    responses=add_res.confirm_otp,
 )
 async def confirm(user_request: ConfirmOTPRequest) -> OTPConfirmationResponse:
     """Confirm Otp"""
@@ -71,9 +71,9 @@ async def confirm(user_request: ConfirmOTPRequest) -> OTPConfirmationResponse:
     "/verify",
     response_model=StatusResponse,
     response_model_exclude_none=True,
-    responses=verify_otp,
+    responses=add_res.verify_otp,
 )
-async def api_verify(user_request: VerifyOTPRequest) -> StatusResponse:
+async def verify_otp(user_request: VerifyOTPRequest) -> StatusResponse:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
