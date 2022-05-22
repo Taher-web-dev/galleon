@@ -25,7 +25,7 @@ router = APIRouter()
 
 @router.get("/status", response_model=StatusResponse)
 async def retrieve_status(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="1234"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
 ) -> StatusResponse:
     """Retrieve SIM status"""
@@ -35,7 +35,7 @@ async def retrieve_status(
 
 @router.get("/subscriptions", response_model=SubscriptionsResponse)
 async def retrieve_subscriptions(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="123"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
@@ -45,7 +45,8 @@ async def retrieve_subscriptions(
 
 @router.get("/wallet", response_model=WalletResponse)
 async def retrieve_wallet(
-    msisdn: str = Query(..., regex=rgx.MSISDN), session_msisdn=Depends(JWTBearer())
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
