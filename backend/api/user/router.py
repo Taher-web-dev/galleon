@@ -130,6 +130,26 @@ async def login(
         )
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+@router.post(
+    "/verify",
+    response_model=ApiResponse,
+    response_model_exclude_none=True,
+    responses=add_res.login,
+)
+async def verify(
+   msisdn=Depends(JWTBearer()),
+    password: str = Body(..., regex=rgx.PASSWORD),
+) -> ApiResponse:
+    """Verify user password"""
+    user = db.query(User).filter(User.msisdn == msisdn).first()
+    if user and verify_password(password, user.password):
+      
+        return ApiResponse(
+            status=Status.success,
+            
+        )
+
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.post(
