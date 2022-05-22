@@ -6,7 +6,7 @@ class SendOTPRequest(BaseModel):
     msisdn: str = Field(..., embed=True, regex=rgx.MSISDN, example="599196408674300")
 
 
-class ConfirmationOTPRequest(BaseModel):
+class ConfirmOTPRequest(BaseModel):
     msisdn: str = Field(..., regex=rgx.MSISDN, example="599196408674300")
     code: str = Field(..., regex=rgx.DIGITS, example="165132")
 

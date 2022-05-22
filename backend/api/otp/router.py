@@ -3,7 +3,7 @@
 from fastapi import APIRouter, status
 
 from api.otp.request_models import (
-    ConfirmationOTPRequest,
+    ConfirmOTPRequest,
     SendOTPRequest,
     VerifyOTPRequest,
 )
@@ -51,7 +51,7 @@ async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
     response_model_exclude_none=True,
     responses=confirm_otp,
 )
-async def confirm(user_request: ConfirmationOTPRequest) -> OTPConfirmationResponse:
+async def confirm(user_request: ConfirmOTPRequest) -> OTPConfirmationResponse:
     """Confirm Otp"""
     if otp := db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first():
         otp.tries += 1
