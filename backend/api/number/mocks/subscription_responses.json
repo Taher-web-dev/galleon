@@ -11,16 +11,16 @@
           "effective_time": "20220130153646",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         },
         {
           "id": "214017",
           "effective_time": "20220327123942",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         },
         {
           "id": "55300",
@@ -35,8 +35,8 @@
           "effective_time": "20220130153646",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         },
         {
           "id": "991",
@@ -61,24 +61,24 @@
           "effective_time": "20220130153646",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         },
         {
           "id": "214017",
           "effective_time": "20220327123942",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         },
         {
           "id": "100171",
           "effective_time": "20220130153646",
           "expire_time": "20370101000000",
           "status": "0",
-          "cycle_start": null,
-          "cycle_end": null
+          "cycle_start": "2022-04-26 00:00:00+03:00",
+          "cycle_end": "2022-04-26 00:00:00+03:00"
         }
       ]
     }

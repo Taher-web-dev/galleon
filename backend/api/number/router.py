@@ -15,25 +15,34 @@ from utils.settings import settings
 import utils.regex as rgx
 from utils.api_responses import ApiResponse, Status
 from .response_models import (
-    StatusResponse,
+    RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
 )
+from api import base_response_models
 
 router = APIRouter()
 
 
-@router.get("/status", response_model=StatusResponse)
+@router.get(
+    "/status",
+    response_model=RetrieveStatusResponse,
+    responses=base_response_models.not_authenticated,
+)
 async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
-) -> StatusResponse:
+) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
     assert msisdn == session_msisdn
-    return StatusResponse(status=Status.success, data=get_sim_details(msisdn))
+    return RetrieveStatusResponse(status=Status.success, data=get_sim_details(msisdn))
 
 
-@router.get("/subscriptions", response_model=SubscriptionsResponse)
+@router.get(
+    "/subscriptions",
+    response_model=SubscriptionsResponse,
+    responses=base_response_models.not_authenticated,
+)
 async def retrieve_subscriptions(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
@@ -43,7 +52,11 @@ async def retrieve_subscriptions(
     return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
-@router.get("/wallet", response_model=WalletResponse)
+@router.get(
+    "/wallet",
+    response_model=WalletResponse,
+    responses=base_response_models.not_authenticated,
+)
 async def retrieve_wallet(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
     session_msisdn=Depends(JWTBearer()),
@@ -53,7 +66,9 @@ async def retrieve_wallet(
     return WalletResponse(status=Status.success, data=get_wallet(msisdn))
 
 
-@router.post("/redeem-registration-gift")
+@router.post(
+    "/redeem-registration-gift", responses=base_response_models.not_authenticated
+)
 async def api_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
@@ -64,7 +79,7 @@ async def api_registration_gift(
     )
 
 
-@router.post("/charge-voucher")
+@router.post("/charge-voucher", responses=base_response_models.not_authenticated)
 async def api_charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     pincode: str = Body(..., regex=rgx.DIGITS),
