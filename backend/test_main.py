@@ -148,30 +148,30 @@ def test_subscriptions():
     # print(response.json())
 
 
-def test_redeem_registration_gift():
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
-    response = client.post(
-        f"/api/number/redeem-registration-gift?msisdn={msisdn}", headers=headers
-    )
-    # print(response.json())
-    assert response.status_code == status.HTTP_200_OK
-
-
 def test_charge_voucher():
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
     response = client.post(
-        f"/api/number/charge-voucher?msisdn={msisdn}",
+        "/api/number/charge-voucher",
         headers=headers,
-        json={"pincode": 1111},
+        json={"msisdn": msisdn, "pincode": 1111},
     )
     assert response.status_code == status.HTTP_200_OK, response.json()
     # print(response.json())
+
+
+def test_redeem_registration_gift():
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.post(
+        "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
+    )
+    # print(response.json())
+    assert response.status_code == status.HTTP_200_OK
 
 
 def test_sim_status():
