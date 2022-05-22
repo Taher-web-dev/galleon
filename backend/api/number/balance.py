@@ -1,4 +1,5 @@
 from json.decoder import JSONDecodeError
+from pydantic import Field
 from pydantic.main import BaseModel
 from typing import Optional, Any
 from fastapi import status
@@ -8,21 +9,13 @@ from .zend import zend_balance, zend_subscriptions
 
 
 class WalletEntry(BaseModel):
-    value: Optional[int]
-    expiry: Optional[str]
+    value: Optional[int] = Field(None, example=1014)
+    expiry: Optional[str] = Field(None, example="2029-09-21T00:00:00.000+03:00")
 
 
 class Wallet(BaseModel):
     balance: WalletEntry
     loan: WalletEntry
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "balance": {"value": 1014, "expiry": "2029-09-21T00:00:00.000+03:00"},
-                "loan": {"value": 2000, "expiry": "2029-04-15T00:00:00.000+03:00"},
-            }
-        }
 
 
 def get_wallet(msisdn: str) -> Wallet:

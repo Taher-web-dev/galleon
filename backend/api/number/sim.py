@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic.main import BaseModel
 
 from api.number import cms
@@ -6,75 +7,39 @@ from .zend import zend_sim
 
 
 class Nba(BaseModel):
-    href: str
-    message_en: str
-    message_ar: str
-    message_kd: str
-    href_text_en: str
-    href_text_ar: str
-    href_text_kd: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "href": "https://apps.iq.zain.com/zain-fi",
-                "message_en": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                "message_ar": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                "message_kd": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                "href_text_en": "View app",
-                "href_text_ar": "View app",
-                "href_text_kd": "View app",
-            }
-        }
+    href: str = Field(..., example="https://apps.iq.zain.com/zain-fi")
+    message_en: str = Field(
+        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
+    )
+    message_ar: str = Field(
+        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
+    )
+    message_kd: str = Field(
+        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
+    )
+    href_text_en: str = Field(..., example="View app")
+    href_text_ar: str = Field(..., example="View app")
+    href_text_kd: str = Field(..., example="View app")
 
 
 class Sim(BaseModel):
     # wrapper around backend response, mainly for debug
-    primary_offering_id: int
-    cbs_status_code: int
-    crm_status_code: str
-    crm_status_details: str
-    activation_date: str
-    expiry_date: str
-    customer_type: str
-    subscriber_type: int
+    primary_offering_id: int = Field(..., example=2122764)
+    cbs_status_code: int = Field(..., example=1)
+    crm_status_code: str = Field(..., example="B01")
+    crm_status_details: str = Field(..., example="Normal")
+    activation_date: str = Field(..., example="2022-01-30 16:00:25+03:00")
+    expiry_date: str = Field(..., example="2022-05-19 00:00:00+03:00")
+    customer_type: str = Field(..., example="Individual")
+    subscriber_type: int = Field(..., example=0)
 
     # our injected info
-    unified_sim_status: str
-    is_4g_compatible: bool
+    unified_sim_status: str = Field(..., example="apNORMALp")
+    is_4g_compatible: bool = Field(..., example=True)
     nba: Nba
 
     # TODO discuss - what does this do & should we include user name here?
     associated_with_user: bool = False
-
-    class Config:
-        schema_extra = {
-            "example": {
-                # backend wrapped response
-                "primary_offering_id": 2122764,
-                "cbs_status_code": 1,
-                "crm_status_code": "B01",
-                "crm_status_details": "Normal",
-                "activation_date": "2022-01-30 16:00:25+03:00",
-                "expiry_date": "2022-05-19 00:00:00+03:00",
-                "customer_type": "Individual",
-                "subscriber_type": 0,
-                # injected info
-                "unified_sim_status": "NORMAL",
-                "is_4g_compatible": True,
-                "nba": {
-                    "href": "https://apps.iq.zain.com/zain-fi",
-                    "message_en": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                    "message_ar": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                    "message_kd": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
-                    "href_text_en": "View app",
-                    "href_text_ar": "View app",
-                    "href_text_kd": "View app",
-                },
-                # user info
-                "associated_with_user": False,
-            }
-        }
 
 
 def get_sim_details(msisdn: str) -> Sim:

@@ -1,6 +1,5 @@
 """ FastApi Main module """
 
-import sys
 import time
 import traceback
 import logging
@@ -162,7 +161,9 @@ async def middle(request: Request, call_next):
                 "request": {
                     "headers": dict(request.headers.items()),
                     "query_params": dict(request.query_params.items()),
-                    "body": request.state.request_body,
+                    "body": request.state.request_body
+                    if hasattr(request.state, "request_body")
+                    else {},
                 },
                 "http_status": response.status_code,
             }
