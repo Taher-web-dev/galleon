@@ -148,6 +148,12 @@ def test_subscriptions():
     # print(response.json())
 
 
+def test_sim_status():
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get(f"/api/number/status?msisdn={msisdn}", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
+
+
 def test_charge_voucher():
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -171,12 +177,6 @@ def test_redeem_registration_gift():
         "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
     # print(response.json())
-    assert response.status_code == status.HTTP_200_OK
-
-
-def test_sim_status():
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.get(f"/api/number/status?msisdn={msisdn}", headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
 
