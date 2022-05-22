@@ -54,7 +54,5 @@ class UserProfileResponse(ApiResponse):
 
 class ValidationErrorResponse(ApiResponse):
     status: Status = Status.failed
-    error = Error(
-        type="validation", code="422", message="Body request data is not valid!"
-    )
+    error = Error(type="validation", code=422, message="Request body is not valid!")
     data: None = Field(None, example=null)

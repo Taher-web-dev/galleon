@@ -27,7 +27,7 @@ create_user: Dict[int | str, Dict[str, Any]] = {
 login: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_200_OK: {
         "model": LoginResponse,
-        "description": "Successfull login",
+        "description": "Successful login",
     },
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidCredentialsErrorResponse,
