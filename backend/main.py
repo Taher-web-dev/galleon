@@ -49,6 +49,16 @@ async def app_startup():
     logger.info("Starting")
     Base.metadata.create_all(bind=engine)
 
+    # Until we handle validation errors properly
+    openapi_schema = app.openapi()
+    paths = openapi_schema["paths"]
+    for path in paths:
+        for method in paths[path]:
+            responses = paths[path][method]["responses"]
+            if responses.get("422"):
+                responses.pop("422")
+    app.openapi_schema = openapi_schema
+
 
 @app.on_event("shutdown")
 async def app_shutdown():
