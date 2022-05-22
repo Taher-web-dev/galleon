@@ -35,3 +35,10 @@ class ApiResponse(BaseModel):
 
     class Config:
         use_enum_values = True
+
+        @staticmethod
+        def schema_extra(schema, model) -> None:
+            if schema.get("properties")["status"]["default"] == "success":
+                schema.get("properties").pop("error")
+            elif schema.get("properties")["status"]["default"] == "failed":
+                schema.get("properties").pop("data")
