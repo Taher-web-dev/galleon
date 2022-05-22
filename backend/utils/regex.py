@@ -1,4 +1,4 @@
-#URL = r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$"  # URL format
+# URL = r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$"  # URL format
 TITLE = r"^(\w{0,25}\s?\w{0,25}){1,3}$"  # String consists of only letters, digits, and spaces
 DESC = (
     r"^(\w*\s?\w*){1,50}$"  # Long string consists of only letters, digits, and spaces

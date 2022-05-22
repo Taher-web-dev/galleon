@@ -20,8 +20,8 @@ create_user: Dict[int | str, Dict[str, Any]] = {
     },
     status.HTTP_422_UNPROCESSABLE_ENTITY: {
         "model": ValidationErrorResponse,
-        "description": "Validation Error"
-    }
+        "description": "Validation Error",
+    },
 }
 
 login: Dict[int | str, Dict[str, Any]] = {

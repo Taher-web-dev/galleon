@@ -70,6 +70,7 @@ async def capture_body(request: Request):
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
+
 @app.get("/", include_in_schema=False, dependencies=[Depends(capture_body)])
 async def root():
     """Micro-service card identifier"""
@@ -78,7 +79,7 @@ async def root():
         "type": "microservice",
         "decription": "Galleon Middleware for Self-service",
         "status": "Up and running",
-        "date" : datetime.now()
+        "date": datetime.now(),
     }
 
 
