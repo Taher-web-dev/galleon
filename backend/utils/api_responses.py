@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Any
 from enum import Enum
 
@@ -25,6 +25,6 @@ class ApiException(Exception):
 
 
 class ApiResponse(BaseModel):
-    status: Status = Status.success
+    status: Status = Field(Status.success, example="success")
     error: Error | None = None
     data: dict[str, Any] | BaseModel | None = None

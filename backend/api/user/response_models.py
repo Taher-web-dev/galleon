@@ -45,7 +45,6 @@ class UserProfile(BaseModel):
 
 class UserProfileResponse(ApiResponse):
     data: UserProfile
-    status: Status = Field(Status.success, example="success")
 
 
 class ValidationErrorResponse(ApiResponse):
