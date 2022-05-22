@@ -26,6 +26,7 @@ router = APIRouter()
     "/create",
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
+    response_model_exclude_unset=True,
     responses=add_res.create_user,
 )
 async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
@@ -61,12 +62,13 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     )
 
 
-@router.get("/profile", response_model=ApiResponse, response_model_exclude_none=True)
+@router.get(
+    "/profile", response_model=UserProfileResponse, response_model_exclude_none=True
+)
 async def get_user_profile(msisdn=Depends(JWTBearer())) -> ApiResponse:
     """Get user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    return ApiResponse(
-        status=Status.success,
+    return UserProfileResponse(
         data=UserProfile(
             id=user.id,
             msisdn=msisdn,
