@@ -1,10 +1,9 @@
 fastapi
 json_logging
-pydantic
+pydantic[email,dotenv]
 uvicorn
 jinja2
 six
-pydantic[dotenv]
 PyJWT
 requests-mock
 SQLAlchemy
