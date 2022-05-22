@@ -3,9 +3,9 @@
 from fastapi import APIRouter, status
 
 from api.otp.request_models import (
-    OTPConfirmationRequest,
-    OTPSendRequest,
-    OTPVerifyRequest,
+    ConfirmationOTPRequest,
+    SendOTPRequest,
+    VerifyOTPRequest,
 )
 from api.base_response_models import StatusResponse
 from api.otp.response_models import OTPConfirmation, OTPConfirmationResponse
@@ -26,7 +26,7 @@ router = APIRouter()
     response_model_exclude_none=True,
     responses=request_otp,
 )
-async def send_otp(user_request: OTPSendRequest) -> StatusResponse:
+async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -51,7 +51,7 @@ async def send_otp(user_request: OTPSendRequest) -> StatusResponse:
     response_model_exclude_none=True,
     responses=confirm_otp,
 )
-async def confirm(user_request: OTPConfirmationRequest) -> OTPConfirmationResponse:
+async def confirm(user_request: ConfirmationOTPRequest) -> OTPConfirmationResponse:
     """Confirm Otp"""
     if otp := db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first():
         otp.tries += 1
@@ -73,7 +73,7 @@ async def confirm(user_request: OTPConfirmationRequest) -> OTPConfirmationRespon
     response_model_exclude_none=True,
     responses=verify_otp,
 )
-async def api_verify(user_request: OTPVerifyRequest) -> StatusResponse:
+async def api_verify(user_request: VerifyOTPRequest) -> StatusResponse:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
