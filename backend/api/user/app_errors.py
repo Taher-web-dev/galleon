@@ -12,7 +12,7 @@ INVALID_OTP = Error(
 
 INVALID_CREDENTIALS = Error(
     type="auth",
-    code=203,
+    code=100,
     message="Invalid credentials",
 )
 
