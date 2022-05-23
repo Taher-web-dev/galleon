@@ -12,12 +12,18 @@ INVALID_OTP = Error(
 
 INVALID_CREDENTIALS = Error(
     type="auth",
-    code=203,
+    code=100,
     message="Invalid credentials",
 )
 
 INVALID_TOKEN = Error(
     type="auth",
-    code=204,
+    code=103,
     message="Invalid token",
+)
+
+INVALID_REFRESH_TOKEN = Error(
+    type="auth",
+    code=130,
+    message="Invalid refresh token",
 )

@@ -160,7 +160,7 @@ async def logout(msisdn=Depends(JWTBearer())) -> StatusResponse:
     "/token",
     response_model=TokensResponse,
     response_model_exclude_none=True,
-    responses=add_res.token,
+    responses=add_res.refresh_token,
 )
 async def gen_access_token(
     refresh_token: Optional[str] = Header(None),
@@ -169,7 +169,7 @@ async def gen_access_token(
 
     if refresh_token is not None:
         data = decode_jwt(refresh_token)
-        if "msisdn" in data:
+        if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == "msisdn").first()
             if user is not None:
@@ -178,7 +178,7 @@ async def gen_access_token(
                     data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
 
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_TOKEN)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_REFRESH_TOKEN)
 
 
 @router.post(
