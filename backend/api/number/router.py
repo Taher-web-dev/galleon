@@ -21,7 +21,7 @@ from .response_models import (
     WalletResponse,
     RegistrationGiftResponse,
 )
-from api import base_response_models
+from api import shared_responses
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ router = APIRouter()
 @router.get(
     "/status",
     response_model=RetrieveStatusResponse,
-    responses=base_response_models.not_authenticated,
+    responses=shared_responses.not_authenticated,
 )
 async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -43,7 +43,7 @@ async def retrieve_status(
 @router.get(
     "/subscriptions",
     response_model=SubscriptionsResponse,
-    responses=base_response_models.not_authenticated,
+    responses=shared_responses.not_authenticated,
 )
 async def retrieve_subscriptions(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -57,7 +57,7 @@ async def retrieve_subscriptions(
 @router.get(
     "/wallet",
     response_model=WalletResponse,
-    responses=base_response_models.not_authenticated,
+    responses=shared_responses.not_authenticated,
 )
 async def retrieve_wallet(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -71,7 +71,7 @@ async def retrieve_wallet(
 @router.post(
     "/redeem-registration-gift",
     response_model=RegistrationGiftResponse,
-    responses=base_response_models.not_authenticated,
+    responses=shared_responses.not_authenticated,
 )
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
@@ -87,7 +87,7 @@ async def redeem_registration_gift(
 @router.post(
     "/charge-voucher",
     response_model=ChargeVoucherResponse,
-    responses=base_response_models.not_authenticated,
+    responses=shared_responses.not_authenticated,
 )
 async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),

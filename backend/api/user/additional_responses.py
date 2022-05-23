@@ -8,7 +8,7 @@ from api.user.response_models import (
     InvalidTokenErrorResponse,
     ValidationErrorResponse,
 )
-from api import base_response_models
+from api import shared_responses
 
 create_user: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_403_FORBIDDEN: {
@@ -26,12 +26,10 @@ create_user: Dict[int | str, Dict[str, Any]] = {
 }
 
 get_user_profile: Dict[int | str, Dict[str, Any]] = {
-    **base_response_models.not_authenticated
+    **shared_responses.not_authenticated
 }
 
-update_profile: Dict[int | str, Dict[str, Any]] = {
-    **base_response_models.not_authenticated
-}
+update_profile: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
 
 login: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
@@ -40,7 +38,7 @@ login: Dict[int | str, Dict[str, Any]] = {
     },
 }
 
-logout: Dict[int | str, Dict[str, Any]] = {**base_response_models.not_authenticated}
+logout: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
 
 token: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
@@ -56,4 +54,4 @@ refresh_token: Dict[int | str, Dict[str, Any]] = {
     },
 }
 
-delete: Dict[int | str, Dict[str, Any]] = {**base_response_models.not_authenticated}
+delete: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
