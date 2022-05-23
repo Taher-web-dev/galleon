@@ -119,7 +119,7 @@ async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     password: str = Body(..., regex=rgx.PASSWORD),
 ) -> LoginResponse:
-    """Login and generate refresh token"""
+    """Login and generate refresh token""" 
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
@@ -138,12 +138,20 @@ async def login(
     response_model_exclude_none=True,
     responses=add_res.login,
 )
+
 async def verify(
    msisdn=Depends(JWTBearer()),
     password: str = Body(..., regex=rgx.PASSWORD,embed= True),
 ) -> ApiResponse:
     """Verify user password"""
+
+    print ("the password is " + password + " --user id:" +msisdn  )  
     user = db.query(User).filter(User.msisdn == msisdn).first()
+    if user : 
+        print("user avaiable")
+    else : 
+        print("user not avaiable")
+
     if user and verify_password(password, user.password):
       
         return ApiResponse(
@@ -152,6 +160,8 @@ async def verify(
         )
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+
+
 
 
 @router.post(
