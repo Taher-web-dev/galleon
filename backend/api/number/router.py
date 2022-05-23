@@ -18,6 +18,7 @@ from .response_models import (
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
+    RegistrationGiftResponse,
 )
 from api import base_response_models
 
@@ -67,16 +68,19 @@ async def retrieve_wallet(
 
 
 @router.post(
-    "/redeem-registration-gift", responses=base_response_models.not_authenticated
+    "/redeem-registration-gift",
+    response_model=RegistrationGiftResponse,
+    responses=base_response_models.not_authenticated,
 )
 async def api_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
-):
+) -> RegistrationGiftResponse:
     assert msisdn == session_msisdn
-    return change_supplementary_offering(
+    resp = change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
+    return RegistrationGiftResponse(data=resp)
 
 
 @router.post("/charge-voucher", responses=base_response_models.not_authenticated)
