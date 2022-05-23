@@ -5,7 +5,7 @@ from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from utils.settings import settings
-from utils.api_responses import ApiException, Error
+from utils.api_responses import ApiException
 import api.shared_app_errors as shared_err
 
 
@@ -29,8 +29,7 @@ class JWTBearer(HTTPBearer):
 
         except:
             raise ApiException(
-                status.HTTP_401_UNAUTHORIZED,
-                Error(type="jwtauth", code=10, message="Not authenticated"),
+                status.HTTP_401_UNAUTHORIZED, shared_err.NOT_AUTHENTICATED
             )
 
 
