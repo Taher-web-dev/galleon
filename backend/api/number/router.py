@@ -15,6 +15,7 @@ from utils.settings import settings
 import utils.regex as rgx
 from utils.api_responses import ApiResponse, Status
 from .response_models import (
+    ChargeVoucherResponse,
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
@@ -72,7 +73,7 @@ async def retrieve_wallet(
     response_model=RegistrationGiftResponse,
     responses=base_response_models.not_authenticated,
 )
-async def api_registration_gift(
+async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ) -> RegistrationGiftResponse:
@@ -83,11 +84,15 @@ async def api_registration_gift(
     return RegistrationGiftResponse(data=resp)
 
 
-@router.post("/charge-voucher", responses=base_response_models.not_authenticated)
-async def api_charge_voucher(
+@router.post(
+    "/charge-voucher",
+    response_model=ChargeVoucherResponse,
+    responses=base_response_models.not_authenticated,
+)
+async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
-):
+) -> ChargeVoucherResponse:
     assert msisdn == session_msisdn
-    return ApiResponse(status=Status.success, data=recharge_voucher(msisdn, pincode))
+    return ChargeVoucherResponse(data=recharge_voucher(msisdn, pincode))

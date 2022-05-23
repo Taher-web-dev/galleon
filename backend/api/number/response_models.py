@@ -18,3 +18,7 @@ class WalletResponse(ApiResponse):
 
 class RegistrationGiftResponse(ApiResponse):
     data: dict  # TODO: define model
+
+
+class ChargeVoucherResponse(ApiResponse):
+    data: dict  # TODO: define model
