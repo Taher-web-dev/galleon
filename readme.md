@@ -123,7 +123,7 @@ exit
 #### Git pre-commit hook
 
 ```
-cp pre-commit > .git/hooks/pre-commit
+cp pre-commit .git/hooks/pre-commit
 ```
 
 Note: Postgresql password can be stored in `~/.pgpass` like this:
@@ -132,6 +132,3 @@ Note: Postgresql password can be stored in `~/.pgpass` like this:
 #hostname:port:database:username:password
 127.0.0.1:5432:galleon:galleon:MYPASS
 ```
-
-
-
