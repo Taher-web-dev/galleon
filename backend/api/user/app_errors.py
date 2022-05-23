@@ -21,3 +21,9 @@ INVALID_TOKEN = Error(
     code=103,
     message="Invalid token",
 )
+
+INVALID_REFRESH_TOKEN = Error(
+    type="auth",
+    code=130,
+    message="Invalid refresh token",
+)

@@ -1,6 +1,7 @@
 from fastapi import status
 from typing import Dict, Any
 from api.user.response_models import (
+    InvalidRefreshTokenErrorResponse,
     UserExistsErrorResponse,
     InvalidOtpErrorResponse,
     InvalidCredentialsErrorResponse,
@@ -44,6 +45,13 @@ logout: Dict[int | str, Dict[str, Any]] = {**base_response_models.not_authentica
 token: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidTokenErrorResponse,
+        "description": "Invalid token.",
+    },
+}
+
+refresh_token: Dict[int | str, Dict[str, Any]] = {
+    status.HTTP_401_UNAUTHORIZED: {
+        "model": InvalidRefreshTokenErrorResponse,
         "description": "Invalid token.",
     },
 }

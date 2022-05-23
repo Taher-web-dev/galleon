@@ -28,6 +28,11 @@ class InvalidTokenErrorResponse(ApiResponse):
     error: Error = err.INVALID_TOKEN
 
 
+class InvalidRefreshTokenErrorResponse(ApiResponse):
+    status: Status = Status.failed
+    error: Error = err.INVALID_REFRESH_TOKEN
+
+
 class InvalidCredentialsErrorResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = err.INVALID_CREDENTIALS
