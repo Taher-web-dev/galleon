@@ -1,6 +1,6 @@
+import time
 from fastapi.testclient import TestClient
 from fastapi import status
-from pytest import param
 from utils.password_hashing import verify_password
 from main import app
 from utils.db import db, Otp, User
@@ -92,12 +92,17 @@ def test_login_user():
     # print(token)
     # print(response.json())
 
-def test_verify_password():
-    headers = {"Authorization": f"Bearer {access_token}",  "Content-Type": "application/json",}
-    response = client.post("/api/user/verify", headers=headers, json={ "password": password
-    })
-    print(access_token)
+
+def test_validate_user():
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.post(
+        "/api/user/validate", headers=headers, json={"password": password}
+    )
     assert response.status_code == status.HTTP_200_OK
+
 
 def test_get_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -217,10 +222,10 @@ def test_verify_otp():
     )
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
-    
+
+
 if __name__ == "__main__":
     test_create_user()
-    """
     test_login_user()
     test_get_profile()
     test_update_profile()
@@ -233,5 +238,3 @@ if __name__ == "__main__":
     test_verify_otp()
     test_redeem_registration_gift()
     test_delete()
-
-    """

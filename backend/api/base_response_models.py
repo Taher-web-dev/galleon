@@ -2,7 +2,7 @@ from starlette import status
 from typing import Any, Dict
 from utils.api_responses import Error, Status, ApiResponse
 
-
+# TODO rename to SuccessResponse
 class StatusResponse(ApiResponse):
     class Config:
         schema_extra = {

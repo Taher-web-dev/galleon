@@ -124,8 +124,8 @@ async def update_profile(
     responses=add_res.login,
 )
 async def login(
-    msisdn: str = Body(..., regex=rgx.MSISDN),
-    password: str = Body(..., regex=rgx.PASSWORD),
+    msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
+    password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
 ) -> TokensResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -142,22 +142,20 @@ async def login(
 
 
 @router.post(
-    "/verify",
-    response_model=ApiResponse,
+    "/validate",
+    response_model=StatusResponse,
     response_model_exclude_none=True,
     responses=add_res.login,
 )
-async def verify(
+async def validate(
     msisdn=Depends(JWTBearer()),
-    password: str = Body(..., regex=rgx.PASSWORD, embed=True),
-) -> ApiResponse:
-    """Verify user password"""
+    password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
+) -> StatusResponse:
+    """Validate user password for logged-in users"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
-        return ApiResponse(
-            status=Status.success,
-        )
-        
+        return StatusResponse()
+
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
