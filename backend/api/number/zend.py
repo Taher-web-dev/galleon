@@ -22,6 +22,11 @@ path = f"{os.path.dirname(__file__)}/mocks/"
 def change_supplementary_offering(
     msisdn: str, offer_id: str, add_offering: bool
 ) -> dict:
+    request_data = {
+        "msisdn": msisdn,
+        "offer_id": offer_id,
+        "add_offering": add_offering,
+    }
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
             m.post(
@@ -31,37 +36,26 @@ def change_supplementary_offering(
                 ).read_text(),
             )
             response = requests.post(
-                zend_change_supplementary_offering_api,
-                json={
-                    "msisdn": msisdn,
-                    "offer_id": offer_id,
-                    "add_offering": add_offering,
-                },
+                zend_change_supplementary_offering_api, json=request_data
             )
             return response.json()
 
-    response = requests.post(
-        zend_change_supplementary_offering_api,
-        json={"msisdn": msisdn, "offer_id": offer_id, "add_offering": add_offering},
-    )
+    response = requests.post(zend_change_supplementary_offering_api, json=request_data)
     return response.json()
 
 
 def recharge_voucher(msisdn: str, pin: str) -> dict:
+    request_data = {"msisdn": msisdn, "pin": pin}
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
             m.post(
                 zend_recharge_voucher_api,
                 text=Path(f"{path}./zend_recharge_voucher.json").read_text(),
             )
-            response = requests.post(
-                zend_recharge_voucher_api, json={"msisdn": msisdn, "pin": pin}
-            )
+            response = requests.post(zend_recharge_voucher_api, json=request_data)
             return response.json()
 
-    response = requests.post(
-        zend_recharge_voucher_api, json={"msisdn": msisdn, "pin": pin}
-    )
+    response = requests.post(zend_recharge_voucher_api, json=request_data)
     return response.json()
 
 

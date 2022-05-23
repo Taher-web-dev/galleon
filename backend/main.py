@@ -1,6 +1,5 @@
 """ FastApi Main module """
 
-import sys
 import time
 import traceback
 import logging
@@ -49,6 +48,8 @@ json_logging.init_request_instrument(app)
 async def app_startup():
     logger.info("Starting")
     Base.metadata.create_all(bind=engine)
+
+    # Until we handle validation errors properly
     openapi_schema = app.openapi()
     paths = openapi_schema["paths"]
     for path in paths:
@@ -77,6 +78,7 @@ async def capture_body(request: Request):
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
+
 @app.get("/", include_in_schema=False, dependencies=[Depends(capture_body)])
 async def root():
     """Micro-service card identifier"""
@@ -85,7 +87,7 @@ async def root():
         "type": "microservice",
         "decription": "Galleon Middleware for Self-service",
         "status": "Up and running",
-        "date" : datetime.now()
+        "date": datetime.now(),
     }
 
 
@@ -169,7 +171,9 @@ async def middle(request: Request, call_next):
                 "request": {
                     "headers": dict(request.headers.items()),
                     "query_params": dict(request.query_params.items()),
-                    "body": request.state.request_body,
+                    "body": request.state.request_body
+                    if hasattr(request.state, "request_body")
+                    else {},
                 },
                 "http_status": response.status_code,
             }
@@ -181,7 +185,6 @@ async def middle(request: Request, call_next):
 app.include_router(user, prefix="/api/user", dependencies=[Depends(capture_body)])
 app.include_router(otp, prefix="/api/otp", dependencies=[Depends(capture_body)])
 app.include_router(number, prefix="/api/number", dependencies=[Depends(capture_body)])
-
 
 if __name__ == "__main__":
     # uvicorn.run("main:app", reload=True)

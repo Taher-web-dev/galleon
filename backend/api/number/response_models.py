@@ -4,7 +4,7 @@ from .sim import Sim
 from .subscriptions import Subscription
 
 
-class StatusResponse(ApiResponse):
+class RetrieveStatusResponse(ApiResponse):
     data: Sim
 
 
@@ -14,3 +14,11 @@ class SubscriptionsResponse(ApiResponse):
 
 class WalletResponse(ApiResponse):
     data: Wallet
+
+
+class RegistrationGiftResponse(ApiResponse):
+    data: dict  # TODO: define model
+
+
+class ChargeVoucherResponse(ApiResponse):
+    data: dict  # TODO: define model

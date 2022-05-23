@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 from enum import Enum
 
 
@@ -27,7 +27,7 @@ class ApiException(Exception):
 class ApiResponse(BaseModel):
     status: Status = Status.success
     error: Optional[Error] = None
-    data: Optional[dict[str, Any]] | Optional[BaseModel] = None
+    data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
@@ -35,3 +35,10 @@ class ApiResponse(BaseModel):
 
     class Config:
         use_enum_values = True
+
+        @staticmethod
+        def schema_extra(schema, model) -> None:
+            if schema.get("properties")["status"]["default"] == "success":
+                schema.get("properties").pop("error")
+            elif schema.get("properties")["status"]["default"] == "failed":
+                schema.get("properties").pop("data")

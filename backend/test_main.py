@@ -1,4 +1,3 @@
-import time
 from fastapi.testclient import TestClient
 from fastapi import status
 from pytest import param
@@ -123,18 +122,6 @@ def test_update_profile():
     # print(response.json())
 
 
-def test_redeem_registration_gift():
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
-    response = client.post(
-        "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
-    )
-    # print(response.json())
-    assert response.status_code == status.HTTP_200_OK
-
-
 def test_logout():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.post("/api/user/logout", headers=headers)
@@ -156,9 +143,7 @@ def test_wallet():
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-    response = client.get(
-        "/api/number/wallet", json={"msisdn": msisdn}, headers=headers
-    )
+    response = client.get(f"/api/number/wallet?msisdn={msisdn}", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
@@ -168,11 +153,15 @@ def test_subscriptions():
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-    response = client.get(
-        "/api/number/subscriptions", json={"msisdn": msisdn}, headers=headers
-    )
+    response = client.get(f"/api/number/subscriptions?msisdn={msisdn}", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
+
+
+def test_sim_status():
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get(f"/api/number/status?msisdn={msisdn}", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
 
 
 def test_charge_voucher():
@@ -189,11 +178,15 @@ def test_charge_voucher():
     # print(response.json())
 
 
-def test_sim_status():
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.get(
-        "/api/number/status", headers=headers, json={"msisdn": msisdn}
+def test_redeem_registration_gift():
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.post(
+        "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
+    # print(response.json())
     assert response.status_code == status.HTTP_200_OK
 
 
