@@ -152,20 +152,12 @@ async def verify(
     password: str = Body(..., regex=rgx.PASSWORD, embed=True),
 ) -> ApiResponse:
     """Verify user password"""
-
-    print("the password is " + password + " --user id:" + msisdn)
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    if user:
-        print("user avaiable")
-    else:
-        print("user not avaiable")
-
     if user and verify_password(password, user.password):
-
         return ApiResponse(
             status=Status.success,
         )
-
+        
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
