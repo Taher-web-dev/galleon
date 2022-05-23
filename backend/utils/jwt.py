@@ -6,19 +6,27 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from utils.settings import settings
 from utils.api_responses import ApiException, Error
+import api.shared_app_errors as shared_err
 
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
-        super(JWTBearer, self).__init__(auto_error=auto_error)
+        super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
         try:
-            credentials: Optional[HTTPAuthorizationCredentials] = await super(
-                JWTBearer, self
-            ).__call__(request)
+            credentials: Optional[
+                HTTPAuthorizationCredentials
+            ] = await super().__call__(request)
             if credentials and credentials.scheme == "Bearer":
-                return decode_jwt(credentials.credentials)["msisdn"]
+                decoded_data = decode_jwt(credentials.credentials)
+                if not decoded_data:
+                    raise ApiException(
+                        status.HTTP_401_UNAUTHORIZED, shared_err.EXPIRED_TOKEN
+                    )
+                # TODO attach logged-in user to the request object
+                return decoded_data.get("msisdn")
+
         except:
             raise ApiException(
                 status.HTTP_401_UNAUTHORIZED,
@@ -32,13 +40,10 @@ def sign_jwt(data: dict, expires: int = 600) -> str:
 
 
 def decode_jwt(token: str) -> dict:
-    try:
-        decoded_token = jwt.decode(
-            token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
-        )
-        return decoded_token["data"] if decoded_token["expires"] >= time() else None
-    except Exception:
-        return {}
+    decoded_token = jwt.decode(
+        token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
+    )
+    return decoded_token["data"] if decoded_token["expires"] >= time() else None
 
 
 if __name__ == "__main__":
