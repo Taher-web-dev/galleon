@@ -1,6 +1,7 @@
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
+from pytest import param
 from utils.password_hashing import verify_password
 from main import app
 from utils.db import db, Otp, User
@@ -106,7 +107,7 @@ def test_get_profile():
 def test_update_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.patch(
-        "/api/user/profilex", json={"password": password2}, headers=headers
+        "/api/user/profile", json={"password": password2}, headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -219,15 +220,17 @@ def test_verify_otp():
     # print(response.json())
 
 def test_verify_password():
+
+
     headers = {"Authorization": f"Bearer {access_token}",  "Content-Type": "application/json",}
-    
     response = client.post("/api/user/verify", headers=headers, json={ "password": password2
     })
+    print(access_token)
     assert response.status_code == status.HTTP_200_OK
-
     
-
-
+    
+    
+    
 if __name__ == "__main__":
     test_create_user()
     """
