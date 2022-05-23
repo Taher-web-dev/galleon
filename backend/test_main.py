@@ -4,6 +4,7 @@ from fastapi import status
 from utils.password_hashing import verify_password
 from main import app
 from utils.db import db, Otp, User
+from utils.jwt import sign_jwt, decode_jwt
 
 client = TestClient(app)
 
@@ -104,6 +105,22 @@ def test_validate_user():
     assert response.status_code == status.HTTP_200_OK
 
 
+def test_expired_token():
+    expired_token = sign_jwt({"msisdn": msisdn}, 1)
+    time.sleep(1.1)
+
+    headers = {
+        "Authorization": f"Bearer {expired_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.post(
+        "/api/user/validate", headers=headers, json={"password": password}
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    print(response.json())
+
+
 def test_get_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     # print({"at": access_token, "rt": refresh_token})
@@ -111,7 +128,6 @@ def test_get_profile():
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
     assert response.json()["data"]["id"] == user.id
-    # assert response.json()["id"] == user.id
 
 
 def test_update_profile():
@@ -227,6 +243,8 @@ def test_verify_otp():
 if __name__ == "__main__":
     test_create_user()
     test_login_user()
+    test_validate_user()
+    test_expired_token()
     test_get_profile()
     test_update_profile()
     test_sim_status()
