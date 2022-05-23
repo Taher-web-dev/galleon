@@ -93,6 +93,14 @@ def test_login_user():
     # print(token)
     # print(response.json())
 
+def test_verify_password():
+
+
+    headers = {"Authorization": f"Bearer {access_token}",  "Content-Type": "application/json",}
+    response = client.post("/api/user/verify", headers=headers, json={ "password": password
+    })
+    print(access_token)
+    assert response.status_code == status.HTTP_200_OK
 
 def test_get_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -107,11 +115,11 @@ def test_get_profile():
 def test_update_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.patch(
-        "/api/user/profile", json={"password": password2}, headers=headers
+        "/api/user/profile", json={"password": password}, headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    assert verify_password(password2, user.password)
+    assert verify_password(password, user.password)
     # print(response.json())
 
 
@@ -219,14 +227,7 @@ def test_verify_otp():
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
-def test_verify_password():
 
-
-    headers = {"Authorization": f"Bearer {access_token}",  "Content-Type": "application/json",}
-    response = client.post("/api/user/verify", headers=headers, json={ "password": password2
-    })
-    print(access_token)
-    assert response.status_code == status.HTTP_200_OK
     
     
     
