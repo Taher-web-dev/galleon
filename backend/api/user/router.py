@@ -95,14 +95,12 @@ async def update_profile(
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
 
-    if user_profile.name:
-        user.name = user_profile.name
-    if user_profile.password:
-        user.password = hash_password(user_profile.password)
-    if user_profile.email:
-        user.email = user_profile.email
-    if user_profile.profile_pic_url:
-        user.profile_pic_url = user_profile.profile_pic_url
+    for key, value in user_profile.dict(exclude_unset=True, exclude_none=True).items():
+        if key == "password":
+            user.password = hash_password(value)
+        else:
+            setattr(user, key, value)
+
     db.commit()
     db.refresh(user)
 
