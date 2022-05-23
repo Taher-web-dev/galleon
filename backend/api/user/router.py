@@ -8,7 +8,7 @@ from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
-from utils.api_responses import Status, ApiException
+from utils.api_responses import ApiResponse, Status, ApiException
 from api.user.request_models import UserCreateRequest, UserUpdateRequest
 from api.user.response_models import (
     Tokens,
@@ -124,8 +124,8 @@ async def update_profile(
     responses=add_res.login,
 )
 async def login(
-    msisdn: str = Body(..., regex=rgx.MSISDN),
-    password: str = Body(..., regex=rgx.PASSWORD),
+    msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
+    password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
 ) -> TokensResponse:
     """Login and generate refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -137,6 +137,24 @@ async def login(
         return TokensResponse(
             data=Tokens(refresh_token=refresh_token, access_token=access_token),
         )
+
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+
+
+@router.post(
+    "/validate",
+    response_model=StatusResponse,
+    response_model_exclude_none=True,
+    responses=add_res.login,
+)
+async def validate(
+    msisdn=Depends(JWTBearer()),
+    password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
+) -> StatusResponse:
+    """Validate user password for logged-in users"""
+    user = db.query(User).filter(User.msisdn == msisdn).first()
+    if user and verify_password(password, user.password):
+        return StatusResponse()
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
