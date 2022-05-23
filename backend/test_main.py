@@ -4,7 +4,7 @@ from fastapi import status
 from utils.password_hashing import verify_password
 from main import app
 from utils.db import db, Otp, User
-from utils.jwt import sign_jwt, decode_jwt
+from utils.jwt import sign_jwt
 
 client = TestClient(app)
 
@@ -46,7 +46,7 @@ def test_create_user():
     response = client.post(endpoint, json=request_data)
     # print(response.json())
     assert response.status_code == 409
-    print(response.json())
+    # print(response.json())
     assert response.json()["status"] == "failed"
     assert response.json()["error"]["code"] == 202
 
@@ -68,7 +68,7 @@ def test_create_user():
 
     # create user again
     response = client.post(endpoint, json=request_data)
-    print(response.json())
+    # print(response.json())
     assert response.status_code == 403
     assert response.json()["status"] == "failed"
     assert response.json()["error"]["code"] == 201
@@ -84,7 +84,7 @@ def test_login_user():
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    print(data)
+    # print(data)
     global access_token
     global refresh_token
     # implicit assertion of access_token and refresh_token
@@ -118,7 +118,7 @@ def test_expired_token():
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    print(response.json())
+    # print(response.json())
 
 
 def test_get_profile():
