@@ -18,6 +18,6 @@ INVALID_CREDENTIALS = Error(
 
 INVALID_TOKEN = Error(
     type="auth",
-    code=204,
+    code=103,
     message="Invalid token",
 )
