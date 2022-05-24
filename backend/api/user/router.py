@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Body, Header, status, Depends
 from typing import Optional
-from backend.api.models.response import SuccessResponse
+from api.models.response import SuccessResponse
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password

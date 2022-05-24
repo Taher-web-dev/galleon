@@ -1,7 +1,7 @@
 from fastapi import status
 from typing import Any, Dict
-from backend.utils.api_responses import Error, Status, ApiResponse
-import backend.api.models.errors as api_errors
+from utils.api_responses import Error, Status, ApiResponse
+import api.models.errors as api_errors
 
 # ================================== Response Models
 class SuccessResponse(ApiResponse):

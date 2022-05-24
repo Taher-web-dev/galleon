@@ -7,7 +7,7 @@ from api.otp.request_models import (
     SendOTPRequest,
     VerifyOTPRequest,
 )
-from api.api_response import SuccessResponse
+from api.models.response import SuccessResponse
 from api.otp.response_models import OTPConfirmation, OTPConfirmationResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms

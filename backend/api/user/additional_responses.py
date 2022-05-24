@@ -8,7 +8,7 @@ from api.user.response_models import (
     InvalidTokenErrorResponse,
     ValidationErrorResponse,
 )
-from api import api_response
+from api.models import response as api_response
 
 create_user: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_403_FORBIDDEN: {
