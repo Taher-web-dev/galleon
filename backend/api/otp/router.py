@@ -12,9 +12,8 @@ from api.otp.response_models import OTPConfirmation, OTPConfirmationResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import ApiException, Status
+from utils.api_responses import ApiException
 from api.otp import additional_responses as add_res
-import utils.regex as rgx
 import api.otp.app_errors as err
 
 router = APIRouter()
@@ -42,7 +41,7 @@ async def send_otp(user_request: SendOTPRequest) -> SuccessResponse:
     db.refresh(otp)
     zend_send_sms(user_request.msisdn, f"Your otp code is {code}")
     slack_notify(user_request.msisdn, code)
-    return SuccessResponse(status=Status.success)
+    return SuccessResponse()
 
 
 @router.post(
@@ -77,5 +76,5 @@ async def verify_otp(user_request: VerifyOTPRequest) -> SuccessResponse:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
-        return SuccessResponse(status=Status.success)
+        return SuccessResponse()
     raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH)

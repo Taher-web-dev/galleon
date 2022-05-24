@@ -8,7 +8,7 @@ from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
-from utils.api_responses import Status, ApiException
+from utils.api_responses import ApiException
 from api.user.request_models import UserCreateRequest, UserUpdateRequest
 from api.user.response_models import (
     Tokens,
@@ -169,7 +169,7 @@ async def logout(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     if user and user.refresh_token:
         user.refresh_token = None
         db.commit()
-    return SuccessResponse(status=Status.success)
+    return SuccessResponse()
 
 
 @router.post(
@@ -209,4 +209,4 @@ async def delete(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     assert user
     db.delete(user)
     db.commit()
-    return SuccessResponse(status=Status.success)
+    return SuccessResponse()
