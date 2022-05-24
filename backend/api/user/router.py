@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter, Body, Header, status, Depends
 from typing import Optional
-from api.shared_responses import StatusResponse
+from api.shared_responses import SuccessResponse
 from utils.jwt import decode_jwt, sign_jwt
 from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
-from utils.api_responses import ApiResponse, Status, ApiException
+from utils.api_responses import Status, ApiException
 from api.user.request_models import UserCreateRequest, UserUpdateRequest
 from api.user.response_models import (
     Tokens,
@@ -141,35 +141,35 @@ async def login(
 
 @router.post(
     "/validate",
-    response_model=StatusResponse,
+    response_model=SuccessResponse,
     response_model_exclude_none=True,
     responses=add_res.login,
 )
 async def validate(
     msisdn=Depends(JWTBearer()),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
-) -> StatusResponse:
+) -> SuccessResponse:
     """Validate user password for logged-in users"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
-        return StatusResponse()
+        return SuccessResponse()
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.post(
     "/logout",
-    response_model=StatusResponse,
+    response_model=SuccessResponse,
     response_model_exclude_none=True,
     responses=add_res.logout,
 )
-async def logout(msisdn=Depends(JWTBearer())) -> StatusResponse:
+async def logout(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     """Logout (aka delete refresh token)"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and user.refresh_token:
         user.refresh_token = None
         db.commit()
-    return StatusResponse(status=Status.success)
+    return SuccessResponse(status=Status.success)
 
 
 @router.post(
@@ -199,14 +199,14 @@ async def gen_access_token(
 
 @router.post(
     "/delete",
-    response_model=StatusResponse,
+    response_model=SuccessResponse,
     response_model_exclude_none=True,
     responses=add_res.delete,
 )
-async def delete(msisdn=Depends(JWTBearer())) -> StatusResponse:
+async def delete(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     """Delete user"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
     db.delete(user)
     db.commit()
-    return StatusResponse(status=Status.success)
+    return SuccessResponse(status=Status.success)
