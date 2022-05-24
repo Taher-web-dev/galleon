@@ -182,9 +182,24 @@ async def middle(request: Request, call_next):
     return response
 
 
-app.include_router(user, prefix="/api/user", dependencies=[Depends(capture_body)])
-app.include_router(otp, prefix="/api/otp", dependencies=[Depends(capture_body)])
-app.include_router(number, prefix="/api/number", dependencies=[Depends(capture_body)])
+app.include_router(
+    user,
+    prefix="/api/user",
+    dependencies=[Depends(capture_body)],
+    tags=["user"],
+)
+app.include_router(
+    otp,
+    prefix="/api/otp",
+    dependencies=[Depends(capture_body)],
+    tags=["otp"],
+)
+app.include_router(
+    number,
+    prefix="/api/number",
+    dependencies=[Depends(capture_body)],
+    tags=["number"],
+)
 
 if __name__ == "__main__":
     # uvicorn.run("main:app", reload=True)
