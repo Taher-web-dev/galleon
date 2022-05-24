@@ -1,0 +1,13 @@
+from pydantic import BaseModel
+from enum import Enum
+
+
+class Status(str, Enum):
+    success = "success"
+    failed = "failed"
+
+
+class Error(BaseModel):
+    type: str
+    code: int
+    message: str

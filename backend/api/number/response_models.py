@@ -1,5 +1,5 @@
 from api.number.balance import Wallet
-from utils.api_responses import ApiResponse
+from api.models.response import ApiResponse
 from .sim import Sim
 from .subscriptions import Subscription
 

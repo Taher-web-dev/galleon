@@ -12,7 +12,7 @@ from api.otp.response_models import OTPConfirmation, OTPConfirmationResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import ApiException
+from api.models.response import ApiException
 from api.otp import additional_responses as add_res
 import api.otp.app_errors as err
 

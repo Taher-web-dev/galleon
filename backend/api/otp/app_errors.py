@@ -1,4 +1,4 @@
-from utils.api_responses import Error
+from api.models.data import Error
 
 INVALID_MSISDN = Error(
     type="otp",

@@ -5,7 +5,7 @@ from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from utils.settings import settings
-from utils.api_responses import ApiException
+from api.models.response import ApiException
 import api.models.errors as api_errors
 
 

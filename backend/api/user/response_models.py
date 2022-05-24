@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, HttpUrl, EmailStr
-from utils.api_responses import Status, ApiResponse, Error
+from api.models.data import Error, Status
+from api.models.response import ApiResponse
 import utils.regex as rgx
 import api.user.app_errors as err
 

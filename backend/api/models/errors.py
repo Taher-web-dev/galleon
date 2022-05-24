@@ -1,6 +1,6 @@
 """ Errors used in the API. """
 
-from utils.api_responses import Error
+from api.models.data import Error
 
 NOT_AUTHENTICATED = Error(type="auth", code=10, message="Not authenticated")
 

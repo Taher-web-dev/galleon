@@ -8,7 +8,7 @@ from utils.db import db, User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
-from utils.api_responses import ApiException
+from api.models.response import ApiException
 from api.user.request_models import UserCreateRequest, UserUpdateRequest
 from api.user.response_models import (
     Tokens,

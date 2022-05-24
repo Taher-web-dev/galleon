@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from utils.api_responses import Status, ApiResponse, Error
+from api.models.response import ApiResponse
+from api.models.data import Status, Error
 
 import api.otp.app_errors as err
 

@@ -21,9 +21,10 @@ from fastapi.responses import JSONResponse
 from utils.db import engine, Base
 from starlette.concurrency import iterate_in_threadpool
 import json
-from utils.api_responses import ApiResponse, Error, Status, ApiException
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime
+from api.models.response import ApiResponse, ApiException
+from api.models.data import Error, Status
 
 Base.metadata.create_all(bind=engine)
 
