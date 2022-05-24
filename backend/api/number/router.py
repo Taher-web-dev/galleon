@@ -20,7 +20,7 @@ from .response_models import (
     WalletResponse,
     RegistrationGiftResponse,
 )
-from api.models import response as api_response, examples as api_examples
+from api.models import examples as api_examples
 
 router = APIRouter()
 
