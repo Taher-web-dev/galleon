@@ -3,7 +3,8 @@ from pydantic import Field
 from pydantic.main import BaseModel
 from typing import Optional, Any
 from fastapi import status
-from utils.api_responses import ApiException, Error
+from api.models.response import ApiException
+from api.models.data import Error
 from .cms import NEGCRED_LOOKUP
 from .zend import zend_balance, zend_subscriptions
 
