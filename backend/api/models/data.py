@@ -1,3 +1,5 @@
+"""Pure data models to be reusable anywhere"""
+
 from pydantic import BaseModel
 from enum import Enum
 
