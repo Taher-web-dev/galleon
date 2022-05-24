@@ -30,7 +30,24 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Galleon Middleware API",
-    description="API microservice for Galleon middleware project",
+    description="""### API microservice for Galleon middleware project
+#### Notes:
+
+* APIs with the 🔒 'lock' icon, require the http header `Authorization: Bearer ABC`.
+* Invoke the login api and use the returned access token in the Authorization form button in the upper right section of this documentation.
+    """,
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+    openapi_tags=[
+        {
+            "name": "otp",
+            "description": "One-Time-Password operations (currently SMS-only)",
+        },
+        {
+            "name": "user",
+            "description": "User, registration and profile management operations",
+        },
+        {"name": "number", "description": "Zain backend `number` (msisdn) operations"},
+    ],
     version="0.0.1",
     redoc_url=None,
 )
