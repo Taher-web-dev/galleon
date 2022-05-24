@@ -37,9 +37,15 @@ app = FastAPI(
     """,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
-        {"name":"otp", "description": "One-Time-Password operations (currently SMS-only)"},
-        {"name":"user", "description": "User, registration and profile management operations"},
-        {"name":"number", "description": "Zain backend `number` (msisdn) operations"}
+        {
+            "name": "otp",
+            "description": "One-Time-Password operations (currently SMS-only)",
+        },
+        {
+            "name": "user",
+            "description": "User, registration and profile management operations",
+        },
+        {"name": "number", "description": "Zain backend `number` (msisdn) operations"},
     ],
     version="0.0.1",
     redoc_url=None,
