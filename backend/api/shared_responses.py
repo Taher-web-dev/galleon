@@ -1,7 +1,7 @@
 from fastapi import status
 from typing import Any, Dict
 from utils.api_responses import Error, Status, ApiResponse
-import api.shared_app_errors as shared_err
+import api.models.errors as api_errors
 
 # ================================== Models
 class SuccessResponse(ApiResponse):
@@ -15,7 +15,7 @@ class SuccessResponse(ApiResponse):
 
 class NotAuthenticatedResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = shared_err.NOT_AUTHENTICATED
+    error: Error = api_errors.NOT_AUTHENTICATED
 
 
 # ================================== Additional Responses (API doc examples)
