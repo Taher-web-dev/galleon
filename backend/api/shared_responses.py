@@ -5,7 +5,7 @@ import api.shared_app_errors as shared_err
 
 # ================================== Models
 # TODO rename to SuccessResponse
-class StatusResponse(ApiResponse):
+class SuccessResponse(ApiResponse):
     class Config:
         schema_extra = {
             "example": {

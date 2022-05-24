@@ -13,7 +13,6 @@ from .zend import recharge_voucher, change_supplementary_offering
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
-from utils.api_responses import ApiResponse, Status
 from .response_models import (
     ChargeVoucherResponse,
     RetrieveStatusResponse,
@@ -37,7 +36,7 @@ async def retrieve_status(
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
     assert msisdn == session_msisdn
-    return RetrieveStatusResponse(status=Status.success, data=get_sim_details(msisdn))
+    return RetrieveStatusResponse(data=get_sim_details(msisdn))
 
 
 @router.get(
@@ -51,7 +50,7 @@ async def retrieve_subscriptions(
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
     assert msisdn == session_msisdn
-    return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
+    return SubscriptionsResponse(data=get_subscriptions(msisdn))
 
 
 @router.get(
@@ -65,7 +64,7 @@ async def retrieve_wallet(
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
-    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
+    return WalletResponse(data=get_wallet(msisdn))
 
 
 @router.post(

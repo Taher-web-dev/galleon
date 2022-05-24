@@ -7,14 +7,13 @@ from api.otp.request_models import (
     SendOTPRequest,
     VerifyOTPRequest,
 )
-from api.shared_responses import StatusResponse
+from api.shared_responses import SuccessResponse
 from api.otp.response_models import OTPConfirmation, OTPConfirmationResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from utils.db import Otp, db
-from utils.api_responses import ApiException, Status
+from utils.api_responses import ApiException
 from api.otp import additional_responses as add_res
-import utils.regex as rgx
 import api.otp.app_errors as err
 
 router = APIRouter()
@@ -22,11 +21,11 @@ router = APIRouter()
 
 @router.post(
     "/request",
-    response_model=StatusResponse,
+    response_model=SuccessResponse,
     response_model_exclude_none=True,
     responses=add_res.request_otp,
 )
-async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
+async def send_otp(user_request: SendOTPRequest) -> SuccessResponse:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -42,7 +41,7 @@ async def send_otp(user_request: SendOTPRequest) -> StatusResponse:
     db.refresh(otp)
     zend_send_sms(user_request.msisdn, f"Your otp code is {code}")
     slack_notify(user_request.msisdn, code)
-    return StatusResponse(status=Status.success)
+    return SuccessResponse()
 
 
 @router.post(
@@ -69,13 +68,13 @@ async def confirm(user_request: ConfirmOTPRequest) -> OTPConfirmationResponse:
 
 @router.post(
     "/verify",
-    response_model=StatusResponse,
+    response_model=SuccessResponse,
     response_model_exclude_none=True,
     responses=add_res.verify_otp,
 )
-async def verify_otp(user_request: VerifyOTPRequest) -> StatusResponse:
+async def verify_otp(user_request: VerifyOTPRequest) -> SuccessResponse:
     """Verify otp status (internal use)"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
-        return StatusResponse(status=Status.success)
+        return SuccessResponse()
     raise ApiException(status.HTTP_400_BAD_REQUEST, err.OTP_MISMATCH)
