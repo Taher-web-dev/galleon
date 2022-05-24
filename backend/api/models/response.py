@@ -1,9 +1,9 @@
 from fastapi import status
 from typing import Any, Dict
-from utils.api_responses import Error, Status, ApiResponse
-import api.models.errors as api_errors
+from backend.utils.api_responses import Error, Status, ApiResponse
+import backend.api.models.errors as api_errors
 
-# ================================== Models
+# ================================== Response Models
 class SuccessResponse(ApiResponse):
     class Config:
         schema_extra = {
@@ -13,6 +13,7 @@ class SuccessResponse(ApiResponse):
         }
 
 
+# ================================== ErrorResponse Models
 class NotAuthenticatedResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = api_errors.NOT_AUTHENTICATED
