@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, HttpUrl, EmailStr
 from api.models.data import Error, Status
 from api.models.response import ApiResponse
 import utils.regex as rgx
-import api.user.app_errors as err
+import api.user.models.errors as err
 
 
 class Tokens(BaseModel):

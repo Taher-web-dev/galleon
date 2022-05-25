@@ -1,6 +1,6 @@
 from fastapi import status
 from typing import Dict, Any
-from api.user.response_models import (
+from api.user.models.response import (
     InvalidRefreshTokenErrorResponse,
     UserExistsErrorResponse,
     InvalidOtpErrorResponse,

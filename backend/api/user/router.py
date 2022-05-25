@@ -9,15 +9,15 @@ from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
 from api.models.response import ApiException
-from api.user.request_models import UserCreateRequest, UserUpdateRequest
-from api.user.response_models import (
+from api.user.models.request import UserCreateRequest, UserUpdateRequest
+from api.user.models.response import (
     Tokens,
     TokensResponse,
     UserProfile,
     UserProfileResponse,
 )
-import api.user.additional_responses as add_res
-import api.user.app_errors as err
+from api.user.models import examples
+import api.user.models.errors as err
 
 
 router = APIRouter()
@@ -28,7 +28,7 @@ router = APIRouter()
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
     response_model_exclude_unset=True,
-    responses=add_res.create_user,
+    responses=examples.create_user,
 )
 async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     """Register a new user"""
@@ -67,7 +67,7 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     "/profile",
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
-    responses=add_res.get_user_profile,
+    responses=examples.get_user_profile,
 )
 async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     """Get user profile"""
@@ -87,7 +87,7 @@ async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     "/profile",
     response_model=UserProfileResponse,
     response_model_exclude_none=True,
-    responses=add_res.update_profile,
+    responses=examples.update_profile,
 )
 async def update_profile(
     user_profile: UserUpdateRequest, msisdn=Depends(JWTBearer())
@@ -119,7 +119,7 @@ async def update_profile(
     "/login",
     response_model=TokensResponse,
     response_model_exclude_none=True,
-    responses=add_res.login,
+    responses=examples.login,
 )
 async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
@@ -143,7 +143,7 @@ async def login(
     "/validate",
     response_model=SuccessResponse,
     response_model_exclude_none=True,
-    responses=add_res.login,
+    responses=examples.login,
 )
 async def validate(
     msisdn=Depends(JWTBearer()),
@@ -161,7 +161,7 @@ async def validate(
     "/logout",
     response_model=SuccessResponse,
     response_model_exclude_none=True,
-    responses=add_res.logout,
+    responses=examples.logout,
 )
 async def logout(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     """Logout (aka delete refresh token)"""
@@ -176,7 +176,7 @@ async def logout(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     "/token",
     response_model=TokensResponse,
     response_model_exclude_none=True,
-    responses=add_res.refresh_token,
+    responses=examples.refresh_token,
 )
 async def gen_access_token(
     refresh_token: Optional[str] = Header(None),
@@ -201,7 +201,7 @@ async def gen_access_token(
     "/delete",
     response_model=SuccessResponse,
     response_model_exclude_none=True,
-    responses=add_res.delete,
+    responses=examples.delete,
 )
 async def delete(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     """Delete user"""
