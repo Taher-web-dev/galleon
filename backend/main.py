@@ -8,6 +8,7 @@ import uvicorn
 
 # from settings import settings
 import json_logging
+from utils.db import Base, engine
 from utils.settings import settings
 
 from api.user.router import router as user
@@ -18,7 +19,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import JSONResponse
-from utils.db import engine, Base
 from starlette.concurrency import iterate_in_threadpool
 import json
 from fastapi.encoders import jsonable_encoder
