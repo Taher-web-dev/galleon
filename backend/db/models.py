@@ -1,21 +1,6 @@
-""" Database """
-
-# import sys
 from datetime import datetime
-
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import DateTime, Boolean, Column, Integer, String  # , ForeignKey
-
-# from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
-from .settings import settings
-
-engine = create_engine(settings.database_url)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-db = SessionLocal()
+from sqlalchemy import DateTime, Boolean, Column, Integer, String
+from db import Base
 
 
 class Otp(Base):

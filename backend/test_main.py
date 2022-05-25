@@ -3,7 +3,8 @@ from fastapi.testclient import TestClient
 from fastapi import status
 from utils.password_hashing import verify_password
 from main import app
-from utils.db import db, Otp, User
+from db import db
+from db.models import Otp, User
 from utils.jwt import sign_jwt
 
 client = TestClient(app)
