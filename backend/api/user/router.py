@@ -4,7 +4,8 @@ from fastapi import APIRouter, Body, Header, status, Depends
 from typing import Optional
 from api.models.response import SuccessResponse
 from utils.jwt import decode_jwt, sign_jwt
-from utils.db import db, User, Otp
+from utils.db import db
+from utils.db.models import User, Otp
 from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer

@@ -5,7 +5,8 @@ from fastapi import APIRouter, status
 from api.models.response import SuccessResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
-from utils.db import Otp, db
+from utils.db import db
+from utils.db.models import Otp
 from api.models.response import ApiException
 from api.otp.models import examples
 from api.otp.models.errors import INVALID_OTP
