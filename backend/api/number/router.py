@@ -13,14 +13,14 @@ from .zend import recharge_voucher, change_supplementary_offering
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
-from .response_models import (
+from api.number.models.response import (
     ChargeVoucherResponse,
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
     RegistrationGiftResponse,
 )
-from api import shared_responses
+from api.models import examples as api_examples
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ router = APIRouter()
 @router.get(
     "/status",
     response_model=RetrieveStatusResponse,
-    responses=shared_responses.not_authenticated,
+    responses=api_examples.not_authenticated,
 )
 async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -42,7 +42,7 @@ async def retrieve_status(
 @router.get(
     "/subscriptions",
     response_model=SubscriptionsResponse,
-    responses=shared_responses.not_authenticated,
+    responses=api_examples.not_authenticated,
 )
 async def retrieve_subscriptions(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -56,7 +56,7 @@ async def retrieve_subscriptions(
 @router.get(
     "/wallet",
     response_model=WalletResponse,
-    responses=shared_responses.not_authenticated,
+    responses=api_examples.not_authenticated,
 )
 async def retrieve_wallet(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
@@ -70,7 +70,7 @@ async def retrieve_wallet(
 @router.post(
     "/redeem-registration-gift",
     response_model=RegistrationGiftResponse,
-    responses=shared_responses.not_authenticated,
+    responses=api_examples.not_authenticated,
 )
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
@@ -86,7 +86,7 @@ async def redeem_registration_gift(
 @router.post(
     "/charge-voucher",
     response_model=ChargeVoucherResponse,
-    responses=shared_responses.not_authenticated,
+    responses=api_examples.not_authenticated,
 )
 async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),

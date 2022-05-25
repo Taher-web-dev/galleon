@@ -1,7 +1,7 @@
 from api.number.balance import Wallet
-from utils.api_responses import ApiResponse
-from .sim import Sim
-from .subscriptions import Subscription
+from api.models.response import ApiResponse
+from api.number.sim import Sim
+from api.number.subscriptions import Subscription
 
 
 class RetrieveStatusResponse(ApiResponse):

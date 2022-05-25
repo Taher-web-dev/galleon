@@ -5,8 +5,8 @@ from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from utils.settings import settings
-from utils.api_responses import ApiException
-import api.shared_app_errors as shared_err
+from api.models.response import ApiException
+import api.models.errors as api_errors
 
 
 class JWTBearer(HTTPBearer):
@@ -22,14 +22,14 @@ class JWTBearer(HTTPBearer):
                 decoded_data = decode_jwt(credentials.credentials)
                 if not decoded_data:
                     raise ApiException(
-                        status.HTTP_401_UNAUTHORIZED, shared_err.EXPIRED_TOKEN
+                        status.HTTP_401_UNAUTHORIZED, api_errors.EXPIRED_TOKEN
                     )
                 # TODO attach logged-in user to the request object
                 return decoded_data.get("msisdn")
 
         except:
             raise ApiException(
-                status.HTTP_401_UNAUTHORIZED, shared_err.NOT_AUTHENTICATED
+                status.HTTP_401_UNAUTHORIZED, api_errors.NOT_AUTHENTICATED
             )
 
 

@@ -1,6 +1,6 @@
 from fastapi import status
 from typing import Dict, Any
-from api.user.response_models import (
+from api.user.models.response import (
     InvalidRefreshTokenErrorResponse,
     UserExistsErrorResponse,
     InvalidOtpErrorResponse,
@@ -8,7 +8,7 @@ from api.user.response_models import (
     InvalidTokenErrorResponse,
     ValidationErrorResponse,
 )
-from api import shared_responses
+from api.models import examples as api_examples
 
 create_user: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_403_FORBIDDEN: {
@@ -25,11 +25,9 @@ create_user: Dict[int | str, Dict[str, Any]] = {
     },
 }
 
-get_user_profile: Dict[int | str, Dict[str, Any]] = {
-    **shared_responses.not_authenticated
-}
+get_user_profile: Dict[int | str, Dict[str, Any]] = {**api_examples.not_authenticated}
 
-update_profile: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
+update_profile: Dict[int | str, Dict[str, Any]] = {**api_examples.not_authenticated}
 
 login: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
@@ -38,7 +36,7 @@ login: Dict[int | str, Dict[str, Any]] = {
     },
 }
 
-logout: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
+logout: Dict[int | str, Dict[str, Any]] = {**api_examples.not_authenticated}
 
 token: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
@@ -54,4 +52,4 @@ refresh_token: Dict[int | str, Dict[str, Any]] = {
     },
 }
 
-delete: Dict[int | str, Dict[str, Any]] = {**shared_responses.not_authenticated}
+delete: Dict[int | str, Dict[str, Any]] = {**api_examples.not_authenticated}

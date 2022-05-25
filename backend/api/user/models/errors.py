@@ -1,4 +1,4 @@
-from utils.api_responses import Error
+from api.models.data import Error
 
 USER_EXISTS = Error(
     type="user", code=201, message="Sorry the msisdn is already registered."

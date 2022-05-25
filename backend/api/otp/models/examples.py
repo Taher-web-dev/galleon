@@ -1,22 +1,21 @@
 from fastapi import status
 from typing import Dict, Any
 
-from api.otp.response_models import (
-    OTPInvalidMSISDNResponse,
-    OTPSMSErrorResponse,
-    OTPInvalidOTPConfirmationResponse,
-    OTPInvalidOTPFormatResponse,
-    OTPInvalidRequestIDResponse,
-    OTPMismatchOTPConfirmationResponse,
+from api.otp.models.response import (
+    InvalidMSISDNResponse,
+    SMSErrorResponse,
+    InvalidRequestIdResponse,
+    InvalidConfirmationResponse,
+    InvalidFormatResponse,
 )
 
 request_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
-        "model": OTPInvalidMSISDNResponse,
+        "model": InvalidMSISDNResponse,
         "description": "Invalid MSISDN or Email.",
     },
     status.HTTP_503_SERVICE_UNAVAILABLE: {
-        "model": OTPSMSErrorResponse,
+        "model": SMSErrorResponse,
         "description": "SMS GW server down or not configured.",
     },
 }
@@ -24,11 +23,11 @@ request_otp: Dict[int | str, Dict[str, Any]] = {
 confirm_otp: Dict[int | str, Dict[str, Any]] = {
     **request_otp,
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPInvalidRequestIDResponse,
+        "model": InvalidRequestIdResponse,
         "description": "Invalid OTP request Id.",
     },
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPInvalidOTPFormatResponse,
+        "model": InvalidFormatResponse,
         "description": "Invalid OTP format.",
     },
 }
@@ -36,11 +35,7 @@ confirm_otp: Dict[int | str, Dict[str, Any]] = {
 verify_otp: Dict[int | str, Dict[str, Any]] = {
     **request_otp,
     status.HTTP_400_BAD_REQUEST: {
-        "model": OTPInvalidOTPConfirmationResponse,
+        "model": InvalidConfirmationResponse,
         "description": "Invalid OTP confirmation Id",
-    },
-    status.HTTP_400_BAD_REQUEST: {
-        "model": OTPMismatchOTPConfirmationResponse,
-        "description": "Mismatch OTP confirmation Id",
     },
 }

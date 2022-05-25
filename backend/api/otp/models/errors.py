@@ -1,4 +1,4 @@
-from utils.api_responses import Error
+from api.models.data import Error
 
 INVALID_MSISDN = Error(
     type="otp",
@@ -12,25 +12,25 @@ SMS_ERROR = Error(
     message="There are no SMS GateWay to fulfill your request.",
 )
 
-INVALID_OTP_REQUEST_ID = Error(
+INVALID_REQUEST_ID = Error(
     type="otp",
     code=304,
     message="Something is the wrong! the OTP request you submitted is invalid.",
 )
 
-INVALID_OTP_REQUEST_FORMAT = Error(
+INVALID_REQUEST_FORMAT = Error(
     type="otp",
     code=305,
     message="The submitted OTP format you shared is invalid format.",
 )
 
-INVALID_OTP_CONFIRMATION = Error(
+INVALID_CONFIRMATION = Error(
     type="otp",
     code=306,
     message="Something is wrong! the OTP request you confirmation is invalid.",
 )
 
-OTP_MISMATCH = Error(
+INVALID_OTP = Error(
     type="otp",
     code=307,
     message="Something is wrong! the OTP request you confirmation does not match the request.",
