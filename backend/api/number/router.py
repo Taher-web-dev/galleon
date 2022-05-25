@@ -13,7 +13,7 @@ from .zend import recharge_voucher, change_supplementary_offering
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
-from .response_models import (
+from api.number.models.response import (
     ChargeVoucherResponse,
     RetrieveStatusResponse,
     SubscriptionsResponse,
