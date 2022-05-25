@@ -1,8 +1,6 @@
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import DateTime, Boolean, Column, Integer, String
-
-Base = declarative_base()
+from db import Base
 
 
 class Otp(Base):

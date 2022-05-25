@@ -1,6 +1,7 @@
 """ Create database example """
 
-from utils.db import User, Otp, engine, Base, db
+from db import engine, Base, db
+from db.models import Otp, User
 
 Base.metadata.create_all(bind=engine)
 
