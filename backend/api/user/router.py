@@ -164,9 +164,8 @@ async def validate(
     response_model_exclude_none=True,
     responses=examples.logout,
 )
-async def logout(msisdn=Depends(JWTBearer())) -> SuccessResponse:
+async def logout(user=Depends(JWTBearer(fetch_user=True))) -> SuccessResponse:
     """Logout (aka delete refresh token)"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
     user.refresh_token = None
     db.commit()
     return SuccessResponse()
