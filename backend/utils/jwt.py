@@ -27,17 +27,15 @@ class JWTBearer(HTTPBearer):
                     raise ApiException(
                         status.HTTP_401_UNAUTHORIZED, api_errors.EXPIRED_TOKEN
                     )
-                # TODO attach logged-in user to the request object
                 msisdn = decoded_data.get("msisdn")
 
-                user = db.query(User).filter(User.msisdn == msisdn).first()
+                if self.fetch_user:
+                    if user := db.query(User).filter(User.msisdn == msisdn).first():
+                        return user
+                    # TODO User not found exception
+                    raise
 
-                if not user or not user.refresh_token:
-                    raise ApiException(
-                        status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS
-                    )
-
-                return user if self.fetch_user else msisdn
+                return msisdn
 
         except:
             raise ApiException(
