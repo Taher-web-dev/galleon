@@ -1,4 +1,3 @@
-from black import err
 import jwt
 from time import time
 from typing import Any, Optional
@@ -31,9 +30,10 @@ class JWTBearer(HTTPBearer):
 
                 if self.fetch_user:
                     if user := db.query(User).filter(User.msisdn == msisdn).first():
-                        return user
-                    # TODO User not found exception
-                    raise
+                        if user.refresh_token:
+                            return user
+                        raise  # User doesn't have a refresh_token
+                    raise  # User not found
 
                 return msisdn
 
