@@ -1,17 +1,20 @@
+from black import err
 import jwt
 from time import time
-from typing import Optional
+from typing import Any, Optional
 from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
+from db.models import User
 from utils.settings import settings
 from api.models.response import ApiException
 import api.models.errors as api_errors
+from db import db
 
 
 class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True):
+    def __init__(self, auto_error: bool = True, fetch_user: bool = False):
         super().__init__(auto_error=auto_error)
+        self.fetch_user = fetch_user
 
     async def __call__(self, request: Request) -> Optional[str]:
         try:
@@ -25,7 +28,16 @@ class JWTBearer(HTTPBearer):
                         status.HTTP_401_UNAUTHORIZED, api_errors.EXPIRED_TOKEN
                     )
                 # TODO attach logged-in user to the request object
-                return decoded_data.get("msisdn")
+                msisdn = decoded_data.get("msisdn")
+
+                user = db.query(User).filter(User.msisdn == msisdn).first()
+                print(not bool(user), not user.refresh_token)
+                if not bool(user) or not user.refresh_token:
+                    raise ApiException(
+                        status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS
+                    )
+                print("XSD", self.fetch_user)
+                return user if self.fetch_user else msisdn
 
         except:
             raise ApiException(

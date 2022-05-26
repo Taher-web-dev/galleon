@@ -70,15 +70,15 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     response_model_exclude_none=True,
     responses=examples.get_user_profile,
 )
-async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
+async def get_user_profile(
+    user=Depends(JWTBearer(fetch_user=True)),
+) -> UserProfileResponse:
     """Get user profile"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
-    if not user.refresh_token:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    print(user)
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
-            msisdn=msisdn,
+            msisdn=user.msisdn,
             name=user.name,
             email=user.email,
             profile_pic_url=user.profile_pic_url,
@@ -93,12 +93,9 @@ async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     responses=examples.update_profile,
 )
 async def update_profile(
-    user_profile: UserUpdateRequest, msisdn=Depends(JWTBearer())
+    user_profile: UserUpdateRequest, user=Depends(JWTBearer(fetch_user=True))
 ) -> UserProfileResponse:
     """Update user profile"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
-    if not user.refresh_token:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
     for key, value in user_profile.dict(exclude_unset=True, exclude_none=True).items():
         if key == "password":
             user.password = hash_password(value)
@@ -111,7 +108,7 @@ async def update_profile(
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
-            msisdn=msisdn,
+            msisdn=user.msisdn,
             name=user.name,
             email=user.email,
             profile_pic_url=user.profile_pic_url,
@@ -206,12 +203,8 @@ async def gen_access_token(
     response_model_exclude_none=True,
     responses=examples.delete,
 )
-async def delete(msisdn=Depends(JWTBearer())) -> SuccessResponse:
+async def delete(user=Depends(JWTBearer(fetch_user=True))) -> SuccessResponse:
     """Delete user"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
-    assert user
-    if not user.refresh_token:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
     db.delete(user)
     db.commit()
     return SuccessResponse()
