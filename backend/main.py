@@ -16,7 +16,7 @@ from api.otp.router import router as otp
 from api.number.router import router as number
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
+from db import db
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import JSONResponse
 from starlette.concurrency import iterate_in_threadpool
@@ -123,6 +123,8 @@ async def middle(request: Request, call_next):
         and settings.api_key == request.query_params["key"]
     ):
         try:
+            if not db.is_active:
+                db.rollback()
             response = await call_next(request)
             raw_response = [section async for section in response.body_iterator]
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
