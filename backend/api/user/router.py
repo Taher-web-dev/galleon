@@ -183,12 +183,11 @@ async def gen_access_token(
     refresh_token: Optional[str] = Header(None),
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
-
     if refresh_token is not None:
         data = decode_jwt(refresh_token)
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
-            user = db.query(User).filter(User.msisdn == "msisdn").first()
+            user = db.query(User).filter(User.msisdn == msisdn).first()
             if user is not None:
                 access_token = sign_jwt({"msisdn": msisdn})
                 return TokensResponse(
