@@ -74,7 +74,7 @@ async def get_user_profile(
     user=Depends(JWTBearer(fetch_user=True)),
 ) -> UserProfileResponse:
     """Get user profile"""
-    print(user)
+
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,

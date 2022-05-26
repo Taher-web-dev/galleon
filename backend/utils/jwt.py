@@ -31,12 +31,12 @@ class JWTBearer(HTTPBearer):
                 msisdn = decoded_data.get("msisdn")
 
                 user = db.query(User).filter(User.msisdn == msisdn).first()
-                print(not bool(user), not user.refresh_token)
-                if not bool(user) or not user.refresh_token:
+
+                if not user or not user.refresh_token:
                     raise ApiException(
                         status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS
                     )
-                print("XSD", self.fetch_user)
+
                 return user if self.fetch_user else msisdn
 
         except:
