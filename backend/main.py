@@ -123,6 +123,7 @@ async def middle(request: Request, call_next):
         and settings.api_key == request.query_params["key"]
     ):
         try:
+            # TODO: look into this for more details.
             if not db.is_active:
                 db.rollback()
             response = await call_next(request)
