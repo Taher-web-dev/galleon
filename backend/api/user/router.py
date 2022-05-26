@@ -73,6 +73,8 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
 async def get_user_profile(msisdn=Depends(JWTBearer())) -> UserProfileResponse:
     """Get user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
+    if not user.refresh_token:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
@@ -95,7 +97,8 @@ async def update_profile(
 ) -> UserProfileResponse:
     """Update user profile"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
-
+    if not user.refresh_token:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
     for key, value in user_profile.dict(exclude_unset=True, exclude_none=True).items():
         if key == "password":
             user.password = hash_password(value)
@@ -208,6 +211,8 @@ async def delete(msisdn=Depends(JWTBearer())) -> SuccessResponse:
     """Delete user"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user
+    if not user.refresh_token:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
     db.delete(user)
     db.commit()
     return SuccessResponse()
