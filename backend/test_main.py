@@ -1,7 +1,7 @@
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
-from utils.password_hashing import verify_password
+from utils.password_hashing import hash_password, verify_password
 from main import app
 from db import db
 from db.models import Otp, User
@@ -83,6 +83,7 @@ def test_login_user():
     response = client.post(
         "/api/user/login", json={"msisdn": msisdn, "password": password}
     )
+    print(response.json())
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     # print(data)
@@ -139,23 +140,9 @@ def test_update_profile():
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert verify_password(new_password, user.password)
-    # print(response.json())
-
-
-def test_logout():
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.post("/api/user/logout", headers=headers)
-    assert response.status_code == status.HTTP_200_OK
-    assert {"status": "success"} == response.json()
-    assert user.refresh_token is None
-
-
-def test_delete():
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.post("/api/user/delete", headers=headers)
-    assert response.status_code == status.HTTP_200_OK
-    assert not db.query(User).filter(User.msisdn == msisdn).first()
-    # print(response.json())
+    # revert password
+    user.password = hash_password(password)
+    db.commit()
 
 
 def test_wallet():
@@ -238,6 +225,23 @@ def test_verify_otp():
         "/api/otp/verify", json={"msisdn": msisdn, "confirmation": confirmation}
     )
     assert response.status_code == status.HTTP_200_OK
+    # print(response.json())
+
+
+def test_logout():
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.post("/api/user/logout", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
+    assert user.refresh_token is None
+
+
+def test_delete():
+    test_login_user()
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.post("/api/user/delete", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
+    assert not db.query(User).filter(User.msisdn == msisdn).first()
     # print(response.json())
 
 
