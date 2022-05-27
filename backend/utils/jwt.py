@@ -1,6 +1,6 @@
 import jwt
 from time import time
-from typing import Any, Optional
+from typing import Optional
 from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from db.models import User
@@ -15,7 +15,7 @@ class JWTBearer(HTTPBearer):
         super().__init__(auto_error=auto_error)
         self.fetch_user = fetch_user
 
-    async def __call__(self, request: Request) -> Optional[str]:
+    async def __call__(self, request: Request) -> str | User:
         try:
             credentials: Optional[
                 HTTPAuthorizationCredentials
