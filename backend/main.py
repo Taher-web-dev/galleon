@@ -4,11 +4,12 @@ import time
 import traceback
 import logging
 import logging.handlers
+from requests.sessions import Session
 import uvicorn
 
 # from settings import settings
 import json_logging
-from db import Base, engine
+from db.main import Base, engine, SessionLocal 
 from utils.settings import settings
 
 from api.user.router import router as user
@@ -16,7 +17,6 @@ from api.otp.router import router as otp
 from api.number.router import router as number
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from db import db
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import JSONResponse
 from starlette.concurrency import iterate_in_threadpool
@@ -26,7 +26,6 @@ from datetime import datetime
 from api.models.response import ApiResponse, ApiException
 from api.models.data import Error, Status
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Galleon Middleware API",
@@ -122,16 +121,16 @@ async def middle(request: Request, call_next):
         "key" in request.query_params
         and settings.api_key == request.query_params["key"]
     ):
+        request.state.db = SessionLocal()
         try:
             # TODO: look into this for more details.
-            if not db.is_active:
-                db.rollback()
             response = await call_next(request)
             raw_response = [section async for section in response.body_iterator]
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
             response_body = json.loads(b"".join(raw_response))
 
         except ApiException as ex:
+            request.state.db.rollback()
             response = JSONResponse(
                 status_code=ex.status_code,
                 content=jsonable_encoder(
@@ -140,6 +139,7 @@ async def middle(request: Request, call_next):
             )
 
         except Exception as ex:
+            request.state.db.rollback()
             # ex = sys.exc_info()[1]
             if ex:
                 stack = [
@@ -161,6 +161,8 @@ async def middle(request: Request, call_next):
                     )
                 ),
             )
+        finally:
+            request.state.db.close()
 
     else:
         response = JSONResponse(

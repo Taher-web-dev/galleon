@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import DateTime, Boolean, Column, Integer, String
-from db import Base
+from db.main import Base
 
 
 class Otp(Base):

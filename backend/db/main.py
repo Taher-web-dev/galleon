@@ -7,6 +7,3 @@ Base = declarative_base()
 engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-db = SessionLocal()
-
-__all__ = ["db", "engine", "Base"]

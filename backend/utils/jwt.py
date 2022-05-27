@@ -7,7 +7,6 @@ from db.models import User
 from utils.settings import settings
 from api.models.response import ApiException
 import api.models.errors as api_errors
-from db import db
 
 
 class JWTBearer(HTTPBearer):
@@ -29,13 +28,14 @@ class JWTBearer(HTTPBearer):
                 msisdn = decoded_data.get("msisdn")
 
                 if self.fetch_user:
-                    if user := db.query(User).filter(User.msisdn == msisdn).first():
+                    if user := request.state.db.query(User).filter(User.msisdn == msisdn).first():
                         if user.refresh_token:
                             return user
                         raise  # User doesn't have a refresh_token
                     raise  # User not found
 
                 return msisdn
+            raise
 
         except:
             raise ApiException(

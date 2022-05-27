@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 from utils.password_hashing import hash_password, verify_password
 from main import app
-from db import db
+from db.main import SessionLocal
 from db.models import Otp, User
 from utils.jwt import sign_jwt
 
@@ -17,6 +17,7 @@ new_password: str = "NewP@ssw0rD"
 confirmation: str = "dummyConfirmation"
 user: User = User()
 
+db = SessionLocal()
 
 # generate confirmation to create user
 if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
@@ -134,21 +135,13 @@ def test_get_profile():
 
 def test_reset_password():
     headers = {"Content-Type": "application/json"}
-    response = client.post(
-        "/api/user/reset_password",
-        json={
-            "msisdn": msisdn,
-            "password": new_password,
-            "otp_confirmation": confirmation,
-        },
-        headers=headers,
-    )
+    json={"msisdn": msisdn, "password": new_password, "otp_confirmation": confirmation},
+    response = client.post("/api/user/reset_password", json=json, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert verify_password(new_password, user.password)
-    # revert password
-    user.password = hash_password(password)
-    db.commit()
+    json={"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},
+    response = client.post("/api/user/reset_password", json=json, headers=headers)
 
 
 def test_wallet():
@@ -257,7 +250,7 @@ if __name__ == "__main__":
     test_validate_user()
     test_expired_token()
     test_get_profile()
-    test_update_profile()
+    test_reset_password()
     test_sim_status()
     test_wallet()
     test_subscriptions()
