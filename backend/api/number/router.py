@@ -31,11 +31,9 @@ router = APIRouter()
     responses=api_examples.not_authenticated,
 )
 async def retrieve_status(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
-    session_msisdn=Depends(JWTBearer()),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257")
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
-    assert msisdn == session_msisdn
     return RetrieveStatusResponse(data=get_sim_details(msisdn))
 
 
