@@ -9,7 +9,7 @@ import uvicorn
 
 # from settings import settings
 import json_logging
-from db.main import Base, engine, SessionLocal 
+from db.main import Base, engine, SessionLocal
 from utils.settings import settings
 
 from api.user.router import router as user

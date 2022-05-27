@@ -34,7 +34,9 @@ router = APIRouter()
     response_model_exclude_unset=True,
     responses=examples.create_user,
 )
-async def create_user(new_user: UserCreateRequest, request: Request) -> UserProfileResponse:
+async def create_user(
+    new_user: UserCreateRequest, request: Request
+) -> UserProfileResponse:
     """Register a new user"""
 
     user = request.state.db.query(User).filter(User.msisdn == new_user.msisdn).first()
@@ -73,9 +75,11 @@ async def create_user(new_user: UserCreateRequest, request: Request) -> UserProf
     response_model_exclude_none=True,
     response_model_exclude_unset=True,
 )
-async def reset_password(reset: UserResetPasswordRequest, request : Request) -> SuccessResponse:
+async def reset_password(
+    reset: UserResetPasswordRequest, request: Request
+) -> SuccessResponse:
     """Register a new user"""
-    
+
     user = request.state.db.query(User).filter(User.msisdn == reset.msisdn).first()
     if not user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
@@ -118,8 +122,9 @@ async def get_user_profile(
     responses=examples.update_profile,
 )
 async def update_profile(
-        request : Request,
-    user_profile: UserUpdateRequest, user=Depends(JWTBearer(fetch_user=True))
+    request: Request,
+    user_profile: UserUpdateRequest,
+    user=Depends(JWTBearer(fetch_user=True)),
 ) -> UserProfileResponse:
     """Update user profile"""
     for key, value in user_profile.dict(exclude_unset=True, exclude_none=True).items():
@@ -146,7 +151,7 @@ async def update_profile(
     responses=examples.login,
 )
 async def login(
-        request : Request,
+    request: Request,
     msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
 ) -> TokensResponse:
@@ -171,7 +176,7 @@ async def login(
     responses=examples.login,
 )
 async def validate(
-        request : Request,
+    request: Request,
     msisdn=Depends(JWTBearer()),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
 ) -> SuccessResponse:
@@ -189,7 +194,9 @@ async def validate(
     response_model_exclude_none=True,
     responses=examples.logout,
 )
-async def logout(request : Request, user=Depends(JWTBearer(fetch_user=True))) -> SuccessResponse:
+async def logout(
+    request: Request, user=Depends(JWTBearer(fetch_user=True))
+) -> SuccessResponse:
     """Logout (aka delete refresh token)"""
     user.refresh_token = None
     request.state.db.commit()
@@ -203,7 +210,7 @@ async def logout(request : Request, user=Depends(JWTBearer(fetch_user=True))) ->
     responses=examples.refresh_token,
 )
 async def gen_access_token(
-        request : Request,
+    request: Request,
     refresh_token: Optional[str] = Header(None),
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
@@ -227,7 +234,9 @@ async def gen_access_token(
     response_model_exclude_none=True,
     responses=examples.delete,
 )
-async def delete(request : Request, user=Depends(JWTBearer(fetch_user=True)) ) -> SuccessResponse:
+async def delete(
+    request: Request, user=Depends(JWTBearer(fetch_user=True))
+) -> SuccessResponse:
     """Delete user"""
     request.state.db.delete(user)
     request.state.db.commit()

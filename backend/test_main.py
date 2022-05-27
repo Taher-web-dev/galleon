@@ -135,12 +135,14 @@ def test_get_profile():
 
 def test_reset_password():
     headers = {"Content-Type": "application/json"}
-    json={"msisdn": msisdn, "password": new_password, "otp_confirmation": confirmation},
+    json = (
+        {"msisdn": msisdn, "password": new_password, "otp_confirmation": confirmation},
+    )
     response = client.post("/api/user/reset_password", json=json, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert verify_password(new_password, user.password)
-    json={"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},
+    json = ({"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},)
     response = client.post("/api/user/reset_password", json=json, headers=headers)
 
 

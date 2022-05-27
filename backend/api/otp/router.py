@@ -25,7 +25,7 @@ router = APIRouter()
     response_model_exclude_none=True,
     responses=examples.request_otp,
 )
-async def send_otp(request : Request, user_request: SendOTPRequest) -> SuccessResponse:
+async def send_otp(request: Request, user_request: SendOTPRequest) -> SuccessResponse:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -50,9 +50,15 @@ async def send_otp(request : Request, user_request: SendOTPRequest) -> SuccessRe
     response_model_exclude_none=True,
     responses=examples.confirm_otp,
 )
-async def confirm(request : Request, user_request: ConfirmOTPRequest) -> ConfirmationResponse:
+async def confirm(
+    request: Request, user_request: ConfirmOTPRequest
+) -> ConfirmationResponse:
     """Confirm Otp"""
-    if otp := request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first():
+    if (
+        otp := request.state.db.query(Otp)
+        .filter(Otp.msisdn == user_request.msisdn)
+        .first()
+    ):
         otp.tries += 1
         request.state.db.commit()
         request.state.db.refresh(otp)
@@ -72,7 +78,9 @@ async def confirm(request : Request, user_request: ConfirmOTPRequest) -> Confirm
     response_model_exclude_none=True,
     responses=examples.verify_otp,
 )
-async def verify_otp(request : Request, user_request: VerifyOTPRequest) -> SuccessResponse:
+async def verify_otp(
+    request: Request, user_request: VerifyOTPRequest
+) -> SuccessResponse:
     """Verify otp status (internal use)"""
     otp = request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     # TODO detail more errors here: no confirmation, invalid confirmation

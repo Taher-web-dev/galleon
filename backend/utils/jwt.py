@@ -28,7 +28,11 @@ class JWTBearer(HTTPBearer):
                 msisdn = decoded_data.get("msisdn")
 
                 if self.fetch_user:
-                    if user := request.state.db.query(User).filter(User.msisdn == msisdn).first():
+                    if (
+                        user := request.state.db.query(User)
+                        .filter(User.msisdn == msisdn)
+                        .first()
+                    ):
                         if user.refresh_token:
                             return user
                         raise  # User doesn't have a refresh_token
