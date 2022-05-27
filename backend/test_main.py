@@ -135,15 +135,25 @@ def test_get_profile():
 
 def test_reset_password():
     headers = {"Content-Type": "application/json"}
-    json = (
-        {"msisdn": msisdn, "password": new_password, "otp_confirmation": confirmation},
+    response = client.post(
+        "/api/user/reset_password",
+        json={
+            "msisdn": msisdn,
+            "password": new_password,
+            "otp_confirmation": confirmation,
+        },
+        headers=headers,
     )
-    response = client.post("/api/user/reset_password", json=json, headers=headers)
     assert response.status_code == status.HTTP_200_OK
+    db.expire_all()
     user = db.query(User).filter(User.msisdn == msisdn).first()
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:", user.password)
     assert verify_password(new_password, user.password)
-    json = ({"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},)
-    response = client.post("/api/user/reset_password", json=json, headers=headers)
+    response = client.post(
+        "/api/user/reset_password",
+        json={"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},
+        headers=headers,
+    )
 
 
 def test_wallet():
@@ -234,6 +244,8 @@ def test_logout():
     response = client.post("/api/user/logout", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
+    db.expire_all()
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     assert user.refresh_token is None
 
 
