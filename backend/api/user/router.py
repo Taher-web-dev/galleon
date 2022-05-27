@@ -10,7 +10,11 @@ from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
 from api.models.response import ApiException
-from api.user.models.request import UserCreateRequest, UserUpdateRequest
+from api.user.models.request import (
+    UserCreateRequest,
+    UserResetPasswordRequest,
+    UserUpdateRequest,
+)
 from api.user.models.response import (
     Tokens,
     TokensResponse,
@@ -64,6 +68,28 @@ async def create_user(new_user: UserCreateRequest) -> UserProfileResponse:
     )
 
 
+@router.post(
+    "/reset_password",
+    response_model=SuccessResponse,
+    response_model_exclude_none=True,
+    response_model_exclude_unset=True,
+)
+async def reset_password(reset: UserResetPasswordRequest) -> SuccessResponse:
+    """Register a new user"""
+
+    user = db.query(User).filter(User.msisdn == reset.msisdn).first()
+    if not user:
+        raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
+
+    otp = db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
+    if not (otp and otp.confirmation and otp.confirmation == reset.otp_confirmation):
+        raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
+
+    user.password = hash_password(reset.password)
+    db.commit()
+    return SuccessResponse()
+
+
 @router.get(
     "/profile",
     response_model=UserProfileResponse,
@@ -97,10 +123,7 @@ async def update_profile(
 ) -> UserProfileResponse:
     """Update user profile"""
     for key, value in user_profile.dict(exclude_unset=True, exclude_none=True).items():
-        if key == "password":
-            user.password = hash_password(value)
-        else:
-            setattr(user, key, value)
+        setattr(user, key, value)
 
     db.commit()
     db.refresh(user)

@@ -23,7 +23,7 @@ if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
     db.delete(otp)
     db.commit()
 
-otp = Otp(msisdn=msisdn, code="123", confirmation=confirmation)
+otp = Otp(msisdn=msisdn, code="123456", confirmation=confirmation)
 db.add(otp)
 db.commit()
 
@@ -132,11 +132,15 @@ def test_get_profile():
     assert response.json()["data"]["id"] == user.id
 
 
-def test_update_profile():
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.patch(
-        "/api/user/profile",
-        json={"password": new_password, "otp_confirmation": "123"},
+def test_reset_password():
+    headers = {"Content-Type": "application/json"}
+    response = client.post(
+        "/api/user/reset_password",
+        json={
+            "msisdn": msisdn,
+            "password": new_password,
+            "otp_confirmation": confirmation,
+        },
         headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
