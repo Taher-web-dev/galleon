@@ -26,3 +26,6 @@ class UserUpdateRequest(BaseModel):
     profile_pic_url: HttpUrl | None = Field(
         None, example="https://example.com/fake_pic.jpg"
     )
+    otp_confirmation: str = Field(
+        ..., regex=rgx.STRING, max_length=30, example="xwerWerQASGASAWasd"
+    )

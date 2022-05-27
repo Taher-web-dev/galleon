@@ -135,7 +135,9 @@ def test_get_profile():
 def test_update_profile():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.patch(
-        "/api/user/profile", json={"password": new_password}, headers=headers
+        "/api/user/profile",
+        json={"password": new_password, "otp_confirmation": "123"},
+        headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
     user = db.query(User).filter(User.msisdn == msisdn).first()
