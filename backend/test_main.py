@@ -252,7 +252,7 @@ def test_logout():
 def test_delete():
     test_login_user()
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.post("/api/user/delete", headers=headers)
+    response = client.delete("/api/user/delete", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert not db.query(User).filter(User.msisdn == msisdn).first()
     # print(response.json())

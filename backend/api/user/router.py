@@ -228,7 +228,7 @@ async def gen_access_token(
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_REFRESH_TOKEN)
 
 
-@router.post(
+@router.delete(
     "/delete",
     response_model=SuccessResponse,
     response_model_exclude_none=True,

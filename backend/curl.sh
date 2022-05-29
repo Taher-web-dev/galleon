@@ -34,5 +34,5 @@ echo "Get profile"
 curl -s -H $CT -H "Authorization: Bearer $TOKEN" $API_URL/user/profile | jq
 
 echo "Delete"
-curl -s -H $CT -H "Authorization: Bearer $TOKEN" -d '{}' $API_URL/user/delete | jq
+curl -s -H $CT -X DELETE -H "Authorization: Bearer $TOKEN" -d '{}' $API_URL/user/delete | jq
 
