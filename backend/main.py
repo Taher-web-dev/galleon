@@ -224,6 +224,21 @@ app.include_router(
     tags=["number"],
 )
 
+
+@app.get("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
+@app.post("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
+@app.put("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
+@app.patch("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
+@app.delete("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
+async def catchall():
+    raise ApiException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        error=Error(
+            type="catchall", code=230, message="Requested method or path is invalid"
+        ),
+    )
+
+
 if __name__ == "__main__":
     # uvicorn.run("main:app", reload=True)
     uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
