@@ -81,6 +81,17 @@ refresh_token: str = ""
 
 
 def test_login_user():
+    # login with not found msisdn
+    response = client.post(
+        "/api/user/login", json={"msisdn": "10202011", "password": password}
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    # login with wrong credentials
+    response = client.post(
+        "/api/user/login", json={"msisdn": msisdn, "password": "00000000"}
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    # login with correct credentials
     response = client.post(
         "/api/user/login", json={"msisdn": msisdn, "password": password}
     )
