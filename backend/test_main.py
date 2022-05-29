@@ -1,4 +1,3 @@
-from os import stat_result
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
