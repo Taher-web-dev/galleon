@@ -135,6 +135,23 @@ def test_update_profile():
     assert name == "someone else"
 
 
+def test_generate_token():
+    headers = {
+        "refresh-token": refresh_token,
+    }
+    response = client.post(
+        "api/user/token",
+        headers=headers,
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # when refresh_token not provided.
+    response = client.post(
+        "api/user/token",
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 def test_expired_token():
     expired_token = sign_jwt({"msisdn": msisdn}, 1)
     time.sleep(1.1)
