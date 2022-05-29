@@ -62,6 +62,17 @@ Note: You will need to repeat this command every time you change the environment
 
 `pytest -v`
 
+#### Code coverage
+
+
+```
+# Conduct coverage check 
+coverage run -m pytest
+
+# Print the report
+coverage report -m
+```
+
 #### Invoke sample apis using curl
 
 `./curl.sh`
