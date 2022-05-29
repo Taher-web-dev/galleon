@@ -12,4 +12,4 @@ class Status(str, Enum):
 class Error(BaseModel):
     type: str
     code: int
-    message: str
+    message: str | list[dict]

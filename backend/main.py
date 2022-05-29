@@ -4,7 +4,6 @@ import time
 import traceback
 import logging
 import logging.handlers
-from requests.sessions import Session
 import uvicorn
 
 # from settings import settings
@@ -17,6 +16,7 @@ from api.otp.router import router as otp
 from api.number.router import router as number
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.responses import JSONResponse
 from starlette.concurrency import iterate_in_threadpool
@@ -94,6 +94,15 @@ async def capture_body(request: Request):
 @app.exception_handler(StarletteHTTPException)
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(_, exc: RequestValidationError):
+    err = jsonable_encoder({"detail": exc.errors()})["detail"]
+    raise ApiException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        error=Error(code=422, type="validation", message=err),
+    )
 
 
 @app.get("/", include_in_schema=False, dependencies=[Depends(capture_body)])
