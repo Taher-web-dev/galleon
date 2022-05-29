@@ -1,3 +1,4 @@
+from os import stat_result
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
@@ -81,6 +82,17 @@ refresh_token: str = ""
 
 
 def test_login_user():
+    # login with not found msisdn
+    response = client.post(
+        "/api/user/login", json={"msisdn": "10202011", "password": password}
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    # login with wrong credentials
+    response = client.post(
+        "/api/user/login", json={"msisdn": msisdn, "password": "00000000"}
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    # login with correct credentials
     response = client.post(
         "/api/user/login", json={"msisdn": msisdn, "password": password}
     )
@@ -106,6 +118,39 @@ def test_validate_user():
         "/api/user/validate", headers=headers, json={"password": password}
     )
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_update_profile():
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.patch(
+        "/api/user/profile",
+        headers=headers,
+        json={"name": "someone else"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    db.expire_all()
+    name = db.query(User).filter(User.msisdn == msisdn).first().name
+    assert name == "someone else"
+
+
+def test_generate_token():
+    headers = {
+        "refresh-token": refresh_token,
+    }
+    response = client.post(
+        "api/user/token",
+        headers=headers,
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # when refresh_token not provided.
+    response = client.post(
+        "api/user/token",
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_expired_token():
@@ -149,6 +194,33 @@ def test_reset_password():
     user = db.query(User).filter(User.msisdn == msisdn).first()
     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:", user.password)
     assert verify_password(new_password, user.password)
+
+    # test user not found
+    response = client.post(
+        "/api/user/reset_password",
+        json={
+            "msisdn": "10452201111",
+            "password": password,
+            "otp_confirmation": confirmation,
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    # test wrong otp confirmation
+    response = client.post(
+        "/api/user/reset_password",
+        json={
+            "msisdn": msisdn,
+            "password": new_password,
+            "otp_confirmation": "wrongconfirmation",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+
     response = client.post(
         "/api/user/reset_password",
         json={"msisdn": msisdn, "password": password, "otp_confirmation": confirmation},
@@ -225,6 +297,11 @@ def test_request_otp():
 def test_confirm_otp():
     global confirmation
     global code
+    # Invalid msisdn
+    response = client.post(
+        "/api/otp/confirm", json={"msisdn": "00000000", "code": code}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     response = client.post("/api/otp/confirm", json={"msisdn": msisdn, "code": code})
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
@@ -232,6 +309,16 @@ def test_confirm_otp():
 
 
 def test_verify_otp():
+    # invalid msisdn
+    response = client.post(
+        "/api/otp/verify", json={"msisdn": "00000000", "confirmation": confirmation}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    # invalid confirmation
+    response = client.post(
+        "/api/otp/verify", json={"msisdn": msisdn, "confirmation": "I22Q564JqsdSD"}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     response = client.post(
         "/api/otp/verify", json={"msisdn": msisdn, "confirmation": confirmation}
     )
