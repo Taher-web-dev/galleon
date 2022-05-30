@@ -47,7 +47,6 @@ async def retrieve_subscriptions(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
-    assert msisdn == session_msisdn
     return SubscriptionsResponse(data=get_subscriptions(msisdn))
 
 
@@ -61,7 +60,6 @@ async def retrieve_wallet(
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
-    assert msisdn == session_msisdn
     return WalletResponse(data=get_wallet(msisdn))
 
 
@@ -74,7 +72,6 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ) -> RegistrationGiftResponse:
-    assert msisdn == session_msisdn
     resp = change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
@@ -91,5 +88,4 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
 ) -> ChargeVoucherResponse:
-    assert msisdn == session_msisdn
     return ChargeVoucherResponse(data=recharge_voucher(msisdn, pincode))
