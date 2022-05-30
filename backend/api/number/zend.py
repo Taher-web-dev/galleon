@@ -7,7 +7,6 @@ from typing import Any
 from pathlib import Path
 from api.models.response import ApiResponse
 from api.models.utils import build_exception, build_response
-from api.models.data import Status
 from utils.settings import settings
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
@@ -44,7 +43,10 @@ def change_supplementary_offering(
             return response.json()
 
     response = requests.post(zend_change_supplementary_offering_api, json=request_data)
-    return response
+
+    if not response.ok:
+        raise build_exception(response)
+    return build_response(response)
 
 
 def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
@@ -59,9 +61,9 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
             return response.json()
 
     response = requests.post(zend_recharge_voucher_api, json=request_data)
-    print("request_data", request_data)
-    print("response", response)
-    return response
+    if not response.ok:
+        raise build_exception(response)
+    return build_response(response)
 
 
 def zend_send_sms(msisdn: str, message: str) -> dict:

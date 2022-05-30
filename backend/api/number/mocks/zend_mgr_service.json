@@ -1,42 +1,42 @@
 {
-  "data": {
-    "subscriptions": [
-      {
-        "cycle_end": "2022-04-26 00:00:00+03:00",
-        "cycle_start": "2022-04-26 00:00:00+03:00",
-        "effective_time": "2022-01-30 15:36:46+03:00",
-        "expire_time": "2037-01-01 00:00:00+03:00",
-        "id": 200092,
-        "status": 0
-      },
-      {
-        "cycle_end": "2022-04-26 00:00:00+03:00",
-        "cycle_start": "2022-04-26 00:00:00+03:00",
-        "effective_time": "2022-03-27 12:39:42+03:00",
-        "expire_time": "2037-01-01 00:00:00+03:00",
-        "id": 214017,
-        "status": 0
-      },
-      {
-        "cycle_end": "2022-04-26 00:00:00+03:00",
-        "cycle_start": "2022-04-18 00:00:00+03:00",
-        "effective_time": "2022-04-18 13:12:29+03:00",
-        "expire_time": "2037-01-01 00:00:00+03:00",
-        "id": 55300,
-        "status": 0
-      },
-      {
-        "cycle_end": "2022-04-26 00:00:00+03:00",
-        "cycle_start": "2022-04-26 00:00:00+03:00",
-        "effective_time": "2022-01-30 15:36:46+03:00",
-        "expire_time": "2037-01-01 00:00:00+03:00",
-        "id": 100171,
-        "status": 0
+  "status": "success",
+  "data": [
+    {
+      "id": 200092,
+      "expire_time": "2114377200",
+      "status": 0,
+      "app_handling": "Invalid",
+      "offer": {
+        "name": "Offer ABC"
       }
-    ]
-  },
-  "response": {
-    "code": 405000000,
-    "message": "Operation is successful."
-  }
+    },
+    {
+      "id": 214017,
+      "expire_time": "2114377200",
+      "status": 0,
+      "app_handling": "Invalid",
+      "offer": {
+        "name": "Offer ABC"
+      }
+    },
+    {
+      "id": 55300,
+      "cycle_end": "1650927600",
+      "expire_time": "2114377200",
+      "status": 0,
+      "app_handling": "Renewing",
+      "offer": {
+        "name": "Offer ABC"
+      }
+    },
+    {
+      "id": 100171,
+      "expire_time": "2114377200",
+      "status": 0,
+      "app_handling": "Invalid",
+      "offer": {
+        "name": "Offer ABC"
+      }
+    }
+  ]
 }

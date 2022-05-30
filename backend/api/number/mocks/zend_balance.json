@@ -1,10 +1,10 @@
 {
+  "status": "success",
   "data": {
-    "amount": 22790566,
-    "validity": "2022-05-19 00:00:00+03:00"
-  },
-  "response": {
-    "code": 0,
-    "message": "Success."
+    "balance": {
+      "value": 22790,
+      "expiry": "2022-05-19T00:00:00"
+    },
+    "loan": {}
   }
 }
