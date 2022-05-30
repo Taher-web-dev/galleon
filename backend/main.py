@@ -66,16 +66,6 @@ async def app_startup():
     logger.info("Starting")
     Base.metadata.create_all(bind=engine)
 
-    # Until we handle validation errors properly
-    openapi_schema = app.openapi()
-    paths = openapi_schema["paths"]
-    for path in paths:
-        for method in paths[path]:
-            responses = paths[path][method]["responses"]
-            if responses.get("422"):
-                responses.pop("422")
-    app.openapi_schema = openapi_schema
-
 
 @app.on_event("shutdown")
 async def app_shutdown():
@@ -220,19 +210,23 @@ app.include_router(
     prefix="/api/user",
     dependencies=[Depends(capture_body)],
     tags=["user"],
+    responses=api_examples.general_response([api_examples.validation]),
 )
 app.include_router(
     otp,
     prefix="/api/otp",
     dependencies=[Depends(capture_body)],
     tags=["otp"],
+    responses=api_examples.general_response([api_examples.validation]),
 )
 app.include_router(
     number,
     prefix="/api/number",
     dependencies=[Depends(capture_body)],
     tags=["number"],
-    responses=api_examples.not_authenticated,
+    responses=api_examples.general_response(
+        [api_examples.validation, api_examples.not_authenticated]
+    ),
 )
 
 

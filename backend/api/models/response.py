@@ -54,3 +54,8 @@ class ApiException(Exception):
 class NotAuthenticatedResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = api_errors.NOT_AUTHENTICATED
+
+
+class ValidationErrorResponse(ApiResponse):
+    status: Status = Status.failed
+    error: Error = api_errors.VALIDATION_ERR
