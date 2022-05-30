@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Body, Header, status, Depends, Request
 from typing import Optional
 from api.models.response import SuccessResponse
+from api.models.data import Status
 from utils.jwt import decode_jwt, sign_jwt
 from db.models import User, Otp
 from utils.password_hashing import verify_password, hash_password
@@ -90,7 +91,7 @@ async def reset_password(
 
     user.password = hash_password(reset.password)
     request.state.db.commit()
-    return SuccessResponse()
+    return SuccessResponse(status=Status.success)
 
 
 @router.get(
@@ -183,7 +184,7 @@ async def validate(
     """Validate user password for logged-in users"""
     user = request.state.db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
-        return SuccessResponse()
+        return SuccessResponse(status=Status.success)
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
@@ -200,7 +201,7 @@ async def logout(
     """Logout (aka delete refresh token)"""
     user.refresh_token = None
     request.state.db.commit()
-    return SuccessResponse()
+    return SuccessResponse(status=Status.success)
 
 
 @router.post(
@@ -240,4 +241,4 @@ async def delete(
     """Delete user"""
     request.state.db.delete(user)
     request.state.db.commit()
-    return SuccessResponse()
+    return SuccessResponse(status=Status.success)

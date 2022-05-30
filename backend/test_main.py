@@ -117,6 +117,7 @@ def test_validate_user():
         "/api/user/validate", headers=headers, json={"password": password}
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
 
 
 def test_update_profile():
@@ -189,9 +190,9 @@ def test_reset_password():
         headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     db.expire_all()
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:", user.password)
     assert verify_password(new_password, user.password)
 
     # test user not found
@@ -340,6 +341,7 @@ def test_delete():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.delete("/api/user/delete", headers=headers)
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     assert not db.query(User).filter(User.msisdn == msisdn).first()
     # print(response.json())
 
