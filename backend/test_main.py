@@ -288,6 +288,7 @@ def test_request_otp():
     headers = {"Content-Type": "application/json"}
     response = client.post("/api/otp/request", headers=headers, json={"msisdn": msisdn})
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     # print(response.json())
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     assert otp
@@ -323,6 +324,7 @@ def test_verify_otp():
         "/api/otp/verify", json={"msisdn": msisdn, "confirmation": confirmation}
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     # print(response.json())
 
 

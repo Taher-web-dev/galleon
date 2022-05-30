@@ -3,6 +3,7 @@
 from fastapi import APIRouter, status, Request
 
 from api.models.response import SuccessResponse
+from api.models.data import Status
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from db.models import Otp
@@ -41,7 +42,7 @@ async def send_otp(request: Request, user_request: SendOTPRequest) -> SuccessRes
     request.state.db.refresh(otp)
     zend_send_sms(user_request.msisdn, f"Your otp code is {code}")
     slack_notify(user_request.msisdn, code)
-    return SuccessResponse()
+    return SuccessResponse(status=Status.success)
 
 
 @router.post(
@@ -85,5 +86,5 @@ async def verify_otp(
     otp = request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     # TODO detail more errors here: no confirmation, invalid confirmation
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
-        return SuccessResponse()
+        return SuccessResponse(status=Status.success)
     raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_OTP)
