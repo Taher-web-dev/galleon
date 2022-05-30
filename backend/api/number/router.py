@@ -46,11 +46,7 @@ async def retrieve_subscriptions(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
-    if msisdn == session_msisdn:
-        return SubscriptionsResponse(
-            status=Status.success, data=get_subscriptions(msisdn)
-        )
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
+    return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
 @router.get(
@@ -62,9 +58,7 @@ async def retrieve_wallet(
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
-    if msisdn == session_msisdn:
-        return WalletResponse(status=Status.success, data=get_wallet(msisdn))
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
+    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
     # assert msisdn == session_msisdn
 
 
@@ -76,12 +70,10 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ) -> RegistrationGiftResponse:
-    if msisdn == session_msisdn:
-        resp = change_supplementary_offering(
-            msisdn, settings.registration_gift_offer_id, True
-        )
-        return RegistrationGiftResponse(status=Status.success, data=resp)
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
+    resp = change_supplementary_offering(
+        msisdn, settings.registration_gift_offer_id, True
+    )
+    return RegistrationGiftResponse(status=Status.success, data=resp)
 
 
 @router.post(
@@ -93,8 +85,6 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
 ) -> ChargeVoucherResponse:
-    if msisdn == session_msisdn:
-        return ChargeVoucherResponse(
-            status=Status.success, data=recharge_voucher(msisdn, pincode)
-        )
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
+    return ChargeVoucherResponse(
+        status=Status.success, data=recharge_voucher(msisdn, pincode)
+    )
