@@ -15,6 +15,7 @@ from utils.settings import settings
 import utils.regex as rgx
 from api.number.models.response import (
     ChargeVoucherResponse,
+    RegistrationGiftResponse,
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
@@ -48,8 +49,11 @@ async def retrieve_subscriptions(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
-    assert msisdn == session_msisdn
-    return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
+    if msisdn == session_msisdn:
+        return SubscriptionsResponse(
+            status=Status.success, data=get_subscriptions(msisdn)
+        )
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
 
 
 @router.get(
@@ -64,7 +68,7 @@ async def retrieve_wallet(
     """Retrieve customer wallet's details (balance and load)"""
     if msisdn == session_msisdn:
         return WalletResponse(status=Status.success, data=get_wallet(msisdn))
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
     # assert msisdn == session_msisdn
 
 
@@ -76,12 +80,13 @@ async def retrieve_wallet(
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
-) -> ApiResponse:
+) -> RegistrationGiftResponse:
     if msisdn == session_msisdn:
-        return change_supplementary_offering(
+        resp = change_supplementary_offering(
             msisdn, settings.registration_gift_offer_id, True
         )
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+        return RegistrationGiftResponse(status=Status.success, data=resp)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)
 
 
 @router.post(
@@ -93,7 +98,9 @@ async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
-) -> ApiResponse:
+) -> ChargeVoucherResponse:
     if msisdn == session_msisdn:
-        return recharge_voucher(msisdn, pincode)
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+        return ChargeVoucherResponse(
+            status=Status.success, data=recharge_voucher(msisdn, pincode)
+        )
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_MSISDN)

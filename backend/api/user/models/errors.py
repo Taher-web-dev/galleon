@@ -10,6 +10,12 @@ INVALID_OTP = Error(
     message="The confirmation provided is not valid please try again.",
 )
 
+INVALID_MSISDN = Error(
+    type="number",
+    code=100,
+    message="Invalid MSISDN",
+)
+
 INVALID_CREDENTIALS = Error(
     type="auth",
     code=100,
