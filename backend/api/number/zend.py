@@ -6,7 +6,7 @@ import requests_mock
 from typing import Any
 from pathlib import Path
 from api.models.response import ApiResponse
-from api.models.utils import build_exception, build_response
+from api.models.utils import api_exception, api_response
 from utils.settings import settings
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
@@ -45,8 +45,8 @@ def change_supplementary_offering(
     response = requests.post(zend_change_supplementary_offering_api, json=request_data)
 
     if not response.ok:
-        raise build_exception(response)
-    return build_response(response)
+        raise api_exception(response)
+    return api_response(response)
 
 
 def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
@@ -62,8 +62,8 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
 
     response = requests.post(zend_recharge_voucher_api, json=request_data)
     if not response.ok:
-        raise build_exception(response)
-    return build_response(response)
+        raise api_exception(response)
+    return api_response(response)
 
 
 def zend_send_sms(msisdn: str, message: str) -> dict:
@@ -82,7 +82,7 @@ def zend_send_sms(msisdn: str, message: str) -> dict:
     )
 
     if not response.ok:
-        raise build_exception(response)
+        raise api_exception(response)
     return response.json()
 
 

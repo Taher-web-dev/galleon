@@ -6,7 +6,6 @@ zain backend systems (aka zain-backend)
 
 from fastapi import APIRouter, Body, Query, status, Depends
 from api.models.data import Status
-from api.models.utils import build_exception, build_response
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions

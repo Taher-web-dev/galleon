@@ -4,7 +4,7 @@ from .response import ApiException, ApiResponse
 from .data import Error
 
 
-def build_error(resp: Response) -> Error:
+def error_obj(resp: Response) -> Error:
     """Generate Error from zain-backend failed response"""
     json = resp.json()
     return Error(
@@ -15,12 +15,12 @@ def build_error(resp: Response) -> Error:
     )
 
 
-def build_exception(resp: Response) -> ApiException:
+def api_exception(resp: Response) -> ApiException:
     """Generate ApiException from zain-backend failed response"""
-    return ApiException(status_code=resp.status_code, error=build_error(resp))
+    return ApiException(status_code=resp.status_code, error=error_obj(resp))
 
 
-def build_response(resp: Response) -> ApiResponse:
+def api_response(resp: Response) -> ApiResponse:
     """Generate ApiResponse from zain-backend successful response"""
     json = resp.json()
     return ApiResponse(
