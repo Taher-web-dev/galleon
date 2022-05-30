@@ -188,6 +188,7 @@ async def middle(request: Request, call_next):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+    response.headers["X-Server-Time"] = datetime.now().isoformat()
 
     logger.info(
         "Processed",
