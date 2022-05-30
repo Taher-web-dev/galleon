@@ -6,6 +6,8 @@ zain backend systems (aka zain-backend)
 
 from fastapi import APIRouter, Body, Query
 from fastapi import Depends
+
+from api.models.data import Status
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
@@ -34,7 +36,7 @@ async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257")
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
-    return RetrieveStatusResponse(data=get_sim_details(msisdn))
+    return RetrieveStatusResponse(status=Status.success, data=get_sim_details(msisdn))
 
 
 @router.get(
@@ -48,7 +50,7 @@ async def retrieve_subscriptions(
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
     assert msisdn == session_msisdn
-    return SubscriptionsResponse(data=get_subscriptions(msisdn))
+    return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
 
 
 @router.get(
@@ -62,7 +64,7 @@ async def retrieve_wallet(
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     assert msisdn == session_msisdn
-    return WalletResponse(data=get_wallet(msisdn))
+    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
 
 
 @router.post(
