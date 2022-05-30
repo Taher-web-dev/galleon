@@ -25,7 +25,7 @@ from fastapi.encoders import jsonable_encoder
 from datetime import datetime
 from api.models.response import ApiResponse, ApiException
 from api.models.data import Error, Status
-
+from api.models import examples as api_examples
 
 app = FastAPI(
     title="Galleon Middleware API",
@@ -232,6 +232,7 @@ app.include_router(
     prefix="/api/number",
     dependencies=[Depends(capture_body)],
     tags=["number"],
+    responses=api_examples.not_authenticated,
 )
 
 
