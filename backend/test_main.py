@@ -95,7 +95,6 @@ def test_login_user():
     response = client.post(
         "/api/user/login", json={"msisdn": msisdn, "password": password}
     )
-    print(response.json())
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     # print(data)
@@ -287,9 +286,6 @@ def test_request_otp():
     global code
     headers = {"Content-Type": "application/json"}
     response = client.post("/api/otp/request", headers=headers, json={"msisdn": msisdn})
-    print("**************************************")
-    print(response.json())
-    print("**************************************")
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
     # print(response.json())

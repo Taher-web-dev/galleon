@@ -1,7 +1,7 @@
 {
   "status": "failed",
   "error": {
-    "type": "zend",
+    "type": "external",
     "code": 9999,
     "message": "عذرا هذا العرض غير فعال في الوقت الحاضر"
   }

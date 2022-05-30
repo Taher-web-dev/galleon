@@ -1,10 +1,4 @@
 {
   "status": "success",
-  "data": {
-    "balance": {
-      "value": 22790,
-      "expiry": "2022-05-19T00:00:00"
-    },
-    "loan": {}
-  }
+  "data": { "amount": 22790566.0, "validity": "2022-05-19T00:00:00" }
 }
