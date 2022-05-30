@@ -1,10 +1,8 @@
 {
   "status": "success",
-  "data": {
-    "status": "success",
-    "data": {
-      "response_code": 0,
-      "response_message": "Success."
-    }
-  }
+  "success": {
+    "code": 0,
+    "message": "Success."
+  },
+  "data": {}
 }
