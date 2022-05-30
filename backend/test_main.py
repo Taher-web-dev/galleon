@@ -276,17 +276,20 @@ def test_redeem_registration_gift():
     response = client.post(
         "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
-    # print(response.json())
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json().get("error").get("code") == 9999
 
 
-code: str
+code: str = "123456"
 
 
 def test_request_otp():
     global code
     headers = {"Content-Type": "application/json"}
     response = client.post("/api/otp/request", headers=headers, json={"msisdn": msisdn})
+    print("**************************************")
+    print(response.json())
+    print("**************************************")
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
     # print(response.json())
