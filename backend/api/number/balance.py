@@ -30,7 +30,7 @@ def get_wallet(msisdn: str) -> Wallet:
 
         loan = WalletEntry(value=None, expiry=None)
         for sub in raw_subscriptions:
-            if sub["id"] in NEGCRED_LOOKUP:
+            if sub["offer_id"] in NEGCRED_LOOKUP:
                 loan.value = NEGCRED_LOOKUP[sub["id"]]
                 loan.expiry = sub["cycle_end"]  # expiry_time timestamp?
                 break

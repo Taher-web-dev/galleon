@@ -6,6 +6,7 @@ zain backend systems (aka zain-backend)
 
 from fastapi import APIRouter, Body, Query, status, Depends
 from api.models.data import Status
+from api.models.utils import build_exception, build_response
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
@@ -64,16 +65,24 @@ async def retrieve_wallet(
 
 @router.post(
     "/redeem-registration-gift",
-    response_model=ApiResponse,
+    response_model=RegistrationGiftResponse,
 )
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ) -> RegistrationGiftResponse:
-    resp = change_supplementary_offering(
+
+    response = change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
-    return RegistrationGiftResponse(status=Status.success, data=resp)
+    print("response", response.json())
+
+    if not response.ok:
+        raise build_exception(response)
+
+    return RegistrationGiftResponse(
+        status=Status.success, data=build_response(response)
+    )
 
 
 @router.post(
@@ -85,6 +94,8 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
 ) -> ChargeVoucherResponse:
-    return ChargeVoucherResponse(
-        status=Status.success, data=recharge_voucher(msisdn, pincode)
-    )
+    data = recharge_voucher(msisdn, pincode)
+    print("data", data)
+    if not data.ok:
+        raise build_exception(data)
+    return ChargeVoucherResponse(status=Status.success, data=data.json())

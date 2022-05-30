@@ -8,11 +8,11 @@ from datetime import datetime
 
 class Subscription(BaseModel):
     id: int = Field(None, example=991)
-    cycle_start: str = Field("", example="2022-04-26 00:00:00+03:00")
-    cycle_end: str = Field("", example="2022-04-18 00:00:00+03:00")
-    effective_time: str = Field("", example="2022-04-18 13:12:29+03:00")
+    cycle_start: str = Field(None, example="2022-04-26 00:00:00+03:00")
+    cycle_end: str = Field(None, example="2022-04-18 00:00:00+03:00")
+    effective_time: str = Field(None, example="2022-04-18 13:12:29+03:00")
     expire_time: str = Field(
-        "",
+        None,
         example="2037-01-01 00:00:00+03:00",
     )
     status: int = Field(None, example=0)
@@ -21,10 +21,9 @@ class Subscription(BaseModel):
     offer: dict = {}
 
     def load(self, raw: dict[str, Any]):
-        print("BEGIN load")
         self.status = int(raw.get("status", 0))
 
-        self.id = raw["id"]
+        self.id = raw["offer_id"]
         if "expire_time" in raw and raw["expire_time"]:
             self.expire_time = int(
                 datetime.fromisoformat(raw["expire_time"]).timestamp()
@@ -48,17 +47,24 @@ class Subscription(BaseModel):
         # not an expired or soon-to-be expired offer
         # print(self.id, self.cycle_end, self.status, self.expire_time)
         # print(int(datetime.today().timestamp()))
+        # 2022-04-18 00:00:00+03:00
         return (
             # TODO disscuss this
-            self.cycle_end < self.expire_time
-            and self.status != 2
-            and self.expire_time >= int(datetime.today().timestamp())
+            # not self.cycle_end
+            # and not self.expire_time
+            # and datetime.fromisoformat(self.cycle_end)
+            # < datetime.fromisoformat(self.expire_time)
+            # and self.status != 2
+            # and self.expire_time >= int(datetime.today().timestamp())
+            True
         )
 
     def get_app_handling(self) -> str:
         """How the app should handle an offer"""
-        print("expire_time:", self.expire_time)
-        print("cycle_end:", self.cycle_end)
+
+        if not self.cycle_end or not self.expire_time:
+            return "Invalid"
+
         if self.status == 0:
             if self.expire_time == self.cycle_end:
                 return "Expiring"
@@ -89,11 +95,12 @@ def get_subscriptions(msisdn: str) -> list[Subscription]:
     subscriptions: list[Subscription] = []
 
     for raw in raw_subscriptions:
-        print("BEGIN raw")
         subscription = Subscription().load(raw)
+
         if subscription.is_relevant():
             subscriptions.append(subscription)
-        print("END raw")
+
+    print("subscriptions:", subscriptions)
     return subscriptions
 
 
