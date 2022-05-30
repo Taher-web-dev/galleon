@@ -1,7 +1,7 @@
 from requests import Response
 
 from .response import ApiException, ApiResponse
-from .data import Error
+from .data import Error, Success
 
 
 def error_obj(resp: Response) -> Error:
@@ -25,6 +25,6 @@ def api_response(resp: Response) -> ApiResponse:
     json = resp.json()
     return ApiResponse(
         status=json.get("status"),
-        success=json.get("success"),
+        success=Success(**json.get("success")),
         data=json.get("data"),
     )
