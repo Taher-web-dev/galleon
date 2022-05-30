@@ -33,7 +33,7 @@ async def retrieve_status(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257")
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
-    return RetrieveStatusResponse(status=Status.success, data=get_sim_details(msisdn))
+    return RetrieveStatusResponse(data=get_sim_details(msisdn))
 
 
 @router.get(
@@ -45,7 +45,7 @@ async def retrieve_subscriptions(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
-    return SubscriptionsResponse(status=Status.success, data=get_subscriptions(msisdn))
+    return SubscriptionsResponse(data=get_subscriptions(msisdn))
 
 
 @router.get(
@@ -57,7 +57,7 @@ async def retrieve_wallet(
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
-    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
+    return WalletResponse(data=get_wallet(msisdn))
     # assert msisdn == session_msisdn
 
 

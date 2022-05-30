@@ -190,6 +190,7 @@ def test_reset_password():
     )
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
+    # print(response)
     db.expire_all()
     user = db.query(User).filter(User.msisdn == msisdn).first()
     assert verify_password(new_password, user.password)

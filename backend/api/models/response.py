@@ -29,15 +29,6 @@ class ApiResponse(BaseModel):
                 schema.get("properties").pop("success")
 
 
-class SuccessResponse(ApiResponse):
-    class Config:
-        schema_extra = {
-            "example": {
-                "status": "success",
-            }
-        }
-
-
 # ================================== ErrorResponse Models
 class ApiException(Exception):
     """Exception customized to acts as an ErrorResponse"""

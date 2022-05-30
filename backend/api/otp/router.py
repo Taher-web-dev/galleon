@@ -2,8 +2,7 @@
 
 from fastapi import APIRouter, status, Request
 
-from api.models.response import SuccessResponse
-from api.models.data import Status
+from api.models.response import ApiResponse
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from db.models import Otp
@@ -22,11 +21,11 @@ router = APIRouter()
 
 @router.post(
     "/request",
-    response_model=SuccessResponse,
+    response_model=ApiResponse,
     response_model_exclude_none=True,
     responses=examples.request_otp,
 )
-async def send_otp(request: Request, user_request: SendOTPRequest) -> SuccessResponse:
+async def send_otp(request: Request, user_request: SendOTPRequest) -> ApiResponse:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
@@ -42,7 +41,7 @@ async def send_otp(request: Request, user_request: SendOTPRequest) -> SuccessRes
     request.state.db.refresh(otp)
     zend_send_sms(user_request.msisdn, f"Your otp code is {code}")
     slack_notify(user_request.msisdn, code)
-    return SuccessResponse(status=Status.success)
+    return ApiResponse()
 
 
 @router.post(
@@ -68,7 +67,6 @@ async def confirm(
             request.state.db.commit()
             request.state.db.refresh(otp)
             return ConfirmationResponse(
-                status=Status.success,
                 data=Confirmation(confirmation=otp.confirmation),
             )
     raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_OTP)
@@ -76,16 +74,14 @@ async def confirm(
 
 @router.post(
     "/verify",
-    response_model=SuccessResponse,
+    response_model=ApiResponse,
     response_model_exclude_none=True,
     responses=examples.verify_otp,
 )
-async def verify_otp(
-    request: Request, user_request: VerifyOTPRequest
-) -> SuccessResponse:
+async def verify_otp(request: Request, user_request: VerifyOTPRequest) -> ApiResponse:
     """Verify otp status (internal use)"""
     otp = request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     # TODO detail more errors here: no confirmation, invalid confirmation
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
-        return SuccessResponse(status=Status.success)
+        return ApiResponse()
     raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_OTP)
