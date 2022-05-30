@@ -4,9 +4,7 @@ This is the middle-ware that connects with
 zain backend systems (aka zain-backend)
 """
 
-from fastapi import APIRouter, Body, Query
-from fastapi import Depends
-
+from fastapi import APIRouter, Body, Query, status, Depends
 from api.models.data import Status
 from .balance import get_wallet
 from .sim import get_sim_details
@@ -22,7 +20,8 @@ from api.number.models.response import (
     WalletResponse,
 )
 from api.models import examples as api_examples
-from api.models.response import ApiResponse
+from api.models.response import ApiException, ApiResponse
+import api.user.models.errors as err
 
 router = APIRouter()
 
@@ -63,8 +62,10 @@ async def retrieve_wallet(
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
-    assert msisdn == session_msisdn
-    return WalletResponse(status=Status.success, data=get_wallet(msisdn))
+    if msisdn == session_msisdn:
+        return WalletResponse(status=Status.success, data=get_wallet(msisdn))
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    # assert msisdn == session_msisdn
 
 
 @router.post(
@@ -76,10 +77,11 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    assert msisdn == session_msisdn
-    return change_supplementary_offering(
-        msisdn, settings.registration_gift_offer_id, True
-    )
+    if msisdn == session_msisdn:
+        return change_supplementary_offering(
+            msisdn, settings.registration_gift_offer_id, True
+        )
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.post(
@@ -92,5 +94,6 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    assert msisdn == session_msisdn
-    return recharge_voucher(msisdn, pincode)
+    if msisdn == session_msisdn:
+        return recharge_voucher(msisdn, pincode)
+    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
