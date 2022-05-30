@@ -60,6 +60,7 @@ async def create_user(
     request.state.db.commit()
     user = request.state.db.query(User).filter(User.msisdn == new_user.msisdn).first()
     return UserProfileResponse(
+        status=Status.success,
         data=UserProfile(
             id=user.id,
             name=user.name,
@@ -106,6 +107,7 @@ async def get_user_profile(
     """Get user profile"""
 
     return UserProfileResponse(
+        status=Status.success,
         data=UserProfile(
             id=user.id,
             msisdn=user.msisdn,
@@ -135,6 +137,7 @@ async def update_profile(
     request.state.db.refresh(user)
 
     return UserProfileResponse(
+        status=Status.success,
         data=UserProfile(
             id=user.id,
             msisdn=user.msisdn,
@@ -164,7 +167,11 @@ async def login(
         user.refresh_token = refresh_token
         request.state.db.commit()
         return TokensResponse(
-            data=Tokens(refresh_token=refresh_token, access_token=access_token),
+            data=Tokens(
+                status=Status.success,
+                refresh_token=refresh_token,
+                access_token=access_token,
+            ),
         )
 
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
@@ -223,6 +230,7 @@ async def gen_access_token(
             if user is not None:
                 access_token = sign_jwt({"msisdn": msisdn})
                 return TokensResponse(
+                    status=Status.success,
                     data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
 

@@ -68,6 +68,7 @@ async def confirm(
             request.state.db.commit()
             request.state.db.refresh(otp)
             return ConfirmationResponse(
+                status=Status.success,
                 data=Confirmation(confirmation=otp.confirmation),
             )
     raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_OTP)
