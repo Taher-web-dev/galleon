@@ -11,10 +11,12 @@ class ApiResponse(BaseModel):
     status: Status = Status.success
     error: Optional[Error] = None
     data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
+    meta: Optional[Dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
-        return super().dict(*args, exclude_none=True, **kwargs)
+        kwargs.pop("exclude_unset")
+        return super().dict(*args, exclude_none=True, exclude_unset=True, **kwargs)
 
     class Config:
         use_enum_values = True

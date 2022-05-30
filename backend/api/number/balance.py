@@ -35,7 +35,7 @@ def get_wallet(msisdn: str) -> Wallet:
                 loan.expiry = sub["cycle_end"]  # expiry_time timestamp?
                 break
 
-        amount = int(raw_balance["amount"]) // 1000  # convert from Fils to IQD
+        amount = int(raw_balance["amount"]) // 1_000  # convert from Fils to IQD
         balance = WalletEntry(value=amount, expiry=str(raw_balance["validity"]))
         return Wallet(balance=balance, loan=loan)
     except JSONDecodeError as ex:

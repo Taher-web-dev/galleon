@@ -18,9 +18,9 @@ from api.number.models.response import (
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,
-    RegistrationGiftResponse,
 )
 from api.models import examples as api_examples
+from api.models.response import ApiResponse
 
 router = APIRouter()
 
@@ -67,29 +67,28 @@ async def retrieve_wallet(
 
 @router.post(
     "/redeem-registration-gift",
-    response_model=RegistrationGiftResponse,
+    response_model=ApiResponse,
     responses=api_examples.not_authenticated,
 )
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
     session_msisdn=Depends(JWTBearer()),
-) -> RegistrationGiftResponse:
+) -> ApiResponse:
     assert msisdn == session_msisdn
-    resp = change_supplementary_offering(
+    return change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
-    return RegistrationGiftResponse(data=resp)
 
 
 @router.post(
     "/charge-voucher",
-    response_model=ChargeVoucherResponse,
+    response_model=ApiResponse,
     responses=api_examples.not_authenticated,
 )
 async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN),
     pincode: str = Body(..., regex=rgx.DIGITS),
     session_msisdn=Depends(JWTBearer()),
-) -> ChargeVoucherResponse:
+) -> ApiResponse:
     assert msisdn == session_msisdn
-    return ChargeVoucherResponse(data=recharge_voucher(msisdn, pincode))
+    return recharge_voucher(msisdn, pincode)

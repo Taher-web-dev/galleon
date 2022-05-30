@@ -5,10 +5,12 @@ import requests
 import requests_mock
 from typing import Any
 from pathlib import Path
+from api.models.response import ApiResponse
+from api.models.utils import build_exception, build_response
 from utils.settings import settings
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
-zend_sim_api = f"{settings.zend_api}esb/query-subscriber-information/"
+zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
 zend_recharge_voucher_api = f"{settings.zend_api}esb/recharge-voucher/"
 zend_subscriptions_api = f"{settings.zend_api}cbs/query-mgr-service/"
 zend_send_sms_api = f"{settings.zend_api}sms/send/"
@@ -21,7 +23,7 @@ path = f"{os.path.dirname(__file__)}/mocks/"
 
 def change_supplementary_offering(
     msisdn: str, offer_id: str, add_offering: bool
-) -> dict:
+) -> ApiResponse:
     request_data = {
         "msisdn": msisdn,
         "offer_id": offer_id,
@@ -41,10 +43,12 @@ def change_supplementary_offering(
             return response.json()
 
     response = requests.post(zend_change_supplementary_offering_api, json=request_data)
-    return response.json()
+    if not response.ok:
+        raise build_exception(response)
+    return build_response(response)
 
 
-def recharge_voucher(msisdn: str, pin: str) -> dict:
+def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
     request_data = {"msisdn": msisdn, "pin": pin}
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
@@ -56,7 +60,10 @@ def recharge_voucher(msisdn: str, pin: str) -> dict:
             return response.json()
 
     response = requests.post(zend_recharge_voucher_api, json=request_data)
-    return response.json()
+
+    if not response.ok:
+        raise build_exception(response)
+    return build_response(response)
 
 
 def zend_send_sms(msisdn: str, message: str) -> dict:
@@ -73,6 +80,9 @@ def zend_send_sms(msisdn: str, message: str) -> dict:
     response = requests.post(
         zend_send_sms_api, json={"msisdn": msisdn, "message": message}
     )
+
+    if not response.ok:
+        raise build_exception(response)
     return response.json()
 
 
