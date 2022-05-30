@@ -50,13 +50,12 @@ class Subscription(BaseModel):
         # 2022-04-18 00:00:00+03:00
         return (
             # TODO disscuss this
-            # not self.cycle_end
-            # and not self.expire_time
-            # and datetime.fromisoformat(self.cycle_end)
-            # < datetime.fromisoformat(self.expire_time)
-            # and self.status != 2
-            # and self.expire_time >= int(datetime.today().timestamp())
-            True
+            not self.cycle_end
+            and not self.expire_time
+            and datetime.fromisoformat(self.cycle_end)
+            < datetime.fromisoformat(self.expire_time)
+            and self.status != 2
+            and self.expire_time >= int(datetime.today().timestamp())
         )
 
     def get_app_handling(self) -> str:
