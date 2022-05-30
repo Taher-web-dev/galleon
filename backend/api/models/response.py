@@ -11,7 +11,7 @@ class ApiResponse(BaseModel):
     status: Status = Status.success
     error: Optional[Error] = None
     data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
-    meta: Optional[Dict[str, Any]] | Optional[BaseModel] = None
+    success: Optional[Dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
@@ -25,8 +25,9 @@ class ApiResponse(BaseModel):
         def schema_extra(schema, model) -> None:
             if schema.get("properties")["status"]["default"] == "success":
                 schema.get("properties").pop("error")
-            elif schema.get("properties")["status"]["default"] == "failed":
+            if schema.get("properties")["status"]["default"] == "failed":
                 schema.get("properties").pop("data")
+                schema.get("properties").pop("success")
 
 
 class SuccessResponse(ApiResponse):

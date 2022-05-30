@@ -25,6 +25,6 @@ def api_response(resp: Response) -> ApiResponse:
     json = resp.json()
     return ApiResponse(
         status=json.get("status"),
+        success=json.get("meta"),
         data=json.get("data"),
-        meta=json.get("meta"),
     )
