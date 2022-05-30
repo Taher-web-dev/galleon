@@ -9,9 +9,9 @@ class ApiResponse(BaseModel):
     """The base ApiResponse model"""
 
     status: Status = Status.success
+    success: Optional[Dict[str, Any]] | Optional[BaseModel] = None
     error: Optional[Error] = None
     data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
-    success: Optional[Dict[str, Any]] | Optional[BaseModel] = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
