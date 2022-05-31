@@ -264,7 +264,7 @@ def test_charge_voucher():
         headers=headers,
         json={"msisdn": msisdn, "pincode": 1111},
     )
-    assert response.status_code == status.HTTP_200_OK, response.json()
+    assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
 
