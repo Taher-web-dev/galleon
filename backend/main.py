@@ -35,7 +35,7 @@ app = FastAPI(
 * APIs with the 🔒 'lock' icon, require the http header `Authorization: Bearer ABC`.
 * Invoke the login api and use the returned access token in the Authorization form button in the upper right section of this documentation.
 * All the api responses are in application/json format.
-* All apis also return X-Server-Time as  http header response, the value of which is iso-formatted server timestamp. 
+* All apis also return X-Server-Time as  http header response, the value of which is iso-formatted server timestamp.
     """,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
@@ -66,7 +66,6 @@ json_logging.init_request_instrument(app)
 @app.on_event("startup")
 async def app_startup():
     logger.info("Starting")
-    Base.metadata.create_all(bind=engine)
 
 
 @app.on_event("shutdown")
@@ -122,16 +121,13 @@ async def middle(request: Request, call_next):
         "key" in request.query_params
         and settings.api_key == request.query_params["key"]
     ):
-        request.state.db = SessionLocal()
         try:
-            # TODO: look into this for more details.
             response = await call_next(request)
             raw_response = [section async for section in response.body_iterator]
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
             response_body = json.loads(b"".join(raw_response))
 
         except ApiException as ex:
-            request.state.db.rollback()
             response = JSONResponse(
                 status_code=ex.status_code,
                 content=jsonable_encoder(
@@ -140,7 +136,6 @@ async def middle(request: Request, call_next):
             )
 
         except Exception as ex:
-            request.state.db.rollback()
             # ex = sys.exc_info()[1]
             if ex:
                 stack = [
@@ -162,8 +157,6 @@ async def middle(request: Request, call_next):
                     )
                 ),
             )
-        finally:
-            request.state.db.close()
 
     else:
         response = JSONResponse(

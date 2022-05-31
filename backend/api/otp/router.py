@@ -1,8 +1,9 @@
 """ OTP api set """
 
-from fastapi import APIRouter, status, Request
-
+from fastapi import APIRouter, status, Depends
+from sqlalchemy.orm import Session
 from api.models.response import ApiResponse
+from db.main import get_db
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
 from db.models import Otp
@@ -25,20 +26,22 @@ router = APIRouter()
     response_model_exclude_none=True,
     responses=examples.request_otp,
 )
-async def send_otp(request: Request, user_request: SendOTPRequest) -> ApiResponse:
+async def send_otp(
+    user_request: SendOTPRequest, db: Session = Depends(get_db)
+) -> ApiResponse:
     """Request new Otp"""
 
     # If a prior otp exists, delete it.
-    otp = request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp:
-        request.state.db.delete(otp)
-        request.state.db.commit()
+        db.delete(otp)
+        db.commit()
 
     code = "123456"  # FIXME this should be used  in production: gen_numeric()
     otp = Otp(msisdn=user_request.msisdn, code=code)
-    request.state.db.add(otp)
-    request.state.db.commit()
-    request.state.db.refresh(otp)
+    db.add(otp)
+    db.commit()
+    db.refresh(otp)
     zend_send_sms(user_request.msisdn, f"Your otp code is {code}")
     slack_notify(user_request.msisdn, code)
     return ApiResponse()
@@ -51,21 +54,17 @@ async def send_otp(request: Request, user_request: SendOTPRequest) -> ApiRespons
     responses=examples.confirm_otp,
 )
 async def confirm(
-    request: Request, user_request: ConfirmOTPRequest
+    user_request: ConfirmOTPRequest, db: Session = Depends(get_db)
 ) -> ConfirmationResponse:
     """Confirm Otp"""
-    if (
-        otp := request.state.db.query(Otp)
-        .filter(Otp.msisdn == user_request.msisdn)
-        .first()
-    ):
+    if otp := db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first():
         otp.tries += 1
-        request.state.db.commit()
-        request.state.db.refresh(otp)
+        db.commit()
+        db.refresh(otp)
         if otp.code == user_request.code:
             otp.confirmation = gen_alphanumeric()
-            request.state.db.commit()
-            request.state.db.refresh(otp)
+            db.commit()
+            db.refresh(otp)
             return ConfirmationResponse(
                 data=Confirmation(confirmation=otp.confirmation),
             )
@@ -78,9 +77,11 @@ async def confirm(
     response_model_exclude_none=True,
     responses=examples.verify_otp,
 )
-async def verify_otp(request: Request, user_request: VerifyOTPRequest) -> ApiResponse:
+async def verify_otp(
+    user_request: VerifyOTPRequest, db: Session = Depends(get_db)
+) -> ApiResponse:
     """Verify otp status (internal use)"""
-    otp = request.state.db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     # TODO detail more errors here: no confirmation, invalid confirmation
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
         return ApiResponse()

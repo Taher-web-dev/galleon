@@ -1,9 +1,9 @@
 """ Create database example """
 
-from db import engine, Base, db
+from db.main import SessionLocal
 from db.models import Otp, User
 
-Base.metadata.create_all(bind=engine)
+db = SessionLocal()
 
 msisdn = "905070704747"
 user = User(name="Ali baba", email="Hello6", msisdn=msisdn, password="World")

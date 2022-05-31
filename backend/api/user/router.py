@@ -1,6 +1,8 @@
 """ User management apis """
 
-from fastapi import APIRouter, Body, Header, status, Depends, Request
+from fastapi import APIRouter, Body, Header, status, Depends
+from db.main import get_db
+from sqlalchemy.orm import Session
 from typing import Optional
 from api.models.response import ApiResponse
 from utils.jwt import decode_jwt, sign_jwt
@@ -34,15 +36,15 @@ router = APIRouter()
     responses=examples.create_user,
 )
 async def create_user(
-    new_user: UserCreateRequest, request: Request
+    new_user: UserCreateRequest, db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """Register a new user"""
 
-    user = request.state.db.query(User).filter(User.msisdn == new_user.msisdn).first()
+    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.USER_EXISTS)
 
-    otp = request.state.db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
@@ -54,9 +56,9 @@ async def create_user(
         profile_pic_url=new_user.profile_pic_url,
     )
 
-    request.state.db.add(user)
-    request.state.db.commit()
-    user = request.state.db.query(User).filter(User.msisdn == new_user.msisdn).first()
+    db.add(user)
+    db.commit()
+    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
@@ -72,20 +74,20 @@ async def create_user(
     "/reset_password", response_model=ApiResponse, response_model_exclude_none=True
 )
 async def reset_password(
-    reset: UserResetPasswordRequest, request: Request
+    reset: UserResetPasswordRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
     """Register a new user"""
 
-    user = request.state.db.query(User).filter(User.msisdn == reset.msisdn).first()
+    user = db.query(User).filter(User.msisdn == reset.msisdn).first()
     if not user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
 
-    otp = request.state.db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
+    otp = db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
     if not (otp and otp.confirmation and otp.confirmation == reset.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
     user.password = hash_password(reset.password)
-    request.state.db.commit()
+    db.commit()
     return ApiResponse()
 
 
@@ -118,16 +120,16 @@ async def get_user_profile(
     responses=examples.update_profile,
 )
 async def update_profile(
-    request: Request,
     user_profile: UserUpdateRequest,
     user=Depends(JWTBearer(fetch_user=True)),
+    db: Session = Depends(get_db),
 ) -> UserProfileResponse:
     """Update user profile"""
     for key, value in user_profile.dict(exclude_none=True).items():
         setattr(user, key, value)
 
-    request.state.db.commit()
-    request.state.db.refresh(user)
+    db.commit()
+    db.refresh(user)
 
     return UserProfileResponse(
         data=UserProfile(
@@ -147,17 +149,17 @@ async def update_profile(
     responses=examples.login,
 )
 async def login(
-    request: Request,
     msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
+    db: Session = Depends(get_db),
 ) -> TokensResponse:
     """Login and generate refresh token"""
-    user = request.state.db.query(User).filter(User.msisdn == msisdn).first()
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
         refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
         user.refresh_token = refresh_token
-        request.state.db.commit()
+        db.commit()
         return TokensResponse(
             data=Tokens(
                 refresh_token=refresh_token,
@@ -175,12 +177,12 @@ async def login(
     responses=examples.login,
 )
 async def validate(
-    request: Request,
+    db: Session = Depends(get_db),
     msisdn=Depends(JWTBearer()),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
 ) -> ApiResponse:
     """Validate user password for logged-in users"""
-    user = request.state.db.query(User).filter(User.msisdn == msisdn).first()
+    user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         return ApiResponse()
 
@@ -194,11 +196,11 @@ async def validate(
     responses=examples.logout,
 )
 async def logout(
-    request: Request, user=Depends(JWTBearer(fetch_user=True))
+    user=Depends(JWTBearer(fetch_user=True)), db: Session = Depends(get_db)
 ) -> ApiResponse:
     """Logout (aka delete refresh token)"""
     user.refresh_token = None
-    request.state.db.commit()
+    db.commit()
     return ApiResponse()
 
 
@@ -209,15 +211,14 @@ async def logout(
     responses=examples.refresh_token,
 )
 async def gen_access_token(
-    request: Request,
-    refresh_token: Optional[str] = Header(None),
+    refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
     if refresh_token is not None:
         data = decode_jwt(refresh_token)
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
-            user = request.state.db.query(User).filter(User.msisdn == msisdn).first()
+            user = db.query(User).filter(User.msisdn == msisdn).first()
             if user is not None:
                 access_token = sign_jwt({"msisdn": msisdn})
                 return TokensResponse(
@@ -234,9 +235,9 @@ async def gen_access_token(
     responses=examples.delete,
 )
 async def delete(
-    request: Request, user=Depends(JWTBearer(fetch_user=True))
+    user=Depends(JWTBearer(fetch_user=True)), db: Session = Depends(get_db)
 ) -> ApiResponse:
     """Delete user"""
-    request.state.db.delete(user)
-    request.state.db.commit()
+    db.delete(user)
+    db.commit()
     return ApiResponse()
