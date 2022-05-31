@@ -10,11 +10,10 @@ import uvicorn
 import json_logging
 from db.main import Base, engine, SessionLocal
 from utils.settings import settings
-import inspect
 from api.user.router import router as user
 from api.otp.router import router as otp
 from api.number.router import router as number
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, Depends, status
@@ -35,7 +34,7 @@ app = FastAPI(
 * APIs with the 🔒 'lock' icon, require the http header `Authorization: Bearer ABC`.
 * Invoke the login api and use the returned access token in the Authorization form button in the upper right section of this documentation.
 * All the api responses are in application/json format.
-* All apis also return X-Server-Time as  http header response, the value of which is iso-formatted server timestamp. 
+* All apis also return X-Server-Time as  http header response, the value of which is iso-formatted server timestamp.
     """,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
@@ -88,12 +87,11 @@ async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
 
 
-@app.exception_handler(IntegrityError)
-async def my_exception_handler(_, exception):
-    err = exception.orig.diag
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(_, exception: SQLAlchemyError):
     raise ApiException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        error=Error(message=err.message_detail, code=400, type="constraint"),
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        error=Error(type="SQLAlchemyError", code=500, message=str(exception)),
     )
 
 
