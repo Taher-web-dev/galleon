@@ -276,8 +276,9 @@ def test_redeem_registration_gift():
     response = client.post(
         "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json().get("error").get("code") == 9999
+    assert response.status_code == status.HTTP_200_OK
+    print(response.json())
+    assert response.json().get("status") == "success"
 
 
 code: str = "123456"

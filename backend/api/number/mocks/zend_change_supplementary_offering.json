@@ -1,8 +1,8 @@
 {
-  "status": "failed",
-  "error": {
+  "status": "success",
+  "success": {
     "type": "external",
-    "code": 9999,
-    "message": "عذرا هذا العرض غير فعال في الوقت الحاضر"
+    "code": 0,
+    "message": "Success."
   }
 }
