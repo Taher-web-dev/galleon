@@ -1,1 +1,8 @@
-    {"response_code": "123", "response_message": "All good"}
+{
+  "status": "success",
+  "success": {
+    "code": 0,
+    "message": "Success."
+  },
+  "data": {}
+}

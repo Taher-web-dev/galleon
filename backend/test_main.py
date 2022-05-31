@@ -95,7 +95,6 @@ def test_login_user():
     response = client.post(
         "/api/user/login", json={"msisdn": msisdn, "password": password}
     )
-    print(response.json())
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     # print(data)
@@ -117,6 +116,7 @@ def test_validate_user():
         "/api/user/validate", headers=headers, json={"password": password}
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
 
 
 def test_update_profile():
@@ -189,9 +189,10 @@ def test_reset_password():
         headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
+    # print(response)
     db.expire_all()
     user = db.query(User).filter(User.msisdn == msisdn).first()
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:", user.password)
     assert verify_password(new_password, user.password)
 
     # test user not found
@@ -275,11 +276,11 @@ def test_redeem_registration_gift():
     response = client.post(
         "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
-    # print(response.json())
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json().get("error").get("code") == 9999
 
 
-code: str
+code: str = "123456"
 
 
 def test_request_otp():
@@ -287,6 +288,7 @@ def test_request_otp():
     headers = {"Content-Type": "application/json"}
     response = client.post("/api/otp/request", headers=headers, json={"msisdn": msisdn})
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     # print(response.json())
     otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
     assert otp
@@ -322,6 +324,7 @@ def test_verify_otp():
         "/api/otp/verify", json={"msisdn": msisdn, "confirmation": confirmation}
     )
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     # print(response.json())
 
 
@@ -340,6 +343,7 @@ def test_delete():
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.delete("/api/user/delete", headers=headers)
     assert response.status_code == status.HTTP_200_OK
+    assert {"status": "success"} == response.json()
     assert not db.query(User).filter(User.msisdn == msisdn).first()
     # print(response.json())
 

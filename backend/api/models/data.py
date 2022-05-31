@@ -13,3 +13,8 @@ class Error(BaseModel):
     type: str
     code: int
     message: str | list[dict]
+
+
+class Success(BaseModel):
+    code: int | str
+    message: str

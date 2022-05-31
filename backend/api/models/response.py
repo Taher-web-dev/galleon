@@ -1,7 +1,7 @@
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from pydantic import BaseModel
 import api.models.errors as api_errors
-from .data import Status, Error
+from .data import Status, Error, Success
 
 
 # ================================== Response Models
@@ -9,8 +9,9 @@ class ApiResponse(BaseModel):
     """The base ApiResponse model"""
 
     status: Status = Status.success
-    error: Optional[Error] = None
-    data: Optional[Dict[str, Any]] | Optional[BaseModel] = None
+    success: Success | Dict[str, Any] | BaseModel | None = None
+    error: Error | None = None
+    data: Dict[str, Any] | BaseModel | None = None
 
     def dict(self, *args, **kwargs) -> dict[str, Any]:
         kwargs.pop("exclude_none")
@@ -23,17 +24,9 @@ class ApiResponse(BaseModel):
         def schema_extra(schema, model) -> None:
             if schema.get("properties")["status"]["default"] == "success":
                 schema.get("properties").pop("error")
-            elif schema.get("properties")["status"]["default"] == "failed":
+            if schema.get("properties")["status"]["default"] == "failed":
                 schema.get("properties").pop("data")
-
-
-class SuccessResponse(ApiResponse):
-    class Config:
-        schema_extra = {
-            "example": {
-                "status": "success",
-            }
-        }
+                schema.get("properties").pop("success")
 
 
 # ================================== ErrorResponse Models
@@ -52,3 +45,8 @@ class ApiException(Exception):
 class NotAuthenticatedResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = api_errors.NOT_AUTHENTICATED
+
+
+class ValidationErrorResponse(ApiResponse):
+    status: Status = Status.failed
+    error: Error = api_errors.VALIDATION_ERR

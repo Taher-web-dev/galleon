@@ -30,12 +30,12 @@ def get_wallet(msisdn: str) -> Wallet:
 
         loan = WalletEntry(value=None, expiry=None)
         for sub in raw_subscriptions:
-            if sub["id"] in NEGCRED_LOOKUP:
+            if sub["offer_id"] in NEGCRED_LOOKUP:
                 loan.value = NEGCRED_LOOKUP[sub["id"]]
                 loan.expiry = sub["cycle_end"]  # expiry_time timestamp?
                 break
 
-        amount = int(raw_balance["amount"]) // 1000  # convert from Fils to IQD
+        amount = int(raw_balance["amount"]) // 1_000  # convert from Fils to IQD
         balance = WalletEntry(value=amount, expiry=str(raw_balance["validity"]))
         return Wallet(balance=balance, loan=loan)
     except JSONDecodeError as ex:

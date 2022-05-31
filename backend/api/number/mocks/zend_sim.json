@@ -1,16 +1,25 @@
 {
+  "status": "success",
   "data": {
-    "activation_date": "2022-01-30 16:00:25+03:00",
+    "primary_offering_id": 2122764,
     "cbs_status_code": 1,
     "crm_status_code": "B01",
     "crm_status_details": "Normal",
+    "activation_date": "2022-01-30T16:00:25",
+    "expiry_date": "2022-05-19T00:00:00",
     "customer_type": "Individual",
-    "expiry_date": "2022-05-19 00:00:00+03:00",
-    "primary_offering_id": 2122764,
-    "subscriber_type": 0
-  },
-  "response": {
-    "code": 0,
-    "message": "Success."
+    "subscriber_type": 0,
+    "unified_sim_status": "BLOCK_INELIGIBLE_PRIMARY_OFFERING",
+    "is_4g_compatible": true,
+    "nba": {
+      "href": "https://apps.iq.zain.com/zain-fi",
+      "message_en": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
+      "message_ar": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
+      "message_kd": "Hello {{customer_name}}, did you hear about our new Zain-Fi app?",
+      "href_text_en": "View app",
+      "href_text_ar": "View app",
+      "href_text_kd": "View app"
+    },
+    "associated_with_user": false
   }
 }
