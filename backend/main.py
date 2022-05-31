@@ -10,11 +10,11 @@ import uvicorn
 import json_logging
 from db.main import Base, engine, SessionLocal
 from utils.settings import settings
-
+import inspect
 from api.user.router import router as user
 from api.otp.router import router as otp
 from api.number.router import router as number
-
+from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, Depends, status
@@ -86,6 +86,15 @@ async def capture_body(request: Request):
 @app.exception_handler(StarletteHTTPException)
 async def my_exception_handler(_, exception):
     return JSONResponse(content=exception.detail, status_code=exception.status_code)
+
+
+@app.exception_handler(IntegrityError)
+async def my_exception_handler(_, exception):
+    err = exception.orig.diag
+    raise ApiException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        error=Error(message=err.message_detail, code=400, type="constraint"),
+    )
 
 
 @app.exception_handler(RequestValidationError)
