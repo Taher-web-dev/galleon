@@ -34,6 +34,8 @@ app = FastAPI(
 
 * APIs with the 🔒 'lock' icon, require the http header `Authorization: Bearer ABC`.
 * Invoke the login api and use the returned access token in the Authorization form button in the upper right section of this documentation.
+* All the api responses are in application/json format.
+* All apis also return X-Server-Time as  http header response, the value of which is iso-formatted server timestamp. 
     """,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
