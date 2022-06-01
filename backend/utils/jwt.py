@@ -1,12 +1,15 @@
 import jwt
 from time import time
 from typing import Optional
-from fastapi import Request, status
+from sqlalchemy.orm import Session
+from fastapi import Request, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from db.main import SessionLocal
 from db.models import User
 from utils.settings import settings
 from api.models.response import ApiException
 import api.models.errors as api_errors
+from db.main import get_db
 
 
 class JWTBearer(HTTPBearer):
@@ -14,7 +17,9 @@ class JWTBearer(HTTPBearer):
         super().__init__(auto_error=auto_error)
         self.fetch_user = fetch_user
 
-    async def __call__(self, request: Request) -> str | User:
+    async def __call__(
+        self, request: Request, db: Session = Depends(get_db)
+    ) -> str | User:
         try:
             credentials: Optional[
                 HTTPAuthorizationCredentials
@@ -28,20 +33,18 @@ class JWTBearer(HTTPBearer):
                 msisdn = decoded_data.get("msisdn")
 
                 if self.fetch_user:
-                    if (
-                        user := request.state.db.query(User)
-                        .filter(User.msisdn == msisdn)
-                        .first()
-                    ):
+                    # db = SessionLocal()
+                    if user := db.query(User).filter(User.msisdn == msisdn).first():
                         if user.refresh_token:
                             return user
                         raise  # User doesn't have a refresh_token
                     raise  # User not found
 
                 return msisdn
-            raise
+            raise  # No/invalid credentials
 
         except:
+            # db.close() if db else None
             raise ApiException(
                 status.HTTP_401_UNAUTHORIZED, api_errors.NOT_AUTHENTICATED
             )

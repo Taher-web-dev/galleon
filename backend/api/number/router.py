@@ -14,7 +14,6 @@ from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
 from api.number.models.response import (
-    RegistrationGiftResponse,
     RetrieveStatusResponse,
     SubscriptionsResponse,
     WalletResponse,

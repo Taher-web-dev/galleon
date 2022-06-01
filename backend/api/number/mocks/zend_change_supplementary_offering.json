@@ -1,7 +1,6 @@
 {
   "status": "success",
   "success": {
-    "type": "external",
     "code": 0,
     "message": "Success."
   }
