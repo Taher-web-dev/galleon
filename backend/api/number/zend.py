@@ -40,7 +40,6 @@ def change_supplementary_offering(
             response = requests.post(
                 zend_change_supplementary_offering_api, json=request_data
             )
-            response.status_code = 400
 
     else:
         response = requests.post(

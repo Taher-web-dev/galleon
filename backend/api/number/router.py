@@ -63,7 +63,7 @@ async def retrieve_wallet(
 
 @router.post(
     "/redeem-registration-gift",
-    response_model=RegistrationGiftResponse,
+    response_model=ApiResponse,
 )
 async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
