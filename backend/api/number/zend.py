@@ -6,6 +6,7 @@ import requests_mock
 from typing import Any
 from pathlib import Path
 from api.models.response import ApiResponse
+from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from utils.settings import settings
 
@@ -14,11 +15,30 @@ zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
 zend_recharge_voucher_api = f"{settings.zend_api}esb/recharge-voucher"
 zend_subscriptions_api = f"{settings.zend_api}cbs/query-mgr-service/"
 zend_send_sms_api = f"{settings.zend_api}sms/send/"
+zend_free_units_api = f"{settings.zend_api}esb/free-units"
 zend_change_supplementary_offering_api = (
     f"{settings.zend_api}esb/change-supplementary-offering"
 )
 
 path = f"{os.path.dirname(__file__)}/mocks/"
+
+
+def get_free_units(msisdn: str) -> list[Subaccount]:
+    response = requests.get(f"{zend_free_units_api}/{msisdn}")
+    if not response.ok:
+        raise api_exception(response)
+    free_units: list[Subaccount] = []
+    json_response = response.json()
+    for one in json_response["free_units"]:
+        free_units.append(
+            Subaccount(
+                account_type=one["account_type"],
+                amount=one["amount"],
+                expiry_date=one["expiry_date"],
+            )
+        )
+
+    return free_units
 
 
 def change_supplementary_offering(

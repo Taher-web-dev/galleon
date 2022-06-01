@@ -4,12 +4,12 @@ This is the middle-ware that connects with
 zain backend systems (aka zain-backend)
 """
 
-from fastapi import APIRouter, Body, Query, status, Depends
-from api.models.data import Status
+from fastapi import APIRouter, Body, Query, Depends
+from api.number.models.response import SubaccountsResponse
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
-from .zend import recharge_voucher, change_supplementary_offering
+from .zend import recharge_voucher, change_supplementary_offering, get_free_units
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
@@ -19,7 +19,6 @@ from api.number.models.response import (
     WalletResponse,
 )
 from api.models.response import ApiResponse
-import api.user.models.errors as err
 
 router = APIRouter()
 
@@ -45,6 +44,14 @@ async def retrieve_subscriptions(
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
     return SubscriptionsResponse(data=get_subscriptions(msisdn))
+
+
+@router.get("/subaccounts", response_model=SubaccountsResponse)
+async def retrieve_subaccounts(
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    session_msisdn=Depends(JWTBearer()),
+) -> SubaccountsResponse:
+    return SubaccountsResponse(data=get_free_units(msisdn))
 
 
 @router.get(
