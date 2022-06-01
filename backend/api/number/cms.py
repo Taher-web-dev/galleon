@@ -129,7 +129,7 @@ NEGCRED_LOOKUP: dict[int, int] = {
     2086111: 12000,
 }
 
-POSTPAID_PRIME_PRIMARY_OFFERINGS: int = []
+POSTPAID_PRIME_PRIMARY_OFFERINGS: list[int] = []
 
 ZAINFI_NBA: dict = {
     "href": "https://apps.iq.zain.com/zain-fi",
