@@ -22,6 +22,8 @@ zend_change_supplementary_offering_api = (
 
 path = f"{os.path.dirname(__file__)}/mocks/"
 
+headers = {"Content-Type": "application/json"}
+
 
 def get_free_units(msisdn: str) -> list[Subaccount]:
     response = requests.get(f"{zend_free_units_api}/{msisdn}")
@@ -58,11 +60,13 @@ def change_supplementary_offering(
                 ).read_text(),
             )
             response = requests.post(
-                zend_change_supplementary_offering_api, json=request_data
+                zend_change_supplementary_offering_api,
+                headers=headers,
+                json=request_data,
             )
     else:
         response = requests.post(
-            zend_change_supplementary_offering_api, json=request_data
+            zend_change_supplementary_offering_api, headers=headers, json=request_data
         )
     if not response.ok:
         raise api_exception(response)
@@ -77,9 +81,13 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
                 zend_recharge_voucher_api,
                 text=Path(f"{path}./zend_recharge_voucher.json").read_text(),
             )
-            response = requests.post(zend_recharge_voucher_api, json=request_data)
+            response = requests.post(
+                zend_recharge_voucher_api, headers=headers, json=request_data
+            )
     else:
-        response = requests.post(zend_recharge_voucher_api, json=request_data)
+        response = requests.post(
+            zend_recharge_voucher_api, headers=headers, json=request_data
+        )
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
@@ -92,11 +100,15 @@ def zend_send_sms(msisdn: str, message: str) -> dict:
                 zend_send_sms_api, text=Path(f"{path}./zend_sms_sent.json").read_text()
             )
             response = requests.post(
-                zend_send_sms_api, json={"msisdn": msisdn, "message": message}
+                zend_send_sms_api,
+                headers=headers,
+                json={"msisdn": msisdn, "message": message},
             )
     else:
         response = requests.post(
-            zend_send_sms_api, json={"msisdn": msisdn, "message": message}
+            zend_send_sms_api,
+            headers=headers,
+            json={"msisdn": msisdn, "message": message},
         )
     if not response.ok:
         raise api_exception(response)
