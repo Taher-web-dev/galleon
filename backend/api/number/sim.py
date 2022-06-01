@@ -1,4 +1,3 @@
-from oscrypto import backend
 from pydantic import Field
 from pydantic.main import BaseModel
 
