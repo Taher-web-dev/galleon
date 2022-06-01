@@ -10,11 +10,11 @@ from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from utils.settings import settings
 
-zend_balance_api = f"{settings.zend_api}esb/query-balance"
-zend_sim_api = f"{settings.zend_api}esb/subscriber-information"
+zend_balance_api = f"{settings.zend_api}esb/query-balance/"
+zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
 zend_recharge_voucher_api = f"{settings.zend_api}esb/recharge-voucher"
-zend_subscriptions_api = f"{settings.zend_api}cbs/query-mgr-service"
-zend_send_sms_api = f"{settings.zend_api}sms/send"
+zend_subscriptions_api = f"{settings.zend_api}cbs/query-mgr-service/"
+zend_send_sms_api = f"{settings.zend_api}sms/send/"
 zend_free_units_api = f"{settings.zend_api}esb/free-units"
 zend_change_supplementary_offering_api = (
     f"{settings.zend_api}esb/change-supplementary-offering"
