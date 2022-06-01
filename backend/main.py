@@ -17,6 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, Depends, status
+from utils.logger import logger
 from fastapi.responses import JSONResponse
 from starlette.concurrency import iterate_in_threadpool
 import json
@@ -25,6 +26,8 @@ from datetime import datetime
 from api.models.response import ApiResponse, ApiException
 from api.models.data import Error, Status
 from api.models import examples as api_examples
+
+json_logging.init_fastapi(enable_json=True)
 
 app = FastAPI(
     title="Galleon Middleware API",
@@ -52,13 +55,6 @@ app = FastAPI(
     redoc_url=None,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-log_handler = logging.handlers.RotatingFileHandler(
-    filename=f"{settings.log_path}/x-ljson.log", maxBytes=5000000, backupCount=10
-)
-logger.addHandler(log_handler)
-json_logging.init_fastapi(enable_json=True)
 json_logging.init_request_instrument(app)
 
 

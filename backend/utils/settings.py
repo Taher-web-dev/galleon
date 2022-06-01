@@ -7,7 +7,7 @@ from pydantic import BaseSettings  # BaseModel,
 class Settings(BaseSettings):
     """Main settings class"""
 
-    app_name: str = "myapp"
+    app_name: str = "galleon-middleware"
     log_path: str = "./logs/"
     jwt_secret: str = ""
     jwt_algorithm: str = ""
