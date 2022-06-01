@@ -130,10 +130,6 @@ async def middle(request: Request, call_next):
     ):
         try:
             response = await call_next(request)
-            raw_response = [section async for section in response.body_iterator]
-            response.body_iterator = iterate_in_threadpool(iter(raw_response))
-            response_body = json.loads(b"".join(raw_response))
-
         except ApiException as ex:
             response = JSONResponse(
                 status_code=ex.status_code,
@@ -181,6 +177,10 @@ async def middle(request: Request, call_next):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     response.headers["X-Server-Time"] = datetime.now().isoformat()
+
+    raw_response = [section async for section in response.body_iterator]
+    response.body_iterator = iterate_in_threadpool(iter(raw_response))
+    response_body = json.loads(b"".join(raw_response))
 
     logger.info(
         "Processed",
