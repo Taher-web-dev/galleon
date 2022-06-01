@@ -23,5 +23,5 @@ db.refresh(otp)
 # user = User.query.get(msisdn=msisdn)
 user = db.query(User).filter(User.msisdn == msisdn).first()
 
-print(user.id, user.name, user.email, user.created_at, user.updated_at)
-print(otp.msisdn, otp.code, otp.tries, otp.created_at, otp.updated_at)
+# print(user.id, user.name, user.email, user.created_at, user.updated_at)
+# print(otp.msisdn, otp.code, otp.tries, otp.created_at, otp.updated_at)

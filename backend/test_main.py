@@ -264,7 +264,7 @@ def test_charge_voucher():
         headers=headers,
         json={"msisdn": msisdn, "pincode": 1111},
     )
-    assert response.status_code == status.HTTP_200_OK, response.json()
+    assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
 
@@ -277,6 +277,7 @@ def test_redeem_registration_gift():
         "/api/number/redeem-registration-gift", headers=headers, json={"msisdn": msisdn}
     )
     assert response.status_code == status.HTTP_200_OK
+    assert response.json().get("status") == "success"
     assert response.json().get("success").get("code") == 0
     # print(response.json())
 

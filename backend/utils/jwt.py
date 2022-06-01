@@ -67,4 +67,4 @@ if __name__ == "__main__":
     import binascii
 
     # Generate secret
-    print(binascii.hexlify(os.urandom(24)))
+    # print(binascii.hexlify(os.urandom(24)))
