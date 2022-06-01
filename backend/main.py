@@ -133,7 +133,6 @@ async def middle(request: Request, call_next):
             raw_response = [section async for section in response.body_iterator]
             response.body_iterator = iterate_in_threadpool(iter(raw_response))
             response_body = json.loads(b"".join(raw_response))
-
         except ApiException as ex:
             response = JSONResponse(
                 status_code=ex.status_code,
@@ -141,6 +140,7 @@ async def middle(request: Request, call_next):
                     ApiResponse(status=Status.failed, error=ex.error)
                 ),
             )
+            response_body = response.body.decode()
 
         except Exception as ex:
             # ex = sys.exc_info()[1]
@@ -164,7 +164,7 @@ async def middle(request: Request, call_next):
                     )
                 ),
             )
-
+            response_body = response.body.decode()
     else:
         response = JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -177,6 +177,8 @@ async def middle(request: Request, call_next):
                 )
             ),
         )
+        response_body = response.body.decode()
+
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
