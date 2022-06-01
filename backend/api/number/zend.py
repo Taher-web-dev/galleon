@@ -40,12 +40,10 @@ def change_supplementary_offering(
             response = requests.post(
                 zend_change_supplementary_offering_api, json=request_data
             )
-
     else:
         response = requests.post(
             zend_change_supplementary_offering_api, json=request_data
         )
-
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
@@ -60,9 +58,8 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
                 text=Path(f"{path}./zend_recharge_voucher.json").read_text(),
             )
             response = requests.post(zend_recharge_voucher_api, json=request_data)
-            return response.json()
-
-    response = requests.post(zend_recharge_voucher_api, json=request_data)
+    else:
+        response = requests.post(zend_recharge_voucher_api, json=request_data)
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
@@ -77,15 +74,13 @@ def zend_send_sms(msisdn: str, message: str) -> dict:
             response = requests.post(
                 zend_send_sms_api, json={"msisdn": msisdn, "message": message}
             )
-            return response.json()
-
-    response = requests.post(
-        zend_send_sms_api, json={"msisdn": msisdn, "message": message}
-    )
-
+    else:
+        response = requests.post(
+            zend_send_sms_api, json={"msisdn": msisdn, "message": message}
+        )
     if not response.ok:
         raise api_exception(response)
-    return response.json()
+    return response.json().get("data")
 
 
 def zend_balance(msisdn: str) -> dict[str, Any]:
@@ -96,12 +91,11 @@ def zend_balance(msisdn: str) -> dict[str, Any]:
                 text=Path(f"{path}./zend_balance.json").read_text(),
             )
             response = requests.get(zend_balance_api + msisdn)
-            json = response.json()
-            return json["data"]
     else:
         response = requests.get(zend_balance_api + msisdn)  # , json={"msisdn": msisdn})
-        json = response.json()
-        return json["data"]
+    if not response.ok:
+        raise api_exception(response)
+    return response.json().get("data")
 
 
 def zend_sim(msisdn: str) -> dict[str, Any]:
@@ -111,12 +105,11 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
                 zend_sim_api + msisdn, text=Path(f"{path}./zend_sim.json").read_text()
             )
             response = requests.get(zend_sim_api + msisdn)  # , json={"msisdn": msisdn})
-            json = response.json()
-            return json["data"]
-
-    response = requests.get(zend_sim_api + msisdn)  # , json={"msisdn": msisdn})
-    json = response.json()
-    return json["data"]
+    else:
+        response = requests.get(zend_sim_api + msisdn)  # , json={"msisdn": msisdn})
+    if not response.ok:
+        raise api_exception(response)
+    return response.json().get("data")
 
 
 def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
@@ -127,9 +120,8 @@ def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
                 text=Path(f"{path}./zend_mgr_service.json").read_text(),
             )
             response = requests.get(zend_subscriptions_api + msisdn)
-            json = response.json()
-            return json["data"]["subscriptions"]
     else:
         response = requests.get(zend_subscriptions_api + msisdn)
-        json = response.json()
-        return json["data"]["subscriptions"]
+    if not response.ok:
+        raise api_exception(response)
+    return response.json().get("data").get("subscriptions")
