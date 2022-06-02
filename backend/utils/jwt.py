@@ -4,7 +4,6 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from fastapi import Request, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from db.main import SessionLocal
 from db.models import User
 from utils.settings import settings
 from api.models.response import ApiException
@@ -50,7 +49,7 @@ class JWTBearer(HTTPBearer):
             )
 
 
-def sign_jwt(data: dict, expires: int = 600) -> str:
+def sign_jwt(data: dict, expires=settings.jwt_access_expires) -> str:
     payload = {"data": data, "expires": time() + expires}
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 

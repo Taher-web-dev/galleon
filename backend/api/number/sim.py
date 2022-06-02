@@ -36,6 +36,7 @@ class Sim(BaseModel):
     # our injected info
     unified_sim_status: str = Field(..., example="apNORMALp")
     is_4g_compatible: bool = Field(..., example=True)
+    is_eligible: bool = Field(..., example=False)
     nba: Nba
 
     # TODO discuss - what does this do & should we include user name here?
@@ -71,6 +72,7 @@ def get_sim_details(msisdn: str) -> Sim:
         # injected info
         unified_sim_status=unified_sim_status,
         is_4g_compatible=usim_status["is_4g_compatible"],
+        is_eligible=False if "BLOCK" in unified_sim_status else True,
         nba=nba,
         # user info
         associated_with_user=False,  # FIXME

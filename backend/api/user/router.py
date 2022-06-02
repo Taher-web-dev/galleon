@@ -11,6 +11,7 @@ from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
 from api.models.response import ApiException
+from utils.settings import settings
 from api.user.models.request import (
     UserCreateRequest,
     UserResetPasswordRequest,
@@ -157,7 +158,9 @@ async def login(
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
-        refresh_token = sign_jwt({"msisdn": msisdn, "grant_type": "refresh"}, 86400)
+        refresh_token = sign_jwt(
+            {"msisdn": msisdn, "grant_type": "refresh"}, settings.jwt_refresh_expires
+        )
         user.refresh_token = refresh_token
         db.commit()
         return TokensResponse(
@@ -189,7 +192,7 @@ async def validate(
     raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
-@router.post(
+@router.delete(
     "/logout",
     response_model=ApiResponse,
     response_model_exclude_none=True,

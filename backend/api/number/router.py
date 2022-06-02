@@ -10,9 +10,12 @@ from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
 from .zend import recharge_voucher, change_supplementary_offering, get_free_units
+from sqlalchemy.orm import Session
+from db.main import get_db
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
+from db.models import User
 from api.number.models.response import (
     RetrieveStatusResponse,
     SubscriptionsResponse,
@@ -28,10 +31,16 @@ router = APIRouter()
     response_model=RetrieveStatusResponse,
 )
 async def retrieve_status(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257")
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    db: Session = Depends(get_db),
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
-    return RetrieveStatusResponse(data=get_sim_details(msisdn))
+    sim_details = get_sim_details(msisdn)
+    sim_details.associated_with_user = (
+        db.query(User).filter(User.msisdn == msisdn).first() is not None
+    )
+
+    return RetrieveStatusResponse(data=sim_details)
 
 
 @router.get(

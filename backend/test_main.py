@@ -83,7 +83,7 @@ refresh_token: str = ""
 def test_login_user():
     # login with not found msisdn
     response = client.post(
-        "/api/user/login", json={"msisdn": "10202011", "password": password}
+        "/api/user/login", json={"msisdn": "7810202011", "password": password}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     # login with wrong credentials
@@ -199,7 +199,7 @@ def test_reset_password():
     response = client.post(
         "/api/user/reset_password",
         json={
-            "msisdn": "10452201111",
+            "msisdn": "7842201111",
             "password": password,
             "otp_confirmation": confirmation,
         },
@@ -302,7 +302,7 @@ def test_confirm_otp():
     global code
     # Invalid msisdn
     response = client.post(
-        "/api/otp/confirm", json={"msisdn": "00000000", "code": code}
+        "/api/otp/confirm", json={"msisdn": "7800000000", "code": code}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response = client.post("/api/otp/confirm", json={"msisdn": msisdn, "code": code})
@@ -314,7 +314,7 @@ def test_confirm_otp():
 def test_verify_otp():
     # invalid msisdn
     response = client.post(
-        "/api/otp/verify", json={"msisdn": "00000000", "confirmation": confirmation}
+        "/api/otp/verify", json={"msisdn": "7800000000", "confirmation": confirmation}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     # invalid confirmation
@@ -332,7 +332,7 @@ def test_verify_otp():
 
 def test_logout():
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = client.post("/api/user/logout", headers=headers)
+    response = client.delete("/api/user/logout", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
     db.expire_all()

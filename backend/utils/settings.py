@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     log_path: str = "./logs/"
     jwt_secret: str = ""
     jwt_algorithm: str = ""
+    jwt_access_expires: int = 14400
+    jwt_refresh_expires: int = 86400
     slack_webhook_url: str = ""
     slack_notify: bool = False
     listening_host: str = "0.0.0.0"
