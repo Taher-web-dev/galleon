@@ -19,7 +19,7 @@ INVALID_MSISDN = Error(
 INVALID_CREDENTIALS = Error(
     type="auth",
     code=100,
-    message="Invalid credentials",
+    message="Phone number or password is incorrect",
 )
 
 INVALID_TOKEN = Error(
