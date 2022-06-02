@@ -11,6 +11,7 @@ from utils.password_hashing import verify_password, hash_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
 from api.models.response import ApiException
+from api.models.errors import ELIGIBILITY_ERR
 from utils.settings import settings
 from api.user.models.request import (
     UserCreateRequest,
@@ -25,7 +26,7 @@ from api.user.models.response import (
 )
 from api.user.models import examples
 import api.user.models.errors as err
-
+from .check_eligibility import check_eligibility
 
 router = APIRouter()
 
@@ -40,7 +41,8 @@ async def create_user(
     new_user: UserCreateRequest, db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """Register a new user"""
-
+    if not check_eligibility(new_user.msisdn):
+        raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.USER_EXISTS)

@@ -50,3 +50,8 @@ class NotAuthenticatedResponse(ApiResponse):
 class ValidationErrorResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = api_errors.VALIDATION_ERR
+
+
+class EligibilityErrorResponse(ApiResponse):
+    status: Status = Status.failed
+    error: Error = api_errors.ELIGIBILITY_ERR

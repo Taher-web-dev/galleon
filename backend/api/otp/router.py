@@ -3,6 +3,8 @@
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 from api.models.response import ApiResponse
+from api.models.errors import ELIGIBILITY_ERR
+from api.user.check_eligibility import check_eligibility
 from db.main import get_db
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
@@ -16,6 +18,7 @@ from api.otp.models.request import (
     VerifyOTPRequest,
 )
 from api.otp.models.response import Confirmation, ConfirmationResponse
+from api.user.check_eligibility import check_eligibility
 
 router = APIRouter()
 
@@ -30,7 +33,8 @@ async def send_otp(
     user_request: SendOTPRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
     """Request new Otp"""
-
+    if not check_eligibility(user_request.msisdn):
+        raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
     # If a prior otp exists, delete it.
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp:
