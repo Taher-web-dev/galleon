@@ -8,6 +8,7 @@ from api.otp.models.response import (
     InvalidConfirmationResponse,
     InvalidFormatResponse,
 )
+from api.models.response import EligibilityErrorResponse
 
 request_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
@@ -17,6 +18,10 @@ request_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_503_SERVICE_UNAVAILABLE: {
         "model": SMSErrorResponse,
         "description": "SMS GW server down or not configured.",
+    },
+    status.HTTP_403_FORBIDDEN: {
+        "model": EligibilityErrorResponse,
+        "description": "User Eligibility",
     },
 }
 

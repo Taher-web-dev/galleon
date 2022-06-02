@@ -1,5 +1,6 @@
 from fastapi import status
 from typing import Dict, Any
+from api.models.response import EligibilityErrorResponse
 from api.user.models.response import (
     InvalidRefreshTokenErrorResponse,
     UserExistsErrorResponse,
@@ -22,6 +23,10 @@ create_user: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_422_UNPROCESSABLE_ENTITY: {
         "model": ValidationErrorResponse,
         "description": "Validation Error",
+    },
+    status.HTTP_403_FORBIDDEN: {
+        "model": EligibilityErrorResponse,
+        "description": "User Eligibility",
     },
 }
 
