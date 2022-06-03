@@ -3,13 +3,21 @@
 from http.client import responses
 from typing import Any
 from fastapi import status
-from .response import NotAuthenticatedResponse, ValidationErrorResponse
+from .response import (
+    InvalidAccessTokenResponse,
+    ValidationErrorResponse,
+    ExpiredTokenResponse,
+)
 
 not_authenticated: dict[int | str, dict[str, Any]] = {
+    status.HTTP_403_FORBIDDEN: {
+        "model": InvalidAccessTokenResponse,
+        "description": "Invalid Token",
+    },
     status.HTTP_401_UNAUTHORIZED: {
-        "model": NotAuthenticatedResponse,
-        "description": "Not authenticated",
-    }
+        "model": ExpiredTokenResponse,
+        "description": "Expired Token",
+    },
 }
 
 validation: dict[int | str, dict[str, Any]] = {
@@ -25,7 +33,8 @@ def general_response(responses: list[dict]) -> dict:
     keys = []
     vals = []
     for resp in responses:
-        keys.append(*list(resp.keys()))
-        vals.append(*list(resp.values()))
+        for key, val in resp.items():
+            keys.append(key)
+            vals.append(val)
     gen_resp = dict(zip(keys, vals))
     return gen_resp

@@ -42,9 +42,14 @@ class ApiException(Exception):
         self.error = error
 
 
-class NotAuthenticatedResponse(ApiResponse):
+class InvalidAccessTokenResponse(ApiResponse):
     status: Status = Status.failed
-    error: Error = api_errors.NOT_AUTHENTICATED
+    error: Error = api_errors.InvalidAccessToken
+
+
+class ExpiredTokenResponse(ApiResponse):
+    status: Status = Status.failed
+    error: Error = api_errors.EXPIRED_TOKEN
 
 
 class ValidationErrorResponse(ApiResponse):
