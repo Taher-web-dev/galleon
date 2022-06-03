@@ -11,7 +11,7 @@ from api.number.zend import zend_send_sms
 from db.models import Otp
 from api.models.response import ApiException
 from api.otp.models import examples
-from api.otp.models.errors import INVALID_OTP
+from api.otp.models.errors import INVALID_CONFIRMATION, INVALID_OTP
 from api.otp.models.request import (
     ConfirmOTPRequest,
     SendOTPRequest,
@@ -89,4 +89,4 @@ async def verify_otp(
     # TODO detail more errors here: no confirmation, invalid confirmation
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
         return ApiResponse()
-    raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_OTP)
+    raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_CONFIRMATION)

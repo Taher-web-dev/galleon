@@ -3,10 +3,10 @@ from typing import Dict, Any
 
 from api.otp.models.response import (
     InvalidMSISDNResponse,
+    InvalidOTPResponse,
     SMSErrorResponse,
     InvalidRequestIdResponse,
     InvalidConfirmationResponse,
-    InvalidFormatResponse,
 )
 from api.models.response import EligibilityErrorResponse
 
@@ -26,19 +26,17 @@ request_otp: Dict[int | str, Dict[str, Any]] = {
 }
 
 confirm_otp: Dict[int | str, Dict[str, Any]] = {
-    **request_otp,
     status.HTTP_400_BAD_REQUEST: {
         "model": InvalidRequestIdResponse,
         "description": "Invalid OTP request Id.",
     },
     status.HTTP_400_BAD_REQUEST: {
-        "model": InvalidFormatResponse,
-        "description": "Invalid OTP format.",
+        "model": InvalidOTPResponse,
+        "description": "Invalid OTP Credentials",
     },
 }
 
 verify_otp: Dict[int | str, Dict[str, Any]] = {
-    **request_otp,
     status.HTTP_400_BAD_REQUEST: {
         "model": InvalidConfirmationResponse,
         "description": "Invalid OTP confirmation Id",

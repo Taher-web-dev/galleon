@@ -35,11 +35,6 @@ class InvalidRequestIdResponse(ApiResponse):
     error: Error = INVALID_REQUEST_ID
 
 
-class InvalidFormatResponse(ApiResponse):
-    status: Status = Status.failed
-    error: Error = INVALID_REQUEST_FORMAT
-
-
 class InvalidConfirmationResponse(ApiResponse):
     status: Status = Status.failed
     error: Error = INVALID_CONFIRMATION
