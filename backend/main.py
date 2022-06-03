@@ -239,7 +239,7 @@ async def catchall():
     raise ApiException(
         status_code=status.HTTP_404_NOT_FOUND,
         error=Error(
-            type="catchall", code=230, message="Requested method or path is invalid"
+            type="catchall", code=422, message="Requested method or path is invalid"
         ),
     )
 
