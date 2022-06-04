@@ -26,7 +26,7 @@ from datetime import datetime
 from api.models.response import ApiResponse, ApiException
 from api.models.data import Error, Status
 from api.models import examples as api_examples
-import re
+
 
 json_logging.init_fastapi(enable_json=True)
 
@@ -65,14 +65,14 @@ async def app_startup():
     openapi_schema = app.openapi()
     paths = openapi_schema["paths"]
     for path in paths:
-        if re.match(r"^.*status(\/)*$", path):
+        if path == "/api/number/status":
             for method in paths[path]:
                 responses = paths[path][method]["responses"]
                 if responses.get("403"):
                     responses.pop("403")
                 if responses.get("401"):
                     responses.pop("401")
-        if re.match(r"^.*[logout,delete](\/)*$", path):
+        if path in ["/api/user/logout", "/api/user/delete"]:
             for method in paths[path]:
                 responses = paths[path][method]["responses"]
                 if responses.get("422"):
