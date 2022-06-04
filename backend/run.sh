@@ -1,4 +1,8 @@
 #!/bin/sh -x
+
+# Python: use ipdb instead of pdb
+export PYTHONBREAKPOINT=ipdb.set_trace
+
 BASE=$(dirname ${0})
 export BACKEND_ENV="${BACKEND_ENV:-${BASE}/secrets.env}"
 export LOG_PATH=${BASE}/logs
