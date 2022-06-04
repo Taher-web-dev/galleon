@@ -31,7 +31,7 @@ router = APIRouter()
     response_model=RetrieveStatusResponse,
 )
 async def retrieve_status(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     db: Session = Depends(get_db),
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
@@ -48,7 +48,7 @@ async def retrieve_status(
     response_model=SubscriptionsResponse,
 )
 async def retrieve_subscriptions(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
@@ -57,7 +57,7 @@ async def retrieve_subscriptions(
 
 @router.get("/subaccounts", response_model=SubaccountsResponse)
 async def retrieve_subaccounts(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> SubaccountsResponse:
     return SubaccountsResponse(data=get_free_units(msisdn))
@@ -68,7 +68,7 @@ async def retrieve_subaccounts(
     response_model=WalletResponse,
 )
 async def retrieve_wallet(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="308080703257"),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
@@ -81,7 +81,7 @@ async def retrieve_wallet(
     response_model=ApiResponse,
 )
 async def redeem_registration_gift(
-    msisdn: str = Body(..., embed=True, regex=rgx.MSISDN),
+    msisdn: str = Body(..., embed=True, regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return change_supplementary_offering(
@@ -94,8 +94,8 @@ async def redeem_registration_gift(
     response_model=ApiResponse,
 )
 async def charge_voucher(
-    msisdn: str = Body(..., regex=rgx.MSISDN),
-    pincode: str = Body(..., regex=rgx.DIGITS),
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
+    pincode: str = Body(..., regex=rgx.DIGITS, max_length=20, example="123456"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
