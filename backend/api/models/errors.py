@@ -11,6 +11,6 @@ EXPIRED_TOKEN = Error(
     message="You need to renew the Access token using the refresh token",
 )
 
-VALIDATION_ERR = Error(type="validation", code=100, message="Invalid data provided.")
+VALIDATION_ERR = Error(type="validation", code=100, message="")
 
 ELIGIBILITY_ERR = Error(type="eligibility", code=160, message="Not eligibile")

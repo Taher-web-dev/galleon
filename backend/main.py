@@ -27,6 +27,7 @@ from api.models.response import ApiResponse, ApiException
 from api.models.data import Error, Status
 from api.models import examples as api_examples
 
+
 json_logging.init_fastapi(enable_json=True)
 
 app = FastAPI(
@@ -61,6 +62,22 @@ json_logging.init_request_instrument(app)
 @app.on_event("startup")
 async def app_startup():
     logger.info("Starting")
+    openapi_schema = app.openapi()
+    paths = openapi_schema["paths"]
+    for path in paths:
+        if path == "/api/number/status":
+            for method in paths[path]:
+                responses = paths[path][method]["responses"]
+                if responses.get("403"):
+                    responses.pop("403")
+                if responses.get("401"):
+                    responses.pop("401")
+        if path in ["/api/user/logout", "/api/user/delete"]:
+            for method in paths[path]:
+                responses = paths[path][method]["responses"]
+                if responses.get("422"):
+                    responses.pop("422")
+    app.openapi_schema = openapi_schema
 
 
 @app.on_event("shutdown")
