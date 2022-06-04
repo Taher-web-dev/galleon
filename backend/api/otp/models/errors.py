@@ -32,6 +32,6 @@ INVALID_CONFIRMATION = Error(
 
 INVALID_OTP = Error(
     type="otp",
-    code=307,
+    code=304,
     message="Something is wrong! the OTP request you confirmation does not match the request.",
 )

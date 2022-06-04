@@ -152,7 +152,7 @@ async def update_profile(
     responses=examples.login,
 )
 async def login(
-    msisdn: str = Body(..., regex=rgx.MSISDN, max_length=20),
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
     db: Session = Depends(get_db),
 ) -> TokensResponse:
