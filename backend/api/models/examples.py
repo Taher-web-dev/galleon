@@ -10,11 +10,11 @@ from .response import (
 )
 
 not_authenticated: dict[int | str, dict[str, Any]] = {
-    status.HTTP_403_FORBIDDEN: {
+    status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidAccessTokenResponse,
         "description": "Invalid Token",
     },
-    status.HTTP_401_UNAUTHORIZED: {
+    status.HTTP_410_GONE: {
         "model": ExpiredTokenResponse,
         "description": "Expired Token",
     },
