@@ -10,3 +10,4 @@ requests-mock
 SQLAlchemy
 psycopg2
 passlib[bcrypt]
+concurrent-log-handler

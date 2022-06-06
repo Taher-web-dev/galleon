@@ -2,13 +2,10 @@
 
 import time
 import traceback
-import logging
-import logging.handlers
 import uvicorn
 
 # from settings import settings
 import json_logging
-from db.main import Base, engine, SessionLocal
 from utils.settings import settings
 from api.user.router import router as user
 from api.otp.router import router as otp
@@ -202,18 +199,18 @@ async def middle(request: Request, call_next):
         extra={
             "props": {
                 "duration": 1000 * (time.time() - start_time),
-                "verb": request.method,
-                "path": str(request.url.path),
-                "response": {
-                    "headers": dict(response.headers.items()),
-                    "body": response_body,
-                },
                 "request": {
+                    "verb": request.method,
+                    "path": str(request.url.path),
                     "headers": dict(request.headers.items()),
                     "query_params": dict(request.query_params.items()),
                     "body": request.state.request_body
                     if hasattr(request.state, "request_body")
                     else {},
+                },
+                "response": {
+                    "headers": dict(response.headers.items()),
+                    "body": response_body,
                 },
                 "http_status": response.status_code,
             }
