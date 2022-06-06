@@ -1,7 +1,7 @@
 **/__pycache__
 **/*.log
 secrets.env
-
+**/logs/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

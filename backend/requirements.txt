@@ -1,7 +1,6 @@
 fastapi
 json_logging
 pydantic[email,dotenv]
-uvicorn
 jinja2
 six
 PyJWT

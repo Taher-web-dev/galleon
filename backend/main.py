@@ -2,7 +2,8 @@
 
 import time
 import traceback
-import uvicorn
+
+# import uvicorn
 
 # from settings import settings
 import json_logging
@@ -258,6 +259,6 @@ async def catchall():
     )
 
 
-if __name__ == "__main__":
-    # uvicorn.run("main:app", reload=True)
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
+# if __name__ == "__main__":
+# uvicorn.run("main:app", reload=True)
+#    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
