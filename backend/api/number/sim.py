@@ -1,9 +1,7 @@
 from pydantic import Field
 from pydantic.main import BaseModel
-
 from api.number import cms
-
-from .zend import zend_sim
+from .zend import zend_sim, check_postpaid, check_prepaid
 
 
 class Nba(BaseModel):
@@ -76,27 +74,6 @@ def get_sim_details(msisdn: str) -> Sim:
         nba=nba,
         # user info
         associated_with_user=False,  # FIXME
-    )
-
-
-def check_prepaid(backend_sim_status):
-    return backend_sim_status.get("subscriber_type") == 0 and (
-        "crm_status_code" in backend_sim_status
-        and backend_sim_status["crm_status_code"]
-        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
-        and "cbs_status_code" in backend_sim_status
-        and backend_sim_status["cbs_status_code"]
-        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
-            backend_sim_status["crm_status_code"]
-        ]
-    )
-
-
-def check_postpaid(backend_sim_status):
-    return (
-        backend_sim_status.get("subscriber_type") == 1
-        and "crm_status_code" in backend_sim_status
-        and "crm_status_details" in backend_sim_status
     )
 
 

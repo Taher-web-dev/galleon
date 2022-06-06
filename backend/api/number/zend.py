@@ -9,9 +9,9 @@ from api.models.response import ApiException, ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from api.models.data import Error
-from api.number.sim import check_postpaid, check_prepaid
 from utils.settings import settings
 from fastapi import status
+from api.number import cms
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
@@ -27,6 +27,27 @@ zend_change_supplementary_offering_api = (
 path = f"{os.path.dirname(__file__)}/mocks/"
 
 headers = {"Content-Type": "application/json"}
+
+
+def check_prepaid(backend_sim_status):
+    return backend_sim_status.get("subscriber_type") == 0 and (
+        "crm_status_code" in backend_sim_status
+        and backend_sim_status["crm_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
+        and "cbs_status_code" in backend_sim_status
+        and backend_sim_status["cbs_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
+            backend_sim_status["crm_status_code"]
+        ]
+    )
+
+
+def check_postpaid(backend_sim_status):
+    return (
+        backend_sim_status.get("subscriber_type") == 1
+        and "crm_status_code" in backend_sim_status
+        and "crm_status_details" in backend_sim_status
+    )
 
 
 def get_free_units(msisdn: str) -> list[Subaccount]:
