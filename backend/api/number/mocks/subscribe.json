@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "success": {
+    "code": 200,
+    "message": "Thanks for subscription, you will receive a message with details"
+  },
+  "data": {
+    "status": true,
+    "type": "toms",
+    "msg": {
+      "en": "Thanks for subscription, you will receive a message with details",
+      "ar": "شكرا لاشتراكك ستصلك رسالة بالتفاصيل",
+      "kr": "سوباس بؤ بةشداريكردنت، وردةكارييةكانت به نامةيةك بةدةستدةكات"
+    }
+  }
+}

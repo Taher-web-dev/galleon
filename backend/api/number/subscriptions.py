@@ -1,9 +1,22 @@
+import os
+from pathlib import Path
 from pydantic import Field
+import requests
+import requests_mock
+from api.models.utils import api_exception, api_response
+from api.models.response import ApiResponse
+from utils.settings import settings
 from .zend import zend_subscriptions
-
 from pydantic.main import BaseModel
 from typing import Any
 from datetime import datetime
+
+
+subscription_subscribe_api = f"{settings.zend_api}kyo/subscribe"
+subscription_unsubscribe_api = f"{settings.zend_api}kyo/unsubscribe"
+
+path = f"{os.path.dirname(__file__)}/mocks/"
+headers = {"Content-Type": "application/json"}
 
 
 class Subscription(BaseModel):
@@ -105,3 +118,27 @@ def get_subscriptions(msisdn: str) -> list[Subscription]:
 
 def redeem_registration_gift(msisdn: str) -> dict:
     return {"msisdn": msisdn}
+
+
+def set_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+    request_data = {"msisdn": msisdn, "offer_id": offer_id}
+
+    url = subscription_subscribe_api if subscribe else subscription_unsubscribe_api
+
+    if settings.mock_zain_api:
+        mock_path = (
+            f"{path}./subscribe.json" if subscribe else f"{path}./unsubscribe.json"
+        )
+        with requests_mock.Mocker() as m:
+            m.post(
+                url,
+                text=Path(mock_path).read_text(),
+            )
+            print(mock_path)
+            response = requests.post(url, headers=headers, json=request_data)
+    else:
+        response = requests.post(url, headers=headers, json=request_data)
+
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)

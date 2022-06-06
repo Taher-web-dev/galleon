@@ -8,7 +8,7 @@ from fastapi import APIRouter, Body, Query, Depends
 from api.number.models.response import SubaccountsResponse
 from .balance import get_wallet
 from .sim import get_sim_details
-from .subscriptions import get_subscriptions
+from .subscriptions import get_subscriptions, set_subscriptions
 from .zend import recharge_voucher, change_supplementary_offering, get_free_units
 from sqlalchemy.orm import Session
 from db.main import get_db
@@ -99,3 +99,21 @@ async def charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
+
+
+@router.post("/subscribe", response_model=ApiResponse)
+async def api_subscribe(
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
+    offer_id: str = Body(..., example=1000),
+) -> ApiResponse:
+    """Attempts KYO subscription for the provided MSISDN to the provided offer"""
+    return set_subscriptions(msisdn, offer_id, True)
+
+
+@router.post("/unsubscribe", response_model=ApiResponse)
+async def api_unsubscribe(
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
+    offer_id: str = Body(..., example=1000),
+) -> ApiResponse:
+    """Attempts KYO unsubscription for the provided MSISDN to the provided offer"""
+    return set_subscriptions(msisdn, offer_id, False)
