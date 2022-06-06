@@ -56,12 +56,13 @@ def decode_jwt(token: str) -> dict:
         decoded_token = jwt.decode(
             token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
-        return decoded_token["data"]
-    except jwt.exceptions.DecodeError as ex:
-        if "Invalid token type" in str(ex):
-            raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
-        if "Invalid header padding" in str(ex):
-            raise ApiException(status.HTTP_410_GONE, api_errors.EXPIRED_TOKEN)
+    except:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
+    if "data" not in decoded_token or not decoded_token["data"]:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
+    if decoded_token["expires"] < time():
+        raise ApiException(status.HTTP_410_GONE, api_errors.EXPIRED_TOKEN)
+    return decoded_token["data"]
 
 
 if __name__ == "__main__":
