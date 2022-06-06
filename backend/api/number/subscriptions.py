@@ -99,7 +99,7 @@ def get_subscriptions(msisdn: str) -> list[Subscription]:
         if subscription.is_relevant():
             subscriptions.append(subscription)
 
-    print("subscriptions:", subscriptions)
+    # print("subscriptions:", subscriptions)
     return subscriptions
 
 
