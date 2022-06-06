@@ -191,7 +191,7 @@ async def validate(
     if user and verify_password(password, user.password):
         return ApiResponse()
 
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    # raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.delete(
@@ -219,7 +219,13 @@ async def gen_access_token(
     refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
-    data = decode_jwt(refresh_token, True)
+    data = ""
+    try:
+        data = decode_jwt(refresh_token)
+    except:
+        raise ApiException(
+            status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+        )
     if bool(data) and "msisdn" in data:
         msisdn = data["msisdn"]
         user = db.query(User).filter(User.msisdn == msisdn).first()

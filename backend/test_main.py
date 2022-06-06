@@ -149,9 +149,7 @@ def test_generate_token():
     headers = {
         "refresh-token": "invalid_refresh_token",
     }
-    response = client.post(
-        "api/user/token",
-    )
+    response = client.post("api/user/token", headers=headers)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["error"]["code"] == 101
     assert response.json()["error"]["message"] == "The Refresh-Token is not valid"

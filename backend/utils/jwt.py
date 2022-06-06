@@ -26,6 +26,8 @@ class JWTBearer(HTTPBearer):
         )
         if credentials and credentials.scheme == "Bearer":
             decoded_data = decode_jwt(credentials.credentials)
+            if not decoded_data:
+                raise ApiException(status.HTTP_410_GONE, api_errors.EXPIRED_TOKEN)
             msisdn = decoded_data.get("msisdn")
 
             if self.fetch_user:
@@ -51,23 +53,17 @@ def sign_jwt(data: dict, expires=settings.jwt_access_expires) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-def decode_jwt(token: str, refresh: bool = False) -> dict:
+def decode_jwt(token: str) -> dict:
     try:
         decoded_token = jwt.decode(
             token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
-    except jwt.exceptions.DecodeError as ex:
-        if "Invalid token type" in str(ex):
-            if refresh:
-                raise ApiException(
-                    status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
-                )
-            raise ApiException(
-                status.HTTP_401_UNAUTHORIZED, error=api_errors.InvalidAccessToken
-            )
-        if "Invalid header padding" in str(ex):
-            raise ApiException(status.HTTP_410_GONE, error=api_errors.EXPIRED_TOKEN)
-    return decoded_token["data"]
+        if not decoded_token:
+            return None
+        return decoded_token["data"]
+
+    except:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
 
 
 if __name__ == "__main__":
