@@ -22,13 +22,16 @@ from api.user.models.response import (
     Tokens,
     TokensResponse,
     UserProfile,
+    GetUserProfile,
     UserProfileResponse,
+    GetUserProfileResponse,
 )
 from api.user.models import examples
 import api.user.models.errors as err
 from .check_eligibility import check_eligibility
 from api.number.zend import zend_sim
 from api.number.sim import get_unified_sim_status
+from .check_support_4G import check_support_4G
 
 router = APIRouter()
 
@@ -98,7 +101,7 @@ async def reset_password(
 
 @router.get(
     "/profile",
-    response_model=UserProfileResponse,
+    response_model=GetUserProfileResponse,
     response_model_exclude_none=True,
     responses=examples.get_user_profile,
 )
@@ -108,13 +111,13 @@ async def get_user_profile(
     """Get user profile"""
     backend_sim_status = zend_sim(user.msisdn)
     unified_sim_status = get_unified_sim_status(backend_sim_status)
-    return UserProfileResponse(
-        data=UserProfile(
+    return GetUserProfileResponse(
+        data=GetUserProfile(
             id=user.id,
             msisdn=user.msisdn,
             name=user.name,
             email=user.email,
-            is_4g_compatible=True,
+            is_4g_compatible=check_support_4G(user.msisdn),
             unified_sim_status=unified_sim_status,
             profile_pic_url=user.profile_pic_url,
         ),
@@ -196,7 +199,7 @@ async def validate(
     if user and verify_password(password, user.password):
         return ApiResponse()
 
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    # raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.delete(
@@ -224,7 +227,7 @@ async def gen_access_token(
     refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
-    if refresh_token is not None:
+    try:
         data = decode_jwt(refresh_token)
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
@@ -234,8 +237,14 @@ async def gen_access_token(
                 return TokensResponse(
                     data=Tokens(refresh_token=refresh_token, access_token=access_token),
                 )
-
-    raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_REFRESH_TOKEN)
+        if "msisdn" not in data:
+            raise ApiException(
+                status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+            )
+    except:
+        raise ApiException(
+            status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+        )
 
 
 @router.delete(

@@ -139,20 +139,20 @@ def test_generate_token():
     headers = {
         "refresh-token": refresh_token,
     }
-    response = client.post(
-        "api/user/token",
-        headers=headers,
-    )
+    response = client.post("api/user/token", headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
-    # when refresh_token not provided.
-    response = client.post(
-        "api/user/token",
-    )
+    # when refresh_token not valid.
+    headers = {
+        "refresh-token": "invalid_refresh_token",
+    }
+    response = client.post("api/user/token", headers=headers)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error"]["code"] == 101
+    assert response.json()["error"]["message"] == "The Refresh-Token is not valid"
 
 
-def test_expired_token():
+def test_expired_and_invalid_token():
     expired_token = sign_jwt({"msisdn": msisdn}, 1)
     time.sleep(1.1)
 
@@ -163,9 +163,12 @@ def test_expired_token():
     response = client.post(
         "/api/user/validate", headers=headers, json={"password": password}
     )
-    breakpoint()
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    # print(response.json())
+    assert response.status_code == status.HTTP_410_GONE
+    assert response.json()["error"]["code"] == 105
+    assert (
+        response.json()["error"]["message"]
+        == "You need to renew the Access token using the refresh token"
+    )
 
 
 def test_get_profile():
@@ -354,7 +357,7 @@ if __name__ == "__main__":
     test_create_user()
     test_login_user()
     test_validate_user()
-    test_expired_token()
+    test_expired_and_invalid_token()
     test_get_profile()
     test_reset_password()
     test_sim_status()
