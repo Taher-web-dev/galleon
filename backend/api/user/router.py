@@ -219,21 +219,24 @@ async def gen_access_token(
     refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
-    data = ""
     try:
         data = decode_jwt(refresh_token)
+        if bool(data) and "msisdn" in data:
+            msisdn = data["msisdn"]
+            user = db.query(User).filter(User.msisdn == msisdn).first()
+            if user is not None:
+                access_token = sign_jwt({"msisdn": msisdn})
+                return TokensResponse(
+                    data=Tokens(refresh_token=refresh_token, access_token=access_token),
+                )
+        if "msisdn" not in data:
+            raise ApiException(
+                status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+            )
     except:
         raise ApiException(
             status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
         )
-    if bool(data) and "msisdn" in data:
-        msisdn = data["msisdn"]
-        user = db.query(User).filter(User.msisdn == msisdn).first()
-        if user is not None:
-            access_token = sign_jwt({"msisdn": msisdn})
-            return TokensResponse(
-                data=Tokens(refresh_token=refresh_token, access_token=access_token),
-            )
 
 
 @router.delete(

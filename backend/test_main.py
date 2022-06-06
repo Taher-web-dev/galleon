@@ -139,10 +139,7 @@ def test_generate_token():
     headers = {
         "refresh-token": refresh_token,
     }
-    response = client.post(
-        "api/user/token",
-        headers=headers,
-    )
+    response = client.post("api/user/token", headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
     # when refresh_token not valid.
