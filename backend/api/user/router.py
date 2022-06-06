@@ -27,6 +27,8 @@ from api.user.models.response import (
 from api.user.models import examples
 import api.user.models.errors as err
 from .check_eligibility import check_eligibility
+from api.number.zend import zend_sim
+from api.number.sim import get_unified_sim_status
 
 router = APIRouter()
 
@@ -104,13 +106,16 @@ async def get_user_profile(
     user=Depends(JWTBearer(fetch_user=True)),
 ) -> UserProfileResponse:
     """Get user profile"""
-
+    backend_sim_status = zend_sim(user.msisdn)
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
             msisdn=user.msisdn,
             name=user.name,
             email=user.email,
+            is_4g_compatible=True,
+            unified_sim_status=unified_sim_status,
             profile_pic_url=user.profile_pic_url,
         ),
     )
