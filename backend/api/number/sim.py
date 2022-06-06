@@ -79,6 +79,27 @@ def get_sim_details(msisdn: str) -> Sim:
     )
 
 
+def check_prepaid(backend_sim_status):
+    return backend_sim_status.get("subscriber_type") == 0 and (
+        "crm_status_code" in backend_sim_status
+        and backend_sim_status["crm_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
+        and "cbs_status_code" in backend_sim_status
+        and backend_sim_status["cbs_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
+            backend_sim_status["crm_status_code"]
+        ]
+    )
+
+
+def check_postpaid(backend_sim_status):
+    return (
+        backend_sim_status.get("subscriber_type") == 1
+        and "crm_status_code" in backend_sim_status
+        and "crm_status_details" in backend_sim_status
+    )
+
+
 def get_unified_sim_status(backend_sim_status: dict) -> str:
     """
     Based on provided sim_status (with customer/subscriber type, etc. CRM and CBS code keys),
@@ -102,27 +123,13 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
         return cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
 
     # prepaid
-    if backend_sim_status.get("subscriber_type") == 0:
-        if (
-            "crm_status_code" in backend_sim_status
-            and backend_sim_status["crm_status_code"]
-            in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
-            and "cbs_status_code" in backend_sim_status
-            and backend_sim_status["cbs_status_code"]
-            in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
-                backend_sim_status["crm_status_code"]
-            ]
-        ):
-            return cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
-                backend_sim_status["crm_status_code"]
-            ][backend_sim_status["cbs_status_code"]]
+    if check_prepaid(backend_sim_status):
+        return cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
+            backend_sim_status["crm_status_code"]
+        ][backend_sim_status["cbs_status_code"]]
 
     # postpaid
-    if (
-        backend_sim_status.get("subscriber_type") == 1
-        and "crm_status_code" in backend_sim_status
-        and "crm_status_details" in backend_sim_status
-    ):
+    if check_postpaid(backend_sim_status):
         if (
             backend_sim_status["crm_status_details"]
             in cms.SIM_STATUS_LOOKUP_POSTPAID_CONSUMER_MOBILE

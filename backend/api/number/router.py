@@ -9,7 +9,12 @@ from api.number.models.response import SubaccountsResponse
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
-from .zend import recharge_voucher, change_supplementary_offering, get_free_units
+from .zend import (
+    recharge_voucher,
+    forward_recharge_voucher,
+    change_supplementary_offering,
+    get_free_units,
+)
 from sqlalchemy.orm import Session
 from db.main import get_db
 from utils.jwt import JWTBearer
@@ -99,3 +104,15 @@ async def charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
+
+
+@router.post(
+    "/forward-charge-voucher",
+    response_model=ApiResponse,
+)
+async def forward_charge_voucher(
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
+    pincode: str = Body(..., regex=rgx.DIGITS, max_length=20, example="123456"),
+    session_msisdn=Depends(JWTBearer()),
+) -> ApiResponse:
+    return forward_recharge_voucher(msisdn, pincode)

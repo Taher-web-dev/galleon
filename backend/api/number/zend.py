@@ -5,14 +5,18 @@ import requests
 import requests_mock
 from typing import Any
 from pathlib import Path
-from api.models.response import ApiResponse
+from api.models.response import ApiException, ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
+from api.models.data import Error
+from api.number.sim import check_postpaid, check_prepaid
 from utils.settings import settings
+from fastapi import status
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
 zend_recharge_voucher_api = f"{settings.zend_api}esb/recharge-voucher"
+zend_payment_voucher_api = f"{settings.zend_api}esb/payment-voucher"
 zend_subscriptions_api = f"{settings.zend_api}cbs/query-mgr-service/"
 zend_send_sms_api = f"{settings.zend_api}sms/send"
 zend_free_units_api = f"{settings.zend_api}esb/free-units"
@@ -88,6 +92,39 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
         response = requests.post(
             zend_recharge_voucher_api, headers=headers, json=request_data
         )
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
+
+
+def forward_recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
+    request_data = {"msisdn": msisdn, "pincode": pin}
+    #! chk eligything
+    backend_sim_status = zend_sim(msisdn)
+    url = ""
+    if check_postpaid(backend_sim_status):
+        url = zend_payment_voucher_api
+    elif check_prepaid(backend_sim_status):
+        url = zend_recharge_voucher_api
+    else:
+        raise ApiException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            error=Error(
+                code=99,
+                type="number",
+                message="this phone number is not eligible to receive vouchers",
+            ),
+        )
+
+    if settings.mock_zain_api:
+        with requests_mock.Mocker() as m:
+            m.post(
+                url,
+                text=Path(f"{path}./zend_recharge_voucher.json").read_text(),
+            )
+            response = requests.post(url, headers=headers, json=request_data)
+    else:
+        response = requests.post(url, headers=headers, json=request_data)
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
