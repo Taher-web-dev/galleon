@@ -163,7 +163,7 @@ def test_expired_token():
     response = client.post(
         "/api/user/validate", headers=headers, json={"password": password}
     )
-
+    breakpoint()
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     # print(response.json())
 

@@ -19,34 +19,34 @@ class JWTBearer(HTTPBearer):
     async def __call__(
         self, request: Request, db: Session = Depends(get_db)
     ) -> str | User:
-        try:
-            credentials: Optional[
-                HTTPAuthorizationCredentials
-            ] = await super().__call__(request)
-            if credentials and credentials.scheme == "Bearer":
-                decoded_data = decode_jwt(credentials.credentials)
-                if not decoded_data:
-                    raise ApiException(
-                        status.HTTP_401_UNAUTHORIZED, api_errors.EXPIRED_TOKEN
-                    )
-                msisdn = decoded_data.get("msisdn")
 
-                if self.fetch_user:
-                    # db = SessionLocal()
-                    if user := db.query(User).filter(User.msisdn == msisdn).first():
-                        if user.refresh_token:
-                            return user
-                        raise  # User doesn't have a refresh_token
-                    raise  # User not found
+        credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(
+            request
+        )
+        if credentials and credentials.scheme == "Bearer":
+            decoded_data = decode_jwt(credentials.credentials)
+            if not decoded_data:
+                raise ApiException(
+                    status.HTTP_401_UNAUTHORIZED, api_errors.EXPIRED_TOKEN
+                )
+            msisdn = decoded_data.get("msisdn")
 
-                return msisdn
-            raise  # No/invalid credentials
+            if self.fetch_user:
+                # db = SessionLocal()
+                if user := db.query(User).filter(User.msisdn == msisdn).first():
+                    if user.refresh_token:
+                        return user
+                    raise  # User doesn't have a refresh_token
+                raise  # User not found
 
-        except:
-            # db.close() if db else None
-            raise ApiException(
-                status.HTTP_401_UNAUTHORIZED, api_errors.NOT_AUTHENTICATED
-            )
+            return msisdn
+        raise  # No/invalid credentials
+
+    # except:
+    #     # db.close() if db else None
+    #     raise ApiException(
+    #         status.HTTP_401_UNAUTHORIZED, api_errors.NOT_AUTHENTICATED
+    #     )
 
 
 def sign_jwt(data: dict, expires=settings.jwt_access_expires) -> str:

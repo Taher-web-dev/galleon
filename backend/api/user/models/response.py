@@ -44,6 +44,8 @@ class UserProfile(BaseModel):
     name: str = Field(..., example="Ahmed Shahwan")
     msisdn: str = Field(..., regex=rgx.MSISDN, example="7839921514")
     email: EmailStr | None = Field(None, example="ahmed.shahwan@startappz.com")
+    is_4g_compatible: bool = Field(..., example=True)
+    unified_sim_status: str = Field(..., example="BLOCK_UNSUPPORTED_CUSTOMER_TYPE")
     profile_pic_url: HttpUrl | None = Field(
         None, example="https://example.com/fake_pic.jpg"
     )
