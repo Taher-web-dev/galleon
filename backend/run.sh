@@ -12,4 +12,5 @@ mkdir -p $LOG_PATH
 # uvicorn --env-file $BACKEND_ENV --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app
 # gunicorn main:app -w $(nproc --all) -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
 cd $(dirname "$(realpath $0)")
-gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
+# hypercorn main:app -w 1 -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
+hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'

@@ -1,7 +1,6 @@
 fastapi
 json_logging
 pydantic[email,dotenv]
-gunicorn
 uvicorn
 jinja2
 six
@@ -11,3 +10,4 @@ SQLAlchemy
 psycopg2
 passlib[bcrypt]
 concurrent-log-handler
+hypercorn
