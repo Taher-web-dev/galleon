@@ -11,7 +11,6 @@ from .sim import get_sim_details
 from .subscriptions import get_subscriptions
 from .zend import (
     recharge_voucher,
-    forward_recharge_voucher,
     change_supplementary_offering,
     get_free_units,
 )

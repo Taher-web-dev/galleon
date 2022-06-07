@@ -9,6 +9,7 @@ from api.models.response import ApiException, ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from api.models.data import Error
+from backend.api.number.sim import get_unified_sim_status
 from utils.settings import settings
 from fastapi import status
 from api.number import cms
@@ -27,6 +28,14 @@ zend_change_supplementary_offering_api = (
 path = f"{os.path.dirname(__file__)}/mocks/"
 
 headers = {"Content-Type": "application/json"}
+
+
+def check_eligibility_prepaid():
+    pass
+
+
+def check_eligibility_postpaid():
+    pass
 
 
 def check_prepaid(backend_sim_status):
@@ -102,6 +111,8 @@ def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
     request_data = {"msisdn": msisdn, "pincode": pin}
 
     backend_sim_status = zend_sim(msisdn)
+    if backend_sim_status.get("subscriber_type") not in [0, 1]:
+        return
     url = ""
     if check_postpaid(backend_sim_status):
         url = zend_payment_voucher_api
