@@ -4,6 +4,10 @@ from pydantic.main import BaseModel
 from api.number import cms
 
 from .zend import zend_sim
+from utils.settings import settings
+import requests
+
+zend_check_4G_api = f"{settings.zend_api}wewebit/query-usim-service/"
 
 
 class Nba(BaseModel):
@@ -169,3 +173,18 @@ def get_nba(
 
     # otherwise we fall back to Zain-Fi app
     return Nba(**cms.ZAINFI_NBA)
+
+
+def check_support_4G(msisdn: str) -> bool:
+    if settings.mock_zain_api:
+        return True
+    response = requests.get(zend_check_4G_api + msisdn)
+    return response.json().get("data").get("is_4g_compatible")
+
+
+def check_eligibility(msisdn: str):
+    backend_sim_status = zend_sim(msisdn)
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
+    if settings.mock_zain_api:
+        return True
+    return "BLOCK" not in unified_sim_status

@@ -4,7 +4,7 @@ from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 from api.models.response import ApiResponse
 from api.models.errors import ELIGIBILITY_ERR
-from api.user.check_eligibility import check_eligibility
+from api.number.sim import check_eligibility
 from db.main import get_db
 from .utils import gen_alphanumeric, gen_numeric, slack_notify
 from api.number.zend import zend_send_sms
@@ -18,7 +18,6 @@ from api.otp.models.request import (
     VerifyOTPRequest,
 )
 from api.otp.models.response import Confirmation, ConfirmationResponse
-from api.user.check_eligibility import check_eligibility
 
 router = APIRouter()
 

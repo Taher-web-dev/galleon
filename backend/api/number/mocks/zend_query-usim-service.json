@@ -1,0 +1,11 @@
+{
+    "status": "success",
+    "success": {
+        "code": 0,
+        "message": "SUCCESS"
+    },
+    "data": {
+        "is_4g_compatible": true,
+        "is_usim": false
+    }
+}

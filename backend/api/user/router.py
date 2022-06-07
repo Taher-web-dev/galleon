@@ -28,10 +28,9 @@ from api.user.models.response import (
 )
 from api.user.models import examples
 import api.user.models.errors as err
-from .check_eligibility import check_eligibility
 from api.number.zend import zend_sim
-from api.number.sim import get_unified_sim_status
-from .check_support_4G import check_support_4G
+from api.number.sim import get_unified_sim_status, check_support_4G, check_eligibility
+
 
 router = APIRouter()
 
