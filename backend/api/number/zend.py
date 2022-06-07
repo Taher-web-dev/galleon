@@ -175,7 +175,9 @@ def query_bill(msisdn: str) -> ApiResponse:
     return api_response(response)
 
 
-def zend_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+def zend_change_subscription(
+    msisdn: str, offer_id: int, subscribe: bool
+) -> ApiResponse:
     request_data = {"msisdn": msisdn, "offer_id": offer_id, "add_offering": subscribe}
 
     if settings.mock_zain_api:
