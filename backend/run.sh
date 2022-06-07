@@ -13,4 +13,5 @@ mkdir -p $LOG_PATH
 # gunicorn main:app -w $(nproc --all) -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
 cd $(dirname "$(realpath $0)")
 # hypercorn main:app -w 1 -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
-hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
+# hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
+hypercorn --log-config json_log.ini -w 1 --backlog 200 --debug --reload -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio' main:app 2>&1 | jq
