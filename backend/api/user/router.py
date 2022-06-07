@@ -22,11 +22,13 @@ from api.user.models.response import (
     Tokens,
     TokensResponse,
     UserProfile,
+    GetUserProfile,
     UserProfileResponse,
+    GetUserProfileResponse,
 )
 from api.user.models import examples
 import api.user.models.errors as err
-from api.number.zend import zend_sim
+from api.number.zend import zend_sim, is_4g_compatible
 
 router = APIRouter()
 
@@ -96,7 +98,7 @@ async def reset_password(
 
 @router.get(
     "/profile",
-    response_model=UserProfileResponse,
+    response_model=GetUserProfileResponse,
     response_model_exclude_none=True,
     responses=examples.get_user_profile,
 )
@@ -104,13 +106,14 @@ async def get_user_profile(
     user=Depends(JWTBearer(fetch_user=True)),
 ) -> UserProfileResponse:
     """Get user profile"""
-
-    return UserProfileResponse(
-        data=UserProfile(
+    return GetUserProfileResponse(
+        data=GetUserProfile(
             id=user.id,
             msisdn=user.msisdn,
             name=user.name,
             email=user.email,
+            is_4g_compatible=is_4g_compatible(user.msisdn),
+            unified_sim_status=zend_sim(user.msisdn)["unified_sim_status"],
             profile_pic_url=user.profile_pic_url,
         ),
     )

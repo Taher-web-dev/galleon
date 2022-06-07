@@ -10,6 +10,10 @@ from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from utils.settings import settings
 from .sim_helper import get_unified_sim_status
+from utils.settings import settings
+import requests
+
+zend_check_4g_api = f"{settings.zend_api}wewebit/query-usim-service/"
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
@@ -217,3 +221,23 @@ def zend_change_subscription(
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
+
+
+def is_4g_compatible(msisdn: str) -> bool:
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_query-usim-service.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_check_4g_api,
+                text=Path(mock_path).read_text(),
+            )
+            response = requests.post(
+                zend_check_4g_api,
+                headers=headers,
+            )
+            return response.json().get("data").get("is_4g_compatible")
+
+    response = requests.get(zend_check_4g_api + msisdn)
+
+    return response.json().get("data").get("is_4g_compatible")
