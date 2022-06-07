@@ -30,6 +30,6 @@ INVALID_TOKEN = Error(
 
 INVALID_REFRESH_TOKEN = Error(
     type="auth",
-    code=130,
-    message="Invalid refresh token",
+    code=101,
+    message="The Refresh-Token is not valid",
 )
