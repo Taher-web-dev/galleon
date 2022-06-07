@@ -9,6 +9,11 @@ from api.models.response import ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from utils.settings import settings
+from .sim_helper import get_unified_sim_status
+from utils.settings import settings
+import requests
+
+zend_check_4G_api = f"{settings.zend_api}wewebit/query-usim-service/"
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
@@ -19,6 +24,7 @@ zend_free_units_api = f"{settings.zend_api}esb/free-units"
 zend_change_supplementary_offering_api = (
     f"{settings.zend_api}esb/change-supplementary-offering"
 )
+zend_query_bill = f"{settings.zend_api}esb/billing-details/"
 
 path = f"{os.path.dirname(__file__)}/mocks/"
 
@@ -141,7 +147,22 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
         response = requests.get(zend_sim_api + msisdn)  # , json={"msisdn": msisdn})
     if not response.ok:
         raise api_exception(response)
-    return response.json().get("data")
+
+    backend_sim_status = response.json().get("data")
+
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
+
+    backend_sim_status["unified_sim_status"] = unified_sim_status
+    backend_sim_status["is_eligible"] = settings.mock_zain_api | (
+        "BLOCK" not in unified_sim_status
+    )
+    backend_sim_status["is_post_paid"] = (
+        response.json().get("data").get("subscriber_type") == 1
+    )
+    backend_sim_status["is_pre_paid"] = (
+        response.json().get("data").get("subscriber_type") == 0
+    )
+    return backend_sim_status
 
 
 def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
@@ -157,3 +178,66 @@ def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
     if not response.ok:
         raise api_exception(response)
     return response.json().get("data").get("subscriptions")
+
+
+def query_bill(msisdn: str) -> ApiResponse:
+    if settings.mock_zain_api:
+        with requests_mock.Mocker() as m:
+            m.get(
+                zend_query_bill + msisdn,
+                text=Path(f"{path}./zend_mgr_service.json").read_text(),
+            )
+            response = requests.get(zend_query_bill + msisdn)
+    else:
+        response = requests.get(zend_query_bill + msisdn)
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
+
+
+def zend_change_subscription(
+    msisdn: str, offer_id: int, subscribe: bool
+) -> ApiResponse:
+    request_data = {"msisdn": msisdn, "offer_id": offer_id, "add_offering": subscribe}
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_change_supplementary_offering.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_change_supplementary_offering_api,
+                text=Path(mock_path).read_text(),
+            )
+            print(mock_path)
+            response = requests.post(
+                zend_change_supplementary_offering_api,
+                headers=headers,
+                json=request_data,
+            )
+    else:
+        response = requests.post(
+            zend_change_supplementary_offering_api, headers=headers, json=request_data
+        )
+
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
+
+
+def is_4G_compatible(msisdn: str) -> bool:
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_query-usim-service.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_check_4G_api,
+                text=Path(mock_path).read_text(),
+            )
+            response = requests.post(
+                zend_check_4G_api,
+                headers=headers,
+            )
+            return response.json().get("data").get("is_4g_compatible")
+
+    response = requests.get(zend_check_4G_api + msisdn)
+
+    return response.json().get("data").get("is_4g_compatible")

@@ -28,9 +28,7 @@ from api.user.models.response import (
 )
 from api.user.models import examples
 import api.user.models.errors as err
-from api.number.zend import zend_sim
-from api.number.sim import get_unified_sim_status, check_support_4G, check_eligibility
-
+from api.number.zend import zend_sim, is_4G_compatible
 
 router = APIRouter()
 
@@ -45,7 +43,7 @@ async def create_user(
     new_user: UserCreateRequest, db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """Register a new user"""
-    if not check_eligibility(new_user.msisdn):
+    if not zend_sim(new_user.msisdn)["is_eligible"]:
         raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:
@@ -108,16 +106,14 @@ async def get_user_profile(
     user=Depends(JWTBearer(fetch_user=True)),
 ) -> UserProfileResponse:
     """Get user profile"""
-    backend_sim_status = zend_sim(user.msisdn)
-    unified_sim_status = get_unified_sim_status(backend_sim_status)
     return GetUserProfileResponse(
         data=GetUserProfile(
             id=user.id,
             msisdn=user.msisdn,
             name=user.name,
             email=user.email,
-            is_4g_compatible=check_support_4G(user.msisdn),
-            unified_sim_status=unified_sim_status,
+            is_4g_compatible=is_4G_compatible(user.msisdn),
+            unified_sim_status=zend_sim(user.msisdn)["unified_sim_status"],
             profile_pic_url=user.profile_pic_url,
         ),
     )

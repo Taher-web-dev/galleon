@@ -13,7 +13,7 @@ class UserCreateRequest(BaseModel):
         None, example="https://example.com/fake_pic.jpg"
     )
     otp_confirmation: str = Field(
-        ..., regex=rgx.STRING, max_length=30, example="xwerWerQASGASAWasd"
+        ..., regex=rgx.OTP_CONFIRMATION, example="fjuGQYmZvCBsQbEZ"
     )
 
 
@@ -23,7 +23,7 @@ class UserResetPasswordRequest(BaseModel):
         None, regex=rgx.PASSWORD, max_length=40, example="aZ$eqsdwxc2@3"
     )
     otp_confirmation: str = Field(
-        ..., regex=rgx.STRING, max_length=30, example="xwerWerQASGASAWasd"
+        ..., regex=rgx.OTP_CONFIRMATION, example="fjuGQYmZvCBsQbEZ"
     )
 
 

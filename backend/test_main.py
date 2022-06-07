@@ -14,7 +14,7 @@ msisdn: str = "7841631859"
 name: str = "Some one"
 password: str = "hiBiggerPass"
 new_password: str = "NewP@ssw0rD"
-confirmation: str = "dummyConfirmation"
+confirmation: str = "fjuGQYmZvCBsQbEZ"
 user: User = User()
 
 db = SessionLocal()
@@ -41,7 +41,7 @@ def test_create_user():
         "msisdn": msisdn,
         "name": name,
         "password": password,
-        "otp_confirmation": "wrongConfirmation",
+        "otp_confirmation": "fjuGQYmZvCBsQbEX",
     }
 
     # wrong confirmation
@@ -217,7 +217,7 @@ def test_reset_password():
         json={
             "msisdn": msisdn,
             "password": new_password,
-            "otp_confirmation": "wrongconfirmation",
+            "otp_confirmation": "fjuGQYmZvCBsQbEX",
         },
         headers=headers,
     )
@@ -237,6 +237,9 @@ def test_wallet():
         "Content-Type": "application/json",
     }
     response = client.get(f"/api/number/wallet?msisdn={msisdn}", headers=headers)
+    print("--------------------------")
+    print(response.json())
+    print("--------------------------")
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
@@ -322,7 +325,7 @@ def test_verify_otp():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     # invalid confirmation
     response = client.post(
-        "/api/otp/verify", json={"msisdn": msisdn, "confirmation": "I22Q564JqsdSD"}
+        "/api/otp/verify", json={"msisdn": msisdn, "confirmation": "fjuGQYmZvCBsQbEX"}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response = client.post(

@@ -2,10 +2,7 @@
   "status": "success",
   "success": {
     "code": 0,
-    "message": "string"
+    "message": "Success."
   },
-  "data": {
-    "supports_4G": true,
-    "is_usim": true
-  }
+  "data": {}
 }
