@@ -12,7 +12,7 @@ def gen_alphanumeric(length=16):
     )
 
 
-def gen_numeric(length=4):
+def gen_numeric(length=6):
     return "".join(random.choice(string.digits) for _ in range(length))
 
 
