@@ -19,6 +19,7 @@ zend_free_units_api = f"{settings.zend_api}esb/free-units"
 zend_change_supplementary_offering_api = (
     f"{settings.zend_api}esb/change-supplementary-offering"
 )
+zend_query_bill = f"{settings.zend_api}esb/billing-details/"
 
 path = f"{os.path.dirname(__file__)}/mocks/"
 
@@ -157,3 +158,7 @@ def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
     if not response.ok:
         raise api_exception(response)
     return response.json().get("data").get("subscriptions")
+
+
+def query_bill(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+    pass
