@@ -148,7 +148,9 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
     unified_sim_status = get_unified_sim_status(backend_sim_status)
 
     backend_sim_status["unified_sim_status"] = unified_sim_status
-    backend_sim_status["is_eligible"] = "BLOCK" not in unified_sim_status
+    backend_sim_status["is_eligible"] = settings.mock_zain_api | (
+        "BLOCK" not in unified_sim_status
+    )
     backend_sim_status["is_post_paid"] = (
         response.json().get("data").get("subscriber_type") == 1
     )
