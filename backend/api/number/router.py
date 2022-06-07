@@ -8,7 +8,7 @@ from fastapi import APIRouter, Body, Query, Depends
 from api.number.models.response import SubaccountsResponse
 from .balance import get_wallet
 from .sim import get_sim_details
-from .subscriptions import get_subscriptions, set_subscriptions
+from .subscriptions import get_subscriptions, zend_subscriptions
 from .zend import (
     recharge_voucher,
     change_supplementary_offering,
@@ -120,7 +120,7 @@ async def api_subscribe(
     offer_id: str = Body(..., example=1000),
 ) -> ApiResponse:
     """Attempts KYO subscription for the provided MSISDN to the provided offer"""
-    return set_subscriptions(msisdn, offer_id, True)
+    return zend_subscriptions(msisdn, offer_id, True)
 
 
 @router.post("/unsubscribe", response_model=ApiResponse)
@@ -129,4 +129,4 @@ async def api_unsubscribe(
     offer_id: str = Body(..., example=1000),
 ) -> ApiResponse:
     """Attempts KYO unsubscription for the provided MSISDN to the provided offer"""
-    return set_subscriptions(msisdn, offer_id, False)
+    return zend_subscriptions(msisdn, offer_id, False)

@@ -173,3 +173,29 @@ def query_bill(msisdn: str) -> ApiResponse:
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
+
+
+def zend_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+    request_data = {"msisdn": msisdn, "offer_id": offer_id, "add_offering": subscribe}
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_change_supplementary_offering.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_change_supplementary_offering_api,
+                text=Path(mock_path).read_text(),
+            )
+            print(mock_path)
+            response = requests.post(
+                zend_change_supplementary_offering_api,
+                headers=headers,
+                json=request_data,
+            )
+    else:
+        response = requests.post(
+            zend_change_supplementary_offering_api, headers=headers, json=request_data
+        )
+
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
