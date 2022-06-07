@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "success": {
+    "code": 200,
+    "message": "You are successfully unsubscribed from the offer"
+  },
+  "data": {
+    "status": true,
+    "type": "toms",
+    "msg": {
+      "en": "You are successfully unsubscribed from the offer",
+      "ar": "تم الغاء اشتراكك من العرض بنجاح",
+      "kr": "بةشداريكردنت لةم ئؤفةره بةسةركةوتوويي هةلوةشايةوه"
+    }
+  }
+}

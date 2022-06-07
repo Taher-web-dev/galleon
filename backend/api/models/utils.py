@@ -28,9 +28,10 @@ def api_response(resp: Response, klass=None) -> ApiResponse:
     json = resp.json()
     building_data = {
         "status": json.get("status"),
-        "success": Success(**json.get("success")),
+        "success": Success(**json.get("success")) if json.get("success") else None,
         "data": json.get("data"),
     }
+
     if klass:
         return klass(**building_data)
 

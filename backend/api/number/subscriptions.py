@@ -1,9 +1,17 @@
+import os
 from pydantic import Field
+from utils.settings import settings
 from .zend import zend_subscriptions
-
 from pydantic.main import BaseModel
 from typing import Any
 from datetime import datetime
+
+
+subscription_subscribe_api = f"{settings.zend_api}kyo/subscribe"
+subscription_unsubscribe_api = f"{settings.zend_api}kyo/unsubscribe"
+
+path = f"{os.path.dirname(__file__)}/mocks/"
+headers = {"Content-Type": "application/json"}
 
 
 class Subscription(BaseModel):
