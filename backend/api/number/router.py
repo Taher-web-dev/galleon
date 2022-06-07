@@ -104,15 +104,3 @@ async def charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
-
-
-@router.post(
-    "/forward-charge-voucher",
-    response_model=ApiResponse,
-)
-async def forward_charge_voucher(
-    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
-    pincode: str = Body(..., regex=rgx.DIGITS, max_length=20, example="123456"),
-    session_msisdn=Depends(JWTBearer()),
-) -> ApiResponse:
-    return forward_recharge_voucher(msisdn, pincode)

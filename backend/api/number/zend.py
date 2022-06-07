@@ -100,27 +100,7 @@ def change_supplementary_offering(
 
 def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
     request_data = {"msisdn": msisdn, "pincode": pin}
-    if settings.mock_zain_api:
-        with requests_mock.Mocker() as m:
-            m.post(
-                zend_recharge_voucher_api,
-                text=Path(f"{path}./zend_recharge_voucher.json").read_text(),
-            )
-            response = requests.post(
-                zend_recharge_voucher_api, headers=headers, json=request_data
-            )
-    else:
-        response = requests.post(
-            zend_recharge_voucher_api, headers=headers, json=request_data
-        )
-    if not response.ok:
-        raise api_exception(response)
-    return api_response(response)
 
-
-def forward_recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
-    request_data = {"msisdn": msisdn, "pincode": pin}
-    #! chk eligything
     backend_sim_status = zend_sim(msisdn)
     url = ""
     if check_postpaid(backend_sim_status):
