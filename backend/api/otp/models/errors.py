@@ -35,3 +35,9 @@ INVALID_OTP = Error(
     code=307,
     message="Something is wrong! msisdn or code is wrong",
 )
+
+INVALID_MSISDN_MISSMATCH = Error(
+    type="number",
+    code=300,
+    message="The MSISDN is invalid.",
+)

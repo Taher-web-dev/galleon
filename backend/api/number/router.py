@@ -4,8 +4,9 @@ This is the middle-ware that connects with
 zain backend systems (aka zain-backend)
 """
 
-from fastapi import APIRouter, Body, Query, Depends
+from fastapi import APIRouter, Body, Query, Depends, status
 from api.number.models.response import SubaccountsResponse
+from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions, zend_subscriptions
@@ -26,7 +27,7 @@ from api.number.models.response import (
     SubscriptionsResponse,
     WalletResponse,
 )
-from api.models.response import ApiResponse
+from api.models.response import ApiException, ApiResponse
 
 router = APIRouter()
 
@@ -109,8 +110,11 @@ async def charge_voucher(
 @router.get("/query-bill", response_model=ApiResponse)
 async def api_query_bill(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
+    session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Attempts KYO subscription for the provided MSISDN to the provided offer"""
+    """Check bill for postpaid msisdn"""
+    if msisdn != session_msisdn:
+        raise ApiException(status_code=99, error=INVALID_MSISDN_MISSMATCH)
     return query_bill(msisdn)
 
 
@@ -118,8 +122,11 @@ async def api_query_bill(
 async def api_subscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: str = Body(..., example=1000),
+    session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
     return zend_subscriptions(msisdn, offer_id, True)
 
 
@@ -127,6 +134,9 @@ async def api_subscribe(
 async def api_unsubscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: str = Body(..., example=1000),
+    session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
     return zend_subscriptions(msisdn, offer_id, False)
