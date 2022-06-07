@@ -106,9 +106,9 @@ async def charge_voucher(
     return recharge_voucher(msisdn, pincode)
 
 
-@router.post("/query-bill", response_model=ApiResponse)
+@router.get("/query-bill", response_model=ApiResponse)
 async def api_query_bill(
-    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514")
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
 ) -> ApiResponse:
     """Attempts KYO subscription for the provided MSISDN to the provided offer"""
     return query_bill(msisdn)

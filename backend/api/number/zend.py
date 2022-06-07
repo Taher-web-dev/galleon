@@ -160,5 +160,16 @@ def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
     return response.json().get("data").get("subscriptions")
 
 
-def query_bill(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
-    pass
+def query_bill(msisdn: str) -> ApiResponse:
+    if settings.mock_zain_api:
+        with requests_mock.Mocker() as m:
+            m.get(
+                zend_query_bill + msisdn,
+                text=Path(f"{path}./zend_mgr_service.json").read_text(),
+            )
+            response = requests.get(zend_query_bill + msisdn)
+    else:
+        response = requests.get(zend_query_bill + msisdn)
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
