@@ -40,7 +40,7 @@ async def send_otp(
         db.delete(otp)
         db.commit()
 
-    code = "123456"  # FIXME this should be used  in production: gen_numeric()
+    code = gen_numeric()
     otp = Otp(msisdn=user_request.msisdn, code=code)
     db.add(otp)
     db.commit()

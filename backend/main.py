@@ -2,6 +2,7 @@
 
 import time
 import traceback
+from typing import Any
 
 # import uvicorn
 
@@ -139,6 +140,7 @@ async def middle(request: Request, call_next):
         "key" in request.query_params
         and settings.api_key == request.query_params["key"]
     ):
+        exception_data: dict[str, Any] | None = None
         try:
             response = await call_next(request)
             raw_response = [section async for section in response.body_iterator]
@@ -151,6 +153,16 @@ async def middle(request: Request, call_next):
                     ApiResponse(status=Status.failed, error=ex.error)
                 ),
             )
+            stack = [
+                {
+                    "file": frame.f_code.co_filename,
+                    "function": frame.f_code.co_name,
+                    "line": lineno,
+                }
+                for frame, lineno in traceback.walk_tb(ex.__traceback__)
+                if "site-packages" not in frame.f_code.co_filename
+            ]
+            exception_data = {"props": {"exception": str(ex), "stack": stack}}
             response_body = json.loads(response.body.decode())
 
         except Exception as ex:
@@ -165,7 +177,7 @@ async def middle(request: Request, call_next):
                     for frame, lineno in traceback.walk_tb(ex.__traceback__)
                     if "site-packages" not in frame.f_code.co_filename
                 ]
-                logger.error(str(ex), extra={"props": {"stack": stack}})
+                exception_data = {"props": {"exception": str(ex), "stack": stack}}
             response = JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content=jsonable_encoder(
@@ -195,28 +207,35 @@ async def middle(request: Request, call_next):
     response.headers["Expires"] = "0"
     response.headers["X-Server-Time"] = datetime.now().isoformat()
 
-    logger.info(
-        "Processed",
-        extra={
-            "props": {
-                "duration": 1000 * (time.time() - start_time),
-                "request": {
-                    "verb": request.method,
-                    "path": str(request.url.path),
-                    "headers": dict(request.headers.items()),
-                    "query_params": dict(request.query_params.items()),
-                    "body": request.state.request_body
-                    if hasattr(request.state, "request_body")
-                    else {},
-                },
-                "response": {
-                    "headers": dict(response.headers.items()),
-                    "body": response_body,
-                },
-                "http_status": response.status_code,
-            }
-        },
-    )
+    extra = {
+        "props": {
+            "duration": 1000 * (time.time() - start_time),
+            "request": {
+                "verb": request.method,
+                "path": str(request.url.path),
+                "headers": dict(request.headers.items()),
+                "query_params": dict(request.query_params.items()),
+                "body": request.state.request_body
+                if hasattr(request.state, "request_body")
+                else {},
+            },
+            "response": {
+                "headers": dict(response.headers.items()),
+                "body": response_body,
+            },
+            "http_status": response.status_code,
+        }
+    }
+
+    if exception_data:
+        extra["props"]["exception"] = exception_data
+    if hasattr(request.state, "request_body"):
+        extra["props"]["request"]["body"] = request.state.request_body
+    if response_body:
+        extra["props"]["response"]["body"] = response_body
+
+    logger.info("Processed", extra=extra)
+
     return response
 
 
