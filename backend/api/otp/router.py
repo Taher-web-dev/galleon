@@ -84,9 +84,8 @@ async def confirm(
 async def verify_otp(
     user_request: VerifyOTPRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
-    """Verify otp status (internal use)"""
+    """Verify otp"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
-    # TODO detail more errors here: no confirmation, invalid confirmation
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
         return ApiResponse()
     raise ApiException(status.HTTP_400_BAD_REQUEST, INVALID_CONFIRMATION)
