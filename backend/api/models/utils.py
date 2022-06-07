@@ -24,13 +24,14 @@ def api_response(resp: Response, klass=None) -> ApiResponse:
     """Generate ApiResponse/its inheritors from zain-backend successful response"""
     if klass and not issubclass(klass, ApiResponse):
         raise TypeError("klass must be ApiResponse")
+
     json = resp.json()
-    print(json.get("success"))
     building_data = {
         "status": json.get("status"),
-        "success": Success(**json.get("success")),
+        "success": Success(**json.get("success")) if json.get("success") else None,
         "data": json.get("data"),
     }
+
     if klass:
         return klass(**building_data)
 
