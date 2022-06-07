@@ -1,21 +1,4 @@
 from api.number import cms
-from pydantic import BaseModel, Field
-
-
-class Nba(BaseModel):
-    href: str = Field(..., example="https://apps.iq.zain.com/zain-fi")
-    message_en: str = Field(
-        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
-    )
-    message_ar: str = Field(
-        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
-    )
-    message_kd: str = Field(
-        ..., example="Hello {{customer_name}}, did you hear about our new Zain-Fi app?"
-    )
-    href_text_en: str = Field(..., example="View app")
-    href_text_ar: str = Field(..., example="View app")
-    href_text_kd: str = Field(..., example="View app")
 
 
 def get_unified_sim_status(backend_sim_status: dict) -> str:
@@ -32,13 +15,13 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
     """
     # first check fundamental SIM-level issues to ensure it's prepaid or postpaid (not hybrid)
     if backend_sim_status.get("subscriber_type") not in [0, 1]:
-        return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
+        return "BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE"
 
     if backend_sim_status["customer_type"] != "Individual":
-        return cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
+        return "BLOCK_UNSUPPORTED_CUSTOMER_TYPE"
 
     if backend_sim_status["primary_offering_id"] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
-        return cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
+        return "BLOCK_INELIGIBLE_PRIMARY_OFFERING"
 
     # prepaid
     if backend_sim_status.get("subscriber_type") == 0:
@@ -74,12 +57,12 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
                 backend_sim_status["crm_status_code"]
             ]["unhandled"]
 
-    return cms.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
+    return "BLOCK_UNKNOWN_SIM_STATUS_COMBINATION"
 
 
 def get_nba(
     msisdn: str, unified_sim_status: str, usim_status: dict, backend_sim_status: dict
-) -> Nba:
+) -> dict:
     """
     Provides NBA for the MSISDN. Covers:
     - Call to action for recharge-only, must-pay-bill SIMs
@@ -92,11 +75,11 @@ def get_nba(
     """
     # if we get a SIM status NBA that isn't normal, use it [we know it isn't NORMAL or BLOCK_X]
     if unified_sim_status != "NORMAL" and unified_sim_status in cms.SIM_NBA_LOOKUP:
-        return Nba(**cms.SIM_NBA_LOOKUP[unified_sim_status])
+        return unified_sim_status
 
     # otherwise, if SIM not 4G eligible then use this one
     if usim_status["is_4g_compatible"] == 0:
-        return Nba(**cms.SIM_NBA_LOOKUP[cms.WARN_NOT_4G_COMPATIBLE])
+        return "WARN_NOT_4G_COMPATIBLE"
 
     # non-Prime postpaid special handling
     if (
@@ -104,7 +87,7 @@ def get_nba(
         and backend_sim_status["primary_offering_id"]
         not in cms.POSTPAID_PRIME_PRIMARY_OFFERINGS
     ):
-        return Nba(**cms.POSTPAID_PRIME_NBA)
+        return "POSTPAID_PRIME_NBA"
 
     # otherwise we fall back to Zain-Fi app
-    return Nba(**cms.ZAINFI_NBA)
+    return "ZAINFI_NBA"

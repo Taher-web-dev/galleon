@@ -1,7 +1,6 @@
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from .sim_helper import get_nba, Nba
 
 from .zend import zend_sim
 
@@ -21,7 +20,7 @@ class Sim(BaseModel):
     unified_sim_status: str = Field(..., example="apNORMALp")
     is_4g_compatible: bool = Field(..., example=True)
     is_eligible: bool = Field(..., example=False)
-    nba: Nba
+    # nba: Nba
 
     # TODO discuss - what does this do & should we include user name here?
     associated_with_user: bool = False
@@ -41,7 +40,7 @@ def get_sim_details(msisdn: str) -> Sim:
 
     # get details
     unified_sim_status = zend_sim(msisdn)["unified_sim_status"]
-    nba = get_nba(msisdn, unified_sim_status, usim_status, backend_sim_status)
+    # nba = get_nba(msisdn, unified_sim_status, usim_status, backend_sim_status)
 
     return Sim(
         # backend response - mainly for debug
@@ -57,7 +56,7 @@ def get_sim_details(msisdn: str) -> Sim:
         unified_sim_status=unified_sim_status,
         is_4g_compatible=usim_status["is_4g_compatible"],
         is_eligible=False if "BLOCK" in unified_sim_status else True,
-        nba=nba,
+        # nba=nba,
         # user info
         associated_with_user=False,  # FIXME
     )
