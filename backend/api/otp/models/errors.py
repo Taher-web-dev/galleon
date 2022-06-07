@@ -33,5 +33,5 @@ INVALID_CONFIRMATION = Error(
 INVALID_OTP = Error(
     type="otp",
     code=307,
-    message="Something is wrong! msisdn or code is wrong",
+    message="Invalid OTP",
 )
