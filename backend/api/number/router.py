@@ -119,7 +119,7 @@ async def api_subscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: str = Body(..., example=1000),
 ) -> ApiResponse:
-    """Attempts KYO subscription for the provided MSISDN to the provided offer"""
+    """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     return zend_subscriptions(msisdn, offer_id, True)
 
 
@@ -128,5 +128,5 @@ async def api_unsubscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: str = Body(..., example=1000),
 ) -> ApiResponse:
-    """Attempts KYO unsubscription for the provided MSISDN to the provided offer"""
+    """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     return zend_subscriptions(msisdn, offer_id, False)
