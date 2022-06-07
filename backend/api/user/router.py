@@ -26,7 +26,7 @@ from api.user.models.response import (
 )
 from api.user.models import examples
 import api.user.models.errors as err
-from .check_eligibility import check_eligibility
+from api.number.zend import zend_sim
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ async def create_user(
     new_user: UserCreateRequest, db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """Register a new user"""
-    if not check_eligibility(new_user.msisdn):
+    if not zend_sim(new_user.msisdn)["is_eligible"]:
         raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
     user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
     if user:

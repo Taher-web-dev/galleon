@@ -9,6 +9,7 @@ from api.models.response import ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from utils.settings import settings
+from .sim_helper import get_unified_sim_status
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
@@ -141,7 +142,20 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
         response = requests.get(zend_sim_api + msisdn)  # , json={"msisdn": msisdn})
     if not response.ok:
         raise api_exception(response)
-    return response.json().get("data")
+
+    backend_sim_status = response.json().get("data")
+
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
+
+    backend_sim_status["unified_sim_status"] = unified_sim_status
+    backend_sim_status["is_eligible"] = "BLOCK" not in unified_sim_status
+    backend_sim_status["is_post_paid"] = (
+        response.json().get("data").get("subscriber_type") == 1
+    )
+    backend_sim_status["is_pre_paid"] = (
+        response.json().get("data").get("subscriber_type") == 0
+    )
+    return backend_sim_status
 
 
 def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
