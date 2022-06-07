@@ -28,7 +28,7 @@ from api.user.models.response import (
 )
 from api.user.models import examples
 import api.user.models.errors as err
-from api.number.zend import zend_sim, is_4G_compatible
+from api.number.zend import zend_sim, is_4g_compatible
 
 router = APIRouter()
 
@@ -112,7 +112,7 @@ async def get_user_profile(
             msisdn=user.msisdn,
             name=user.name,
             email=user.email,
-            is_4g_compatible=is_4G_compatible(user.msisdn),
+            is_4g_compatible=is_4g_compatible(user.msisdn),
             unified_sim_status=zend_sim(user.msisdn)["unified_sim_status"],
             profile_pic_url=user.profile_pic_url,
         ),
