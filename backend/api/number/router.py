@@ -9,7 +9,12 @@ from api.number.models.response import SubaccountsResponse
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions, set_subscriptions
-from .zend import recharge_voucher, change_supplementary_offering, get_free_units
+from .zend import (
+    recharge_voucher,
+    change_supplementary_offering,
+    get_free_units,
+    query_bill,
+)
 from sqlalchemy.orm import Session
 from db.main import get_db
 from utils.jwt import JWTBearer
@@ -99,6 +104,14 @@ async def charge_voucher(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
+
+
+@router.post("/query-bill", response_model=ApiResponse)
+async def api_query_bill(
+    msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514")
+) -> ApiResponse:
+    """Attempts KYO subscription for the provided MSISDN to the provided offer"""
+    return query_bill(msisdn)
 
 
 @router.post("/subscribe", response_model=ApiResponse)
