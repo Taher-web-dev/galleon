@@ -24,6 +24,7 @@ zend_free_units_api = f"{settings.zend_api}esb/free-units"
 zend_change_supplementary_offering_api = (
     f"{settings.zend_api}esb/change-supplementary-offering"
 )
+zend_query_bill = f"{settings.zend_api}esb/billing-details/"
 
 path = f"{os.path.dirname(__file__)}/mocks/"
 
@@ -257,3 +258,44 @@ def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
     if not response.ok:
         raise api_exception(response)
     return response.json().get("data").get("subscriptions")
+
+
+def query_bill(msisdn: str) -> ApiResponse:
+    if settings.mock_zain_api:
+        with requests_mock.Mocker() as m:
+            m.get(
+                zend_query_bill + msisdn,
+                text=Path(f"{path}./zend_mgr_service.json").read_text(),
+            )
+            response = requests.get(zend_query_bill + msisdn)
+    else:
+        response = requests.get(zend_query_bill + msisdn)
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)
+
+
+def zend_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+    request_data = {"msisdn": msisdn, "offer_id": offer_id, "add_offering": subscribe}
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_change_supplementary_offering.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_change_supplementary_offering_api,
+                text=Path(mock_path).read_text(),
+            )
+            print(mock_path)
+            response = requests.post(
+                zend_change_supplementary_offering_api,
+                headers=headers,
+                json=request_data,
+            )
+    else:
+        response = requests.post(
+            zend_change_supplementary_offering_api, headers=headers, json=request_data
+        )
+
+    if not response.ok:
+        raise api_exception(response)
+    return api_response(response)

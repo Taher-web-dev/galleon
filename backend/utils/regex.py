@@ -5,5 +5,6 @@ DESC = (
 )
 STRING = r"^\w{1,50}$"  # Only digits and letters between 1 and 50
 DIGITS = r"^\d{1,50}$"  # Only digits between 1 and 50
+OTP_CODE = r"^\d{6}$"  # Exactly 6 digits
 MSISDN = r"^[1-9]\d{9}$"  # Exactly 10 digits, not starting with zero
 PASSWORD = r"^[\w.@#$%^&+=\-\s]{8,}$"  # Password format, at least 8 chars

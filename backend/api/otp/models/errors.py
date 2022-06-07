@@ -33,5 +33,11 @@ INVALID_CONFIRMATION = Error(
 INVALID_OTP = Error(
     type="otp",
     code=307,
-    message="Something is wrong! msisdn or code is wrong",
+    message="Invalid OTP",
+)
+
+INVALID_MSISDN_MISSMATCH = Error(
+    type="number",
+    code=300,
+    message="The MSISDN is invalid.",
 )

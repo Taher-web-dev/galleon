@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "success": {
+    "code": 0,
+    "message": "Success."
+  },
+  "data": {
+    "total_with_tax": -12038003,
+    "total_without_tax": -12038003,
+    "unbilled": 0,
+    "unbilled_tax": 0,
+    "outstanding": 0,
+    "deposit": 0,
+    "advanced_payment": 12038003
+  }
+}
