@@ -1,5 +1,6 @@
 **/__pycache__
 **/*.log
+**/*.lock
 secrets.env
 **/logs/*
 **/.debug_jwt.swp
