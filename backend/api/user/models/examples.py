@@ -53,7 +53,7 @@ token: Dict[int | str, Dict[str, Any]] = {
 refresh_token: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
         "model": InvalidRefreshTokenErrorResponse,
-        "description": "Invalid token.",
+        "description": "Invalid refresh token.",
     },
 }
 
