@@ -184,7 +184,7 @@ def zend_sim_unified_data(backend_sim_status: dict) -> dict:
     # return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
 
     if backend_sim_status["customer_type"] != "Individual":
-        backend_sim_status["customer_type"] = cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
+        backend_sim_status["customer_type_status"] = cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
 
     if backend_sim_status["primary_offering_id"] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
         backend_sim_status[
