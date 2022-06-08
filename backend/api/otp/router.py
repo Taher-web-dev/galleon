@@ -39,7 +39,7 @@ async def send_otp(
         db.delete(otp)
         db.commit()
 
-    code = "123456" # gen_numeric()
+    code = "123456"  # gen_numeric()
     otp = Otp(msisdn=user_request.msisdn, code=code)
     db.add(otp)
     db.commit()
