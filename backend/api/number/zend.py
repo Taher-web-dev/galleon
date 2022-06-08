@@ -33,35 +33,6 @@ path = f"{os.path.dirname(__file__)}/mocks/"
 headers = {"Content-Type": "application/json"}
 
 
-def check_eligibility_prepaid():
-    pass
-
-
-def check_eligibility_postpaid():
-    pass
-
-
-def check_prepaid(backend_sim_status):
-    return backend_sim_status.get("subscriber_type") == 0 and (
-        "crm_status_code" in backend_sim_status
-        and backend_sim_status["crm_status_code"]
-        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
-        and "cbs_status_code" in backend_sim_status
-        and backend_sim_status["cbs_status_code"]
-        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
-            backend_sim_status["crm_status_code"]
-        ]
-    )
-
-
-def check_postpaid(backend_sim_status):
-    return (
-        backend_sim_status.get("subscriber_type") == 1
-        and "crm_status_code" in backend_sim_status
-        and "crm_status_details" in backend_sim_status
-    )
-
-
 def get_free_units(msisdn: str) -> list[Subaccount]:
     response = requests.get(f"{zend_free_units_api}/{msisdn}")
     if not response.ok:
@@ -113,23 +84,28 @@ def change_supplementary_offering(
 def recharge_voucher(msisdn: str, pin: str) -> ApiResponse:
     request_data = {"msisdn": msisdn, "pincode": pin}
 
+    not_eligible_exception = ApiException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        error=Error(
+            code=99,
+            type="number",
+            message="this phone number is not eligible to receive vouchers",
+        ),
+    )
+
     backend_sim_status = zend_sim(msisdn)
+
     if backend_sim_status.get("subscriber_type") not in [0, 1]:
-        return
+        raise not_eligible_exception
+
     url = ""
-    if check_postpaid(backend_sim_status):
+
+    if backend_sim_status["is_post_paid"]:
         url = zend_payment_voucher_api
-    elif check_prepaid(backend_sim_status):
+    elif backend_sim_status["is_pre_paid"]:
         url = zend_recharge_voucher_api
     else:
-        raise ApiException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            error=Error(
-                code=99,
-                type="number",
-                message="this phone number is not eligible to receive vouchers",
-            ),
-        )
+        raise not_eligible_exception
 
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
