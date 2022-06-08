@@ -237,9 +237,6 @@ def test_wallet():
         "Content-Type": "application/json",
     }
     response = client.get(f"/api/number/wallet?msisdn={msisdn}", headers=headers)
-    print("--------------------------")
-    print(response.json())
-    print("--------------------------")
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
