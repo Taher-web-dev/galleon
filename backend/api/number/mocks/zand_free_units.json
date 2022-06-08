@@ -1,0 +1,26 @@
+{
+  "status": "success",
+  "success": {
+    "code": 0,
+    "message": "Success."
+  },
+  "data": {
+    "free_units": [
+      {
+        "account_type": 4425,
+        "amount": 10,
+        "expiry_date": "2037-01-01T00:00:00"
+      },
+      {
+        "account_type": 5781,
+        "amount": 0,
+        "expiry_date": "2037-01-01T00:00:00"
+      },
+      {
+        "account_type": 5016,
+        "amount": 1,
+        "expiry_date": "2037-01-01T00:00:00"
+      }
+    ]
+  }
+}
