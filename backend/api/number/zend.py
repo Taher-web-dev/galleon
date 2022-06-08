@@ -168,54 +168,6 @@ def zend_balance(msisdn: str) -> dict[str, Any]:
     return response.json().get("data")
 
 
-def zend_sim_unified_data(backend_sim_status: dict) -> dict:
-    # if backend_sim_status.get("subscriber_type") not in [0, 1]:
-    # return cms.BLOCK_UNSUPPORTED_SUBSCRIBER_TYPE
-
-    if backend_sim_status["customer_type"] != "Individual":
-        backend_sim_status["unified_sim_status"] = cms.BLOCK_UNSUPPORTED_CUSTOMER_TYPE
-
-    if backend_sim_status["primary_offering_id"] not in cms.ELIGIBLE_PRIMARY_OFFERINGS:
-        backend_sim_status["unified_sim_status"] = cms.BLOCK_INELIGIBLE_PRIMARY_OFFERING
-
-    # prepaid
-    if check_prepaid(backend_sim_status):
-        backend_sim_status[
-            "unified_sim_status"
-        ] = cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
-            backend_sim_status["crm_status_code"]
-        ][
-            backend_sim_status["cbs_status_code"]
-        ]
-
-    elif check_postpaid(backend_sim_status):
-        if (
-            backend_sim_status["crm_status_details"]
-            in cms.SIM_STATUS_LOOKUP_POSTPAID_CONSUMER_MOBILE
-        ):
-            backend_sim_status[
-                "unified_sim_status"
-            ] = cms.SIM_STATUS_LOOKUP_POSTPAID_CONSUMER_MOBILE[
-                backend_sim_status["crm_status_code"]
-            ][
-                backend_sim_status["crm_status_details"]
-            ]
-        else:
-            backend_sim_status[
-                "unified_sim_status"
-            ] = cms.SIM_STATUS_LOOKUP_POSTPAID_CONSUMER_MOBILE[
-                backend_sim_status["crm_status_code"]
-            ][
-                "unhandled"
-            ]
-    else:
-        backend_sim_status[
-            "unified_sim_status"
-        ] = cms.BLOCK_UNKNOWN_SIM_STATUS_COMBINATION
-
-    return backend_sim_status
-
-
 def zend_sim(msisdn: str) -> dict[str, Any]:
     if settings.mock_zain_api:
         with requests_mock.Mocker() as m:
