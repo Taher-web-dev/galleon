@@ -13,4 +13,6 @@ class ConfirmOTPRequest(BaseModel):
 
 class VerifyOTPRequest(BaseModel):
     msisdn: str = Field(..., regex=rgx.MSISDN, example="7839921514")
-    confirmation: str = Field(..., regex=rgx.STRING, example="I22Q564JqsdSD")
+    confirmation: str = Field(
+        ..., regex=rgx.OTP_CONFIRMATION, example="fjuGQYmZvCBsQbEZ"
+    )

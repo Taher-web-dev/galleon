@@ -9,12 +9,13 @@ from api.number.models.response import SubaccountsResponse
 from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
 from .balance import get_wallet
 from .sim import get_sim_details
-from .subscriptions import get_subscriptions, zend_subscriptions
+from .subscriptions import get_subscriptions
 from .zend import (
     recharge_voucher,
     change_supplementary_offering,
     get_free_units,
     query_bill,
+    zend_change_subscription,
 )
 from sqlalchemy.orm import Session
 from db.main import get_db
@@ -127,7 +128,7 @@ async def api_subscribe(
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
-    return zend_subscriptions(msisdn, offer_id, True)
+    return zend_change_subscription(msisdn, offer_id, True)
 
 
 @router.post("/unsubscribe", response_model=ApiResponse)
@@ -139,4 +140,4 @@ async def api_unsubscribe(
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
-    return zend_subscriptions(msisdn, offer_id, False)
+    return zend_change_subscription(msisdn, offer_id, False)

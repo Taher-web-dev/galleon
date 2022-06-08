@@ -10,3 +10,4 @@ psycopg2
 passlib[bcrypt]
 concurrent-log-handler
 hypercorn
+python-json-logger

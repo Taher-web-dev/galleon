@@ -9,10 +9,12 @@ from api.models.response import ApiException, ApiResponse
 from api.number.subaccount import Subaccount
 from api.models.utils import api_exception, api_response
 from api.models.data import Error
-from backend.api.number.sim import get_unified_sim_status
 from utils.settings import settings
 from fastapi import status
 from api.number import cms
+from .sim_helper import get_unified_sim_status
+
+zend_check_4g_api = f"{settings.zend_api}wewebit/query-usim-service/"
 
 zend_balance_api = f"{settings.zend_api}esb/query-balance/"
 zend_sim_api = f"{settings.zend_api}esb/subscriber-information/"
@@ -241,8 +243,21 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
     if not response.ok:
         raise api_exception(response)
 
-    json = response.json()
-    return zend_sim_unified_data(json.get("data"))
+    backend_sim_status = response.json().get("data")
+
+    unified_sim_status = get_unified_sim_status(backend_sim_status)
+
+    backend_sim_status["unified_sim_status"] = unified_sim_status
+    backend_sim_status["is_eligible"] = settings.mock_zain_api | (
+        "BLOCK" not in unified_sim_status
+    )
+    backend_sim_status["is_post_paid"] = (
+        response.json().get("data").get("subscriber_type") == 1
+    )
+    backend_sim_status["is_pre_paid"] = (
+        response.json().get("data").get("subscriber_type") == 0
+    )
+    return backend_sim_status
 
 
 def zend_subscriptions(msisdn: str) -> list[dict[str, Any]]:
@@ -275,7 +290,9 @@ def query_bill(msisdn: str) -> ApiResponse:
     return api_response(response)
 
 
-def zend_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiResponse:
+def zend_change_subscription(
+    msisdn: str, offer_id: int, subscribe: bool
+) -> ApiResponse:
     request_data = {"msisdn": msisdn, "offer_id": offer_id, "add_offering": subscribe}
 
     if settings.mock_zain_api:
@@ -299,3 +316,23 @@ def zend_subscriptions(msisdn: str, offer_id: int, subscribe: bool) -> ApiRespon
     if not response.ok:
         raise api_exception(response)
     return api_response(response)
+
+
+def is_4g_compatible(msisdn: str) -> bool:
+
+    if settings.mock_zain_api:
+        mock_path = f"{path}./zend_query-usim-service.json"
+        with requests_mock.Mocker() as m:
+            m.post(
+                zend_check_4g_api,
+                text=Path(mock_path).read_text(),
+            )
+            response = requests.post(
+                zend_check_4g_api,
+                headers=headers,
+            )
+            return response.json().get("data").get("is_4g_compatible")
+
+    response = requests.get(zend_check_4g_api + msisdn)
+
+    return response.json().get("data").get("is_4g_compatible")

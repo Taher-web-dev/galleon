@@ -49,8 +49,17 @@ class UserProfile(BaseModel):
     )
 
 
+class GetUserProfile(UserProfile):
+    is_4g_compatible: bool = Field(..., example=True)
+    unified_sim_status: str = Field(..., example="BLOCK_UNSUPPORTED_CUSTOMER_TYPE")
+
+
 class UserProfileResponse(ApiResponse):
     data: UserProfile
+
+
+class GetUserProfileResponse(ApiResponse):
+    data: GetUserProfile
 
 
 class ValidationErrorResponse(ApiResponse):
