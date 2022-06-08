@@ -113,6 +113,7 @@ async def get_user_profile(
             name=user.name,
             email=user.email,
             is_4g_compatible=is_4g_compatible(user.msisdn),
+            primary_offering_id=zend_sim(user.msisdn)["primary_offering_id"],
             unified_sim_status=zend_sim(user.msisdn)["unified_sim_status"],
             profile_pic_url=user.profile_pic_url,
         ),

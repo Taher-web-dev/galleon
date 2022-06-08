@@ -52,6 +52,7 @@ class UserProfile(BaseModel):
 class GetUserProfile(UserProfile):
     is_4g_compatible: bool = Field(..., example=True)
     unified_sim_status: str = Field(..., example="BLOCK_UNSUPPORTED_CUSTOMER_TYPE")
+    primary_offering_id: int = Field(..., example=0)
 
 
 class UserProfileResponse(ApiResponse):
