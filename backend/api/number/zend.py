@@ -150,12 +150,14 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
         raise api_exception(response)
 
     backend_sim_status = response.json().get("data")
-    is_post_paid = (
+    backend_sim_status["is_post_paid"] = (
         (backend_sim_status.get("subscriber_type") == 1)
         and ("crm_status_code" in backend_sim_status)
         and ("crm_status_details" in backend_sim_status)
     )
-    is_pre_paid = (backend_sim_status.get("subscriber_type") == 0) and (
+    backend_sim_status["is_pre_paid"] = (
+        backend_sim_status.get("subscriber_type") == 0
+    ) and (
         "crm_status_code" in backend_sim_status
         and backend_sim_status["crm_status_code"]
         in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
@@ -171,8 +173,7 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
     backend_sim_status["is_eligible"] = settings.mock_zain_api | (
         "BLOCK" not in unified_sim_status
     )
-    backend_sim_status["is_post_paid"] = is_post_paid
-    backend_sim_status["is_pre_paid"] = is_pre_paid
+
     return backend_sim_status
 
 
