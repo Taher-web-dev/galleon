@@ -1,6 +1,6 @@
 from pydantic import Field
 from pydantic.main import BaseModel
-
+from .zend import is_4g_compatible
 
 from .zend import zend_sim
 
@@ -36,7 +36,6 @@ def get_sim_details(msisdn: str) -> Sim:
     """
     # fetch SIM status & USIM status (hardcode USIM in UAT)
     backend_sim_status = zend_sim(msisdn)
-    usim_status = {"is_4g_compatible": True}
 
     # get details
     unified_sim_status = zend_sim(msisdn)["unified_sim_status"]
@@ -54,7 +53,7 @@ def get_sim_details(msisdn: str) -> Sim:
         subscriber_type=backend_sim_status["subscriber_type"],
         # injected info
         unified_sim_status=unified_sim_status,
-        is_4g_compatible=usim_status["is_4g_compatible"],
+        is_4g_compatible=is_4g_compatible(msisdn),
         is_eligible=False if "BLOCK" in unified_sim_status else True,
         # nba=nba,
         # user info
