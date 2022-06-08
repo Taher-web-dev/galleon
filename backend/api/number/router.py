@@ -5,7 +5,7 @@ zain backend systems (aka zain-backend)
 """
 
 from fastapi import APIRouter, Body, Query, Depends, status
-from api.number.models.response import SubaccountsResponse
+from api.number.models.response import SubaccountsResponse, NbaResponse
 from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
 from .balance import get_wallet
 from .sim import get_sim_details
@@ -141,3 +141,13 @@ async def api_unsubscribe(
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
     return zend_change_subscription(msisdn, offer_id, False)
+
+
+@router.get("/nba", response_model=NbaResponse)
+async def api_nba(
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
+    session_msisdn=Depends(JWTBearer()),
+) -> ApiResponse:
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
+    return NbaResponse()

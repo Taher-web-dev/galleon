@@ -1,3 +1,4 @@
+from pydantic import BaseModel, HttpUrl
 from api.number.balance import Wallet
 from api.number.subaccount import Subaccount
 from api.models.response import ApiResponse
@@ -38,6 +39,43 @@ class SubaccountsResponse(ApiResponse):
                 ],
             }
         }
+
+
+class NbaLanguageContent(BaseModel):
+    message: str
+    link_text: str
+    link: HttpUrl
+
+
+class Nba(BaseModel):
+    en: NbaLanguageContent
+    ar: NbaLanguageContent
+    kd: NbaLanguageContent
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "en": {
+                    "message": "",
+                    "link_text": "",
+                    "link": "",
+                },
+                "ar": {
+                    "message": "",
+                    "link_text": "",
+                    "link": "",
+                },
+                "kd": {
+                    "message": "",
+                    "link_text": "",
+                    "link": "",
+                },
+            }
+        }
+
+
+class NbaResponse(ApiResponse):
+    data: Nba
 
 
 class RegistrationGiftResponse(ApiResponse):
