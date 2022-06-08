@@ -1,4 +1,3 @@
-from doctest import Example
 from pydantic import BaseModel, Field
 from api.number.balance import Wallet
 from api.number.subaccount import Subaccount
