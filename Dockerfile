@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.16
 
 # Optional external mount points
 VOLUME ["/home"]
