@@ -34,11 +34,21 @@ headers = {"Content-Type": "application/json"}
 
 
 def get_free_units(msisdn: str) -> list[Subaccount]:
-    response = requests.get(f"{zend_free_units_api}/{msisdn}")
+    if settings.mock_zain_api:
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{zend_free_units_api}/{msisdn}",
+                text=Path(f"{path}./zand_free_units.json").read_text(),
+            )
+            response = requests.get(f"{zend_free_units_api}/{msisdn}")
+    else:
+        response = requests.get(f"{zend_free_units_api}/{msisdn}")
+
     if not response.ok:
         raise api_exception(response)
+
     free_units: list[Subaccount] = []
-    json_response = response.json()
+    json_response = response.json().get("data")
     for one in json_response["free_units"]:
         free_units.append(
             Subaccount(
