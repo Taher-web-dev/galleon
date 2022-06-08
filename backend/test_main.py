@@ -46,7 +46,7 @@ def test_create_user():
 
     # wrong confirmation
     response = client.post(endpoint, json=request_data)
-    print(response.json())
+    # print(response.json())
     assert response.status_code == 409
     # print(response.json())
     assert response.json()["status"] == "failed"
