@@ -7,6 +7,7 @@ zain backend systems (aka zain-backend)
 from fastapi import APIRouter, Body, Query, Depends, status
 from api.number.models.response import SubaccountsResponse
 from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
+from api.models.errors import VALIDATION_ERR
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
@@ -59,6 +60,8 @@ async def retrieve_subscriptions(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
     return SubscriptionsResponse(data=get_subscriptions(msisdn))
 
 
@@ -67,6 +70,8 @@ async def retrieve_subaccounts(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> SubaccountsResponse:
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
     return SubaccountsResponse(data=get_free_units(msisdn))
 
 
@@ -79,6 +84,8 @@ async def retrieve_wallet(
     session_msisdn=Depends(JWTBearer()),
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
+    if msisdn != session_msisdn:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
     return WalletResponse(data=get_wallet(msisdn))
     # assert msisdn == session_msisdn
 
@@ -91,6 +98,8 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
+    if msisdn !=session_msisdn:
+        raise ApiException(status_code=status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
     return change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
