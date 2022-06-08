@@ -5,7 +5,7 @@ zain backend systems (aka zain-backend)
 """
 
 from fastapi import APIRouter, Body, Query, Depends, status
-from api.number.models.response import SubaccountsResponse, NbaResponse
+from api.number.models.response import SubaccountsResponse, nbaResponse
 from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
 from .balance import get_wallet
 from .sim import get_sim_details
@@ -16,6 +16,8 @@ from .zend import (
     get_free_units,
     query_bill,
     zend_change_subscription,
+    zend_sim,
+    is_4g_compatible,
 )
 from sqlalchemy.orm import Session
 from db.main import get_db
@@ -29,6 +31,7 @@ from api.number.models.response import (
     WalletResponse,
 )
 from api.models.response import ApiException, ApiResponse
+from .sim_helper import get_nba
 
 router = APIRouter()
 
@@ -143,11 +146,15 @@ async def api_unsubscribe(
     return zend_change_subscription(msisdn, offer_id, False)
 
 
-@router.get("/nba", response_model=NbaResponse)
+@router.get("/nba", response_model=nbaResponse)
 async def api_nba(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
-    return NbaResponse()
+    sim_status = zend_sim(msisdn)
+    nba = get_nba(
+        msisdn, sim_status["unified_sim_status"], is_4g_compatible(msisdn), sim_status
+    )
+    return nbaResponse(data={"nba": nba})
