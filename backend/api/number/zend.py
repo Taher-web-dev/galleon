@@ -12,6 +12,7 @@ from utils.settings import settings
 from .sim_helper import get_unified_sim_status
 from utils.settings import settings
 import requests
+from api.number import cms
 
 zend_check_4g_api = f"{settings.zend_api}wewebit/query-usim-service/"
 
@@ -149,19 +150,29 @@ def zend_sim(msisdn: str) -> dict[str, Any]:
         raise api_exception(response)
 
     backend_sim_status = response.json().get("data")
-
+    is_post_paid = (
+        (backend_sim_status.get("subscriber_type") == 1)
+        and ("crm_status_code" in backend_sim_status)
+        and ("crm_status_details" in backend_sim_status)
+    )
+    is_pre_paid = (backend_sim_status.get("subscriber_type") == 0) and (
+        "crm_status_code" in backend_sim_status
+        and backend_sim_status["crm_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE
+        and "cbs_status_code" in backend_sim_status
+        and backend_sim_status["cbs_status_code"]
+        in cms.SIM_STATUS_LOOKUP_PREPAID_CONSUMER_MOBILE[
+            backend_sim_status["crm_status_code"]
+        ]
+    )
     unified_sim_status = get_unified_sim_status(backend_sim_status)
 
     backend_sim_status["unified_sim_status"] = unified_sim_status
     backend_sim_status["is_eligible"] = settings.mock_zain_api | (
         "BLOCK" not in unified_sim_status
     )
-    backend_sim_status["is_post_paid"] = (
-        response.json().get("data").get("subscriber_type") == 1
-    )
-    backend_sim_status["is_pre_paid"] = (
-        response.json().get("data").get("subscriber_type") == 0
-    )
+    backend_sim_status["is_post_paid"] = is_post_paid
+    backend_sim_status["is_pre_paid"] = is_pre_paid
     return backend_sim_status
 
 
