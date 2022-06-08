@@ -265,7 +265,7 @@ def test_charge_voucher():
     response = client.post(
         "/api/number/charge-voucher",
         headers=headers,
-        json={"msisdn": msisdn, "pincode": 1111},
+        json={"msisdn": msisdn, "pincode": 1111111111111111},
     )
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())

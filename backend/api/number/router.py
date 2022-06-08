@@ -101,8 +101,10 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    if msisdn !=session_msisdn:
-        raise ApiException(status_code=status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
+    if msisdn != session_msisdn:
+        raise ApiException(
+            status_code=status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR
+        )
     return change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
     )
@@ -114,7 +116,7 @@ async def redeem_registration_gift(
 )
 async def charge_voucher(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
-    pincode: str = Body(..., regex=rgx.DIGITS, max_length=20, example="123456"),
+    pincode: str = Body(..., regex=rgx.VOUCHER_PINCODE, example="1234567891011121"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     return recharge_voucher(msisdn, pincode)
