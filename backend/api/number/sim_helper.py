@@ -61,8 +61,11 @@ def get_unified_sim_status(backend_sim_status: dict) -> str:
 
 
 def get_nba(
-    msisdn: str, unified_sim_status: str, usim_status: dict, backend_sim_status: dict
-) -> dict:
+    msisdn: str,
+    unified_sim_status: str,
+    is_4g_compatible: bool,
+    backend_sim_status: dict,
+) -> str:
     """
     Provides NBA for the MSISDN. Covers:
     - Call to action for recharge-only, must-pay-bill SIMs
@@ -78,7 +81,7 @@ def get_nba(
         return unified_sim_status
 
     # otherwise, if SIM not 4G eligible then use this one
-    if usim_status["is_4g_compatible"] == 0:
+    if is_4g_compatible == 0:
         return "WARN_NOT_4G_COMPATIBLE"
 
     # non-Prime postpaid special handling
