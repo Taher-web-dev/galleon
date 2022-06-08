@@ -280,7 +280,7 @@ def query_bill(msisdn: str) -> ApiResponse:
         with requests_mock.Mocker() as m:
             m.get(
                 zend_query_bill + msisdn,
-                text=Path(f"{path}./zend_mgr_service.json").read_text(),
+                text=Path(f"{path}./query_bill.json").read_text(),
             )
             response = requests.get(zend_query_bill + msisdn)
     else:
@@ -302,7 +302,6 @@ def zend_change_subscription(
                 zend_change_supplementary_offering_api,
                 text=Path(mock_path).read_text(),
             )
-            print(mock_path)
             response = requests.post(
                 zend_change_supplementary_offering_api,
                 headers=headers,
