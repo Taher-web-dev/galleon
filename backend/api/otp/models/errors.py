@@ -12,9 +12,3 @@ INVALID_OTP = Error(
     code=307,
     message="Invalid OTP",
 )
-
-MSISDN_MISSMATCH = Error(
-    type="number",
-    code=300,
-    message="The MSISDN does not match.",
-)
