@@ -136,7 +136,7 @@ async def api_query_bill(
 @router.post("/subscribe", response_model=ApiResponse)
 async def api_subscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
-    offer_id: str = Body(..., example=1000),
+    offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
@@ -145,10 +145,10 @@ async def api_subscribe(
     return zend_change_subscription(msisdn, offer_id, True)
 
 
-@router.post("/unsubscribe", response_model=ApiResponse)
+@router.delete("/unsubscribe", response_model=ApiResponse)
 async def api_unsubscribe(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
-    offer_id: str = Body(..., example=1000),
+    offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
