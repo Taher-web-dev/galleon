@@ -6,8 +6,6 @@ zain backend systems (aka zain-backend)
 
 from fastapi import APIRouter, Body, Query, Depends, status
 from api.number.models.response import SubaccountsResponse, nbaResponse
-from api.otp.models.errors import INVALID_MSISDN_MISSMATCH
-from api.models.errors import VALIDATION_ERR
 from .balance import get_wallet
 from .sim import get_sim_details
 from .subscriptions import get_subscriptions
@@ -32,6 +30,7 @@ from api.number.models.response import (
     WalletResponse,
 )
 from api.models.response import ApiException, ApiResponse
+from .models.errors import MSISDN_MISMATCH
 from .sim_helper import get_nba
 
 router = APIRouter()
@@ -64,7 +63,7 @@ async def retrieve_subscriptions(
 ) -> SubscriptionsResponse:
     """Retrieve subscriptions list"""
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH)
     return SubscriptionsResponse(data=get_subscriptions(msisdn))
 
 
@@ -74,7 +73,7 @@ async def retrieve_subaccounts(
     session_msisdn=Depends(JWTBearer()),
 ) -> SubaccountsResponse:
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH)
     return SubaccountsResponse(data=get_free_units(msisdn))
 
 
@@ -88,7 +87,7 @@ async def retrieve_wallet(
 ) -> WalletResponse:
     """Retrieve customer wallet's details (balance and load)"""
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH)
     return WalletResponse(data=get_wallet(msisdn))
     # assert msisdn == session_msisdn
 
@@ -103,7 +102,7 @@ async def redeem_registration_gift(
 ) -> ApiResponse:
     if msisdn != session_msisdn:
         raise ApiException(
-            status_code=status.HTTP_401_UNAUTHORIZED, error=VALIDATION_ERR
+            status_code=status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH
         )
     return change_supplementary_offering(
         msisdn, settings.registration_gift_offer_id, True
@@ -129,7 +128,7 @@ async def api_query_bill(
 ) -> ApiResponse:
     """Check bill for postpaid msisdn"""
     if msisdn != session_msisdn:
-        raise ApiException(status_code=99, error=INVALID_MSISDN_MISSMATCH)
+        raise ApiException(status_code=99, error=MSISDN_MISMATCH)
     return query_bill(msisdn)
 
 
@@ -141,7 +140,7 @@ async def api_subscribe(
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, True)
 
 
@@ -153,7 +152,7 @@ async def api_unsubscribe(
 ) -> ApiResponse:
     """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, False)
 
 
@@ -163,7 +162,7 @@ async def api_nba(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
     if msisdn != session_msisdn:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, INVALID_MSISDN_MISSMATCH)
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     sim_status = zend_sim(msisdn)
     nba = get_nba(
         msisdn, sim_status["unified_sim_status"], is_4g_compatible(msisdn), sim_status
