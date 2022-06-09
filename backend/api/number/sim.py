@@ -8,7 +8,7 @@ from .zend import zend_sim
 class Sim(BaseModel):
     # wrapper around backend response, mainly for debug
     primary_offering_id: int = Field(..., example=2122764)
-    cbs_status_code: int = Field(..., example=1)
+    cbs_status_code: int | None = Field(None, example=1)
     crm_status_code: str = Field(..., example="B01")
     crm_status_details: str = Field(..., example="Normal")
     activation_date: str = Field(..., example="2022-01-30 16:00:25+03:00")
@@ -44,7 +44,7 @@ def get_sim_details(msisdn: str) -> Sim:
     return Sim(
         # backend response - mainly for debug
         primary_offering_id=backend_sim_status["primary_offering_id"],
-        cbs_status_code=backend_sim_status["cbs_status_code"],
+        cbs_status_code=backend_sim_status.get("cbs_status_code", None),
         crm_status_code=backend_sim_status["crm_status_code"],
         crm_status_details=backend_sim_status["crm_status_details"],
         activation_date=backend_sim_status["activation_date"],
