@@ -113,6 +113,7 @@ async def get_user_profile(
             name=user.name,
             email=user.email,
             is_4g_compatible=is_4g_compatible(user.msisdn),
+            primary_offering_id=zend_sim(user.msisdn)["primary_offering_id"],
             unified_sim_status=zend_sim(user.msisdn)["unified_sim_status"],
             profile_pic_url=user.profile_pic_url,
         ),
@@ -185,16 +186,14 @@ async def login(
     responses=examples.login,
 )
 async def validate(
-    db: Session = Depends(get_db),
-    msisdn=Depends(JWTBearer()),
+    user=Depends(JWTBearer(fetch_user=True)),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
 ) -> ApiResponse:
     """Validate user password for logged-in users"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         return ApiResponse()
-
-    # raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
+    else:
+        raise ApiException(status.HTTP_401_UNAUTHORIZED, err.INVALID_CREDENTIALS)
 
 
 @router.delete(

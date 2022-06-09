@@ -142,7 +142,7 @@ ZAINFI_NBA: dict = {
 }
 
 POSTPAID_PRIME_NBA: dict = {
-    "href": "https://www.iq.zain.com/ar/new-prime-line-strongest-postpaid-line-zain ",
+    "href": "https://www.iq.zain.com/ar/new-prime-line-strongest-postpaid-line-zain",
     "message_en": "Upgrade to Postpaid Prime now!",
     "message_ar": "Upgrade to Postpaid Prime now!",
     "message_kd": "Upgrade to Postpaid Prime now!",

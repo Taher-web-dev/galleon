@@ -15,9 +15,9 @@ echo -n -e "Request OTP : \t\t"
 curl -s -H "$CT" -d "{\"msisdn\":\"${MSISDN}\"}" ${API_URL}/otp/request | jq .status
 OTP=$(psql -q --csv -t -h 127.0.0.1 -U galleon galleon -c "select code from otp where msisdn='${MSISDN}'; ")
 
-#echo "OTP is $OTP"
+echo "OTP is $OTP"
 CONF=$(curl -s -H "$CT" -d "{\"msisdn\":\"${MSISDN}\", \"code\": $OTP}" ${API_URL}/otp/confirm | jq .data.confirmation | tr -d '"')
-#echo "Confirmation $CONF"
+echo "Confirmation $CONF"
 
 echo -n -e "Creating user : \t"
 curl -s -H "$CT" -d "{\"name\":\"${NAME}\", \"msisdn\":\"${MSISDN}\", \"password\":\"${PASSWORD}\", \"otp_confirmation\":\"${CONF}\"}" $API_URL/user/create | jq .status

@@ -15,5 +15,5 @@ VALIDATION_ERR = Error(type="validation", code=100, message="")
 ELIGIBILITY_ERR = Error(type="eligibility", code=160, message="Not eligible")
 
 InvalidAccessToken = Error(
-    type="token", code=103, message="The Access-Token is not valid"
+    type="token", code=101, message="The Access-Token is not valid"
 )

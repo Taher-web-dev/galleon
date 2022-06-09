@@ -237,9 +237,6 @@ def test_wallet():
         "Content-Type": "application/json",
     }
     response = client.get(f"/api/number/wallet?msisdn={msisdn}", headers=headers)
-    print("--------------------------")
-    print(response.json())
-    print("--------------------------")
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())
 
@@ -268,7 +265,20 @@ def test_charge_voucher():
     response = client.post(
         "/api/number/charge-voucher",
         headers=headers,
-        json={"msisdn": msisdn, "pincode": 1111},
+        json={"msisdn": msisdn, "pincode": 1111111111111111},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    # print(response.json())
+
+
+def test_nba():
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    response = client.get(
+        f"/api/number/nba?msisdn={msisdn}",
+        headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
     # print(response.json())

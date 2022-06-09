@@ -1,3 +1,4 @@
+from pydantic import BaseModel, Field
 from api.number.balance import Wallet
 from api.number.subaccount import Subaccount
 from api.models.response import ApiResponse
@@ -38,6 +39,10 @@ class SubaccountsResponse(ApiResponse):
                 ],
             }
         }
+
+
+class nbaResponse(ApiResponse):
+    data: dict[str, str] = Field(..., example={"nba": "POSTPAID_PRIME_NBA"})
 
 
 class RegistrationGiftResponse(ApiResponse):
