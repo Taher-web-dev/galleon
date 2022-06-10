@@ -6,6 +6,8 @@ from api.otp.models.response import (
     InvalidConfirmationResponse,
 )
 from api.models.response import EligibilityErrorResponse
+from api.otp.models.errors import INVALID_OTP
+from utils.example_error_responses import error_response
 
 request_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_403_FORBIDDEN: {
@@ -16,7 +18,7 @@ request_otp: Dict[int | str, Dict[str, Any]] = {
 
 confirm_otp: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_400_BAD_REQUEST: {
-        "model": InvalidOTPResponse,
+        "content": error_response(INVALID_OTP),
         "description": "Invalid OTP",
     },
 }

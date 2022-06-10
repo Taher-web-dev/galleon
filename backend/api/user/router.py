@@ -81,13 +81,14 @@ async def create_user(
 async def reset_password(
     reset: UserResetPasswordRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
-    """Register a new user"""
+    """Reset a new password"""
 
     user = db.query(User).filter(User.msisdn == reset.msisdn).first()
     if not user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
 
     otp = db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
+    print(otp.confirmation, reset.otp_confirmation)
     if not (otp and otp.confirmation and otp.confirmation == reset.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
@@ -160,7 +161,7 @@ async def login(
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
     db: Session = Depends(get_db),
 ) -> TokensResponse:
-    """Login and generate refresh token"""
+    """Login and generate a refresh token"""
     user = db.query(User).filter(User.msisdn == msisdn).first()
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
@@ -185,7 +186,7 @@ async def login(
     response_model_exclude_none=True,
     responses=examples.login,
 )
-async def validate(
+async def validate_user_password(
     user=Depends(JWTBearer(fetch_user=True)),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
 ) -> ApiResponse:
@@ -217,12 +218,16 @@ async def logout(
     response_model_exclude_none=True,
     responses=examples.refresh_token,
 )
-async def gen_access_token(
+async def generate_access_token(
     refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
     try:
         data = decode_jwt(refresh_token)
+        if not data.get("grant_type", None):
+            raise ApiException(
+                status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+            )
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == msisdn).first()
@@ -250,7 +255,7 @@ async def gen_access_token(
 async def delete(
     user=Depends(JWTBearer(fetch_user=True)), db: Session = Depends(get_db)
 ) -> ApiResponse:
-    """Delete user"""
+    """Delete user account"""
     db.delete(user)
     db.commit()
     return ApiResponse()

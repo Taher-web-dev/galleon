@@ -24,8 +24,14 @@ class JWTBearer(HTTPBearer):
         credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(
             request
         )
+        exception = ApiException(
+            status.HTTP_401_UNAUTHORIZED, api_errors.INVALID_ACCESS_TOKEN
+        )
+
         if credentials and credentials.scheme == "Bearer":
             decoded_data = decode_jwt(credentials.credentials)
+            if decoded_data.get("grant_type", None):
+                raise exception  # Should be access token
             msisdn = decoded_data.get("msisdn")
 
             if self.fetch_user:
@@ -33,11 +39,11 @@ class JWTBearer(HTTPBearer):
                 if user := db.query(User).filter(User.msisdn == msisdn).first():
                     if user.refresh_token:
                         return user
-                    raise  # User doesn't have a refresh_token
-                raise  # User not found
+                    raise exception  # User doesn't have a refresh_token
+                raise exception  # User not found
 
             return msisdn
-        raise  # No/invalid credentials
+        raise exception  # No/invalid credentials
 
     # except:
     #     # db.close() if db else None
