@@ -161,6 +161,7 @@ async def api_nba(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
+    print(msisdn, session_msisdn)
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     sim_status = zend_sim(msisdn)
