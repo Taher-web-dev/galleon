@@ -30,7 +30,7 @@ router = APIRouter()
 async def send_otp(
     user_request: SendOTPRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
-    """Request new Otp"""
+    """Request new OTP"""
     if not zend_sim(user_request.msisdn)["is_eligible"]:
         raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
     # If a prior otp exists, delete it.
@@ -55,10 +55,10 @@ async def send_otp(
     response_model_exclude_none=True,
     responses=examples.confirm_otp,
 )
-async def confirm(
+async def confirm_otp(
     user_request: ConfirmOTPRequest, db: Session = Depends(get_db)
 ) -> ConfirmationResponse:
-    """Confirm Otp"""
+    """Confirm OTP"""
     if otp := db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first():
         otp.tries += 1
         db.commit()
@@ -82,7 +82,7 @@ async def confirm(
 async def verify_otp(
     user_request: VerifyOTPRequest, db: Session = Depends(get_db)
 ) -> ApiResponse:
-    """Verify otp"""
+    """Verify the confirmation of OTP"""
     otp = db.query(Otp).filter(Otp.msisdn == user_request.msisdn).first()
     if otp and otp.confirmation and otp.confirmation == user_request.confirmation:
         return ApiResponse()
