@@ -72,6 +72,7 @@ async def retrieve_subaccounts(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> SubaccountsResponse:
+    """Retrieves the subaccounts the customer has free units in and the amount in each subaccount."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH)
     return SubaccountsResponse(data=get_free_units(msisdn))
@@ -100,6 +101,7 @@ async def redeem_registration_gift(
     msisdn: str = Body(..., embed=True, regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
+    """Redeem registration gift offer"""
     if msisdn != session_msisdn:
         raise ApiException(
             status_code=status.HTTP_401_UNAUTHORIZED, error=MSISDN_MISMATCH
@@ -118,50 +120,52 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.VOUCHER_PINCODE, example="1234567891011121"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
+    """Recharge the balance using a voucher"""
     return recharge_voucher(msisdn, pincode)
 
 
 @router.get("/query-bill", response_model=ApiResponse)
-async def api_query_bill(
+async def query_postpaid_bill(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Check bill for postpaid msisdn"""
+    """Returns a postpaid customer's balance"""
     if msisdn != session_msisdn:
         raise ApiException(status_code=99, error=MSISDN_MISMATCH)
     return query_bill(msisdn)
 
 
 @router.post("/subscribe", response_model=ApiResponse)
-async def api_subscribe(
+async def subscribe_an_offer(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
+    """Add a subscription to a Zain customer’s line using the subscriber’s MSISDN."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, True)
 
 
 @router.delete("/unsubscribe", response_model=ApiResponse)
-async def api_unsubscribe(
+async def unsubscribe_an_offer(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Adds or removes the bundle with CRM offer ID provided to/from MSISDN provided"""
+    # removes a subscription from a Zain customer’s line using its TOMS ID and the subscriber’s MSISDNN
+    """Remove a subscription from a Zain customer’s line using the subscriber’s MSISDN."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, False)
 
 
-@router.get("/nba", response_model=nbaResponse)
-async def api_nba(
+@router.get("/welcome-message", response_model=nbaResponse)
+async def welcome_message(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    print(msisdn, session_msisdn)
+    """Welcome message aka nba"""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     sim_status = zend_sim(msisdn)
