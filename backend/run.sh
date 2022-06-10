@@ -14,4 +14,4 @@ mkdir -p $LOG_PATH
 cd $(dirname "$(realpath $0)")
 # hypercorn main:app -w 1 -k uvicorn.workers.UvicornWorker -b $LISTENING_HOST':'$LISTENING_PORT
 # hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
-hypercorn --log-config json_log.ini -w 4 --backlog 200 -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio' main:app
+hypercorn --log-config json_log.ini -w $(nproc --all) --backlog 100 -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio' main:app
