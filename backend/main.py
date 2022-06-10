@@ -101,8 +101,12 @@ async def my_exception_handler(_, exception):
 @app.exception_handler(SQLAlchemyError)
 async def sqlalchemy_exception_handler(_, exception: SQLAlchemyError):
     raise ApiException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        error=Error(type="SQLAlchemyError", code=500, message=str(exception)),
+        status_code=(
+            status.HTTP_409_CONFLICT
+            if "UniqueViolation" not in str(exception)
+            else status.HTTP_500_INTERNAL_SERVER_ERROR
+        ),
+        error=Error(type="SQLAlchemyError", code=543, message=str(exception)),
     )
 
 

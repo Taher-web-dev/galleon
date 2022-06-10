@@ -120,7 +120,7 @@ async def charge_voucher(
     pincode: str = Body(..., regex=rgx.VOUCHER_PINCODE, example="1234567891011121"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """ Recharge the balance using a voucher"""
+    """Recharge the balance using a voucher"""
     return recharge_voucher(msisdn, pincode)
 
 
@@ -153,7 +153,7 @@ async def unsubscribe_an_offer(
     offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-# removes a subscription from a Zain customer’s line using its TOMS ID and the subscriber’s MSISDNN
+    # removes a subscription from a Zain customer’s line using its TOMS ID and the subscriber’s MSISDNN
     """Remove a subscription from a Zain customer’s line using the subscriber’s MSISDN."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
@@ -165,7 +165,7 @@ async def welcome_message(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Welcome message aka nba """
+    """Welcome message aka nba"""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     sim_status = zend_sim(msisdn)

@@ -88,6 +88,7 @@ async def reset_password(
         raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
 
     otp = db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
+    print(otp.confirmation, reset.otp_confirmation)
     if not (otp and otp.confirmation and otp.confirmation == reset.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
@@ -223,6 +224,10 @@ async def generate_access_token(
     """Generate access token from provided refresh token"""
     try:
         data = decode_jwt(refresh_token)
+        if not data.get("grant_type", None):
+            raise ApiException(
+                status.HTTP_401_UNAUTHORIZED, error=err.INVALID_REFRESH_TOKEN
+            )
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
             user = db.query(User).filter(User.msisdn == msisdn).first()

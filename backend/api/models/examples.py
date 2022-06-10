@@ -4,14 +4,14 @@ from http.client import responses
 from typing import Any
 from fastapi import status
 from .response import (
-    InvalidAccessTokenResponse,
+    INVALID_ACCESS_TOKENResponse,
     ValidationErrorResponse,
     ExpiredTokenResponse,
 )
 
 not_authenticated: dict[int | str, dict[str, Any]] = {
     status.HTTP_401_UNAUTHORIZED: {
-        "model": InvalidAccessTokenResponse,
+        "model": INVALID_ACCESS_TOKENResponse,
         "description": "Invalid Token",
     },
     status.HTTP_410_GONE: {
