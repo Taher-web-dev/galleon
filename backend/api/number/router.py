@@ -156,7 +156,7 @@ async def api_unsubscribe(
     return zend_change_subscription(msisdn, offer_id, False)
 
 
-@router.get("/nba", response_model=nbaResponse)
+@router.get("/welcome-message", response_model=nbaResponse)
 async def api_nba(
     msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
     session_msisdn=Depends(JWTBearer()),
