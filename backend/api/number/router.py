@@ -141,7 +141,7 @@ async def subscribe_an_offer(
     offer_id: int = Body(..., example=1000),
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
-    """Adds a subscription to a Zain customer’s line using the subscriber’s MSISDN."""
+    """Add a subscription to a Zain customer’s line using the subscriber’s MSISDN."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, True)
@@ -154,7 +154,7 @@ async def unsubscribe_an_offer(
     session_msisdn=Depends(JWTBearer()),
 ) -> ApiResponse:
 # removes a subscription from a Zain customer’s line using its TOMS ID and the subscriber’s MSISDNN
-    """Removes a subscription from a Zain customer’s line using the subscriber’s MSISDN."""
+    """Remove a subscription from a Zain customer’s line using the subscriber’s MSISDN."""
     if msisdn != session_msisdn:
         raise ApiException(status.HTTP_401_UNAUTHORIZED, MSISDN_MISMATCH)
     return zend_change_subscription(msisdn, offer_id, False)
