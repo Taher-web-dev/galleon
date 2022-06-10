@@ -463,12 +463,6 @@ def test_sim_status():
     response = client.get(f"{endpoint}=784163185b", headers=headers)
     check_validation(response)
 
-    #! TODO check if auth is needed
-    # # wrong access token
-    # headers = {"Authorization": f"Bearer {refresh_token}"}
-    # response = client.get(f"{endpoint}={msisdn}", headers=headers)
-    # check_valid_access_token(response)
-
 
 def test_charge_voucher():
     endpoint = "/api/number/charge-voucher"
