@@ -1,13 +1,12 @@
 """ User management apis """
 
 from fastapi import APIRouter, Body, Header, status, Depends
-from db.main import get_db
 from sqlalchemy.orm import Session
 from typing import Optional
 from api.models.response import ApiResponse
 from utils.jwt import decode_jwt, sign_jwt
 from db.models import User, Otp
-from utils.password_hashing import verify_password, hash_password
+from utils.password_hashing import verify_password
 import utils.regex as rgx
 from utils.jwt import JWTBearer
 from api.models.response import ApiException
@@ -29,6 +28,16 @@ from api.user.models.response import (
 from api.user.models import examples
 import api.user.models.errors as err
 from api.number.zend import zend_sim, is_4g_compatible
+from .repository import (
+    get_user,
+    create_user,
+    update_user_password,
+    update_user,
+    delete_user,
+    update_user_refresh_token,
+    delete_user_refresh_token,
+)
+from api.otp.repository import get_otp
 
 router = APIRouter()
 
@@ -39,31 +48,19 @@ router = APIRouter()
     response_model_exclude_none=True,
     responses=examples.create_user,
 )
-async def create_user(
-    new_user: UserCreateRequest, db: Session = Depends(get_db)
-) -> UserProfileResponse:
+async def register_user(new_user: UserCreateRequest) -> UserProfileResponse:
     """Register a new user"""
     if not zend_sim(new_user.msisdn)["is_eligible"]:
         raise ApiException(status.HTTP_403_FORBIDDEN, error=ELIGIBILITY_ERR)
-    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
+    user = get_user(new_user.msisdn)
     if user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.USER_EXISTS)
 
-    otp = db.query(Otp).filter(Otp.msisdn == new_user.msisdn).first()
+    otp = get_otp(new_user.msisdn)
     if not (otp and otp.confirmation and otp.confirmation == new_user.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
-    user = User(
-        msisdn=new_user.msisdn,
-        name=new_user.name,
-        password=hash_password(new_user.password),
-        email=new_user.email,
-        profile_pic_url=new_user.profile_pic_url,
-    )
-
-    db.add(user)
-    db.commit()
-    user = db.query(User).filter(User.msisdn == new_user.msisdn).first()
+    user = create_user(new_user)
     return UserProfileResponse(
         data=UserProfile(
             id=user.id,
@@ -78,22 +75,19 @@ async def create_user(
 @router.post(
     "/reset_password", response_model=ApiResponse, response_model_exclude_none=True
 )
-async def reset_password(
-    reset: UserResetPasswordRequest, db: Session = Depends(get_db)
-) -> ApiResponse:
+async def reset_password(reset: UserResetPasswordRequest) -> ApiResponse:
     """Reset a new password"""
 
-    user = db.query(User).filter(User.msisdn == reset.msisdn).first()
+    user: User = get_user(reset.msisdn)
     if not user:
         raise ApiException(status.HTTP_403_FORBIDDEN, err.INVALID_CREDENTIALS)
 
-    otp = db.query(Otp).filter(Otp.msisdn == reset.msisdn).first()
-    print(otp.confirmation, reset.otp_confirmation)
+    otp: Otp = get_otp(reset.msisdn)
+    # print(otp.confirmation, reset.otp_confirmation)
     if not (otp and otp.confirmation and otp.confirmation == reset.otp_confirmation):
         raise ApiException(status.HTTP_409_CONFLICT, err.INVALID_OTP)
 
-    user.password = hash_password(reset.password)
-    db.commit()
+    update_user_password(user, reset.password)
     return ApiResponse()
 
 
@@ -128,24 +122,18 @@ async def get_user_profile(
     responses=examples.update_profile,
 )
 async def update_profile(
-    user_profile: UserUpdateRequest,
-    user=Depends(JWTBearer(fetch_user=True)),
-    db: Session = Depends(get_db),
+    user_profile: UserUpdateRequest, user=Depends(JWTBearer(fetch_user=True))
 ) -> UserProfileResponse:
     """Update user profile"""
-    for key, value in user_profile.dict(exclude_none=True).items():
-        setattr(user, key, value)
-
-    db.commit()
-    db.refresh(user)
+    updated_user = update_user(user, user_profile)
 
     return UserProfileResponse(
         data=UserProfile(
-            id=user.id,
-            msisdn=user.msisdn,
-            name=user.name,
-            email=user.email,
-            profile_pic_url=user.profile_pic_url,
+            id=updated_user.id,
+            msisdn=updated_user.msisdn,
+            name=updated_user.name,
+            email=updated_user.email,
+            profile_pic_url=updated_user.profile_pic_url,
         ),
     )
 
@@ -159,17 +147,15 @@ async def update_profile(
 async def login(
     msisdn: str = Body(..., regex=rgx.MSISDN, example="7839921514"),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40),
-    db: Session = Depends(get_db),
 ) -> TokensResponse:
     """Login and generate a refresh token"""
-    user = db.query(User).filter(User.msisdn == msisdn).first()
+    user = get_user(msisdn)
     if user and verify_password(password, user.password):
         access_token = sign_jwt({"msisdn": msisdn})
         refresh_token = sign_jwt(
             {"msisdn": msisdn, "grant_type": "refresh"}, settings.jwt_refresh_expires
         )
-        user.refresh_token = refresh_token
-        db.commit()
+        update_user_refresh_token(user, refresh_token)
         return TokensResponse(
             data=Tokens(
                 refresh_token=refresh_token,
@@ -187,7 +173,7 @@ async def login(
     responses=examples.login,
 )
 async def validate_user_password(
-    user=Depends(JWTBearer(fetch_user=True)),
+    user: User = Depends(JWTBearer(fetch_user=True)),
     password: str = Body(..., regex=rgx.PASSWORD, max_length=40, embed=True),
 ) -> ApiResponse:
     """Validate user password for logged-in users"""
@@ -203,12 +189,9 @@ async def validate_user_password(
     response_model_exclude_none=True,
     responses=examples.logout,
 )
-async def logout(
-    user=Depends(JWTBearer(fetch_user=True)), db: Session = Depends(get_db)
-) -> ApiResponse:
+async def logout(user=Depends(JWTBearer(fetch_user=True))) -> ApiResponse:
     """Logout (aka delete refresh token)"""
-    user.refresh_token = None
-    db.commit()
+    delete_user_refresh_token(user)
     return ApiResponse()
 
 
@@ -219,7 +202,7 @@ async def logout(
     responses=examples.refresh_token,
 )
 async def generate_access_token(
-    refresh_token: Optional[str] = Header(None), db: Session = Depends(get_db)
+    refresh_token: Optional[str] = Header(None),
 ) -> TokensResponse:
     """Generate access token from provided refresh token"""
     try:
@@ -230,7 +213,7 @@ async def generate_access_token(
             )
         if bool(data) and "msisdn" in data:
             msisdn = data["msisdn"]
-            user = db.query(User).filter(User.msisdn == msisdn).first()
+            user = get_user(msisdn)
             if user is not None:
                 access_token = sign_jwt({"msisdn": msisdn})
                 return TokensResponse(
@@ -252,10 +235,7 @@ async def generate_access_token(
     response_model_exclude_none=True,
     responses=examples.delete,
 )
-async def delete(
-    user=Depends(JWTBearer(fetch_user=True)), db: Session = Depends(get_db)
-) -> ApiResponse:
+async def delete(user=Depends(JWTBearer(fetch_user=True))) -> ApiResponse:
     """Delete user account"""
-    db.delete(user)
-    db.commit()
+    delete_user(user)
     return ApiResponse()
