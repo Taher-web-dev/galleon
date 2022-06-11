@@ -7,20 +7,13 @@ Base = declarative_base()
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
-    connect_args={
-        "keepalives": 1,
-        "keepalives_idle": 30,
-        "keepalives_interval": 10,
-        "keepalives_count": 5,
-    },
+    # echo=True,
+    # echo_pool="debug",
+    pool_size=20,
+    max_overflow=30,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 
-# Database Session Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
+__all__ = ["SessionLocal", "Base"]

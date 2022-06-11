@@ -18,12 +18,9 @@ from .zend import (
     zend_sim,
     is_4g_compatible,
 )
-from sqlalchemy.orm import Session
-from db.main import get_db
 from utils.jwt import JWTBearer
 from utils.settings import settings
 import utils.regex as rgx
-from db.models import User
 from api.number.models.response import (
     RetrieveStatusResponse,
     SubscriptionsResponse,
@@ -41,15 +38,10 @@ router = APIRouter()
     response_model=RetrieveStatusResponse,
 )
 async def retrieve_status(
-    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514"),
-    db: Session = Depends(get_db),
+    msisdn: str = Query(..., regex=rgx.MSISDN, example="7839921514")
 ) -> RetrieveStatusResponse:
     """Retrieve SIM status"""
     sim_details = get_sim_details(msisdn)
-    sim_details.associated_with_user = (
-        db.query(User).filter(User.msisdn == msisdn).first() is not None
-    )
-
     return RetrieveStatusResponse(data=sim_details)
 
 

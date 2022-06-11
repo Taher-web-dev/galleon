@@ -1,8 +1,7 @@
 from pydantic import Field
 from pydantic.main import BaseModel
-from .zend import is_4g_compatible
-
-from .zend import zend_sim
+from .zend import is_4g_compatible, zend_sim
+from api.user.repository import get_user
 
 
 class Sim(BaseModel):
@@ -57,5 +56,5 @@ def get_sim_details(msisdn: str) -> Sim:
         is_eligible=False if "BLOCK" in unified_sim_status else True,
         # nba=nba,
         # user info
-        associated_with_user=False,  # FIXME
+        associated_with_user=get_user(msisdn) is not None,
     )

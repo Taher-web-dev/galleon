@@ -1,13 +1,13 @@
-import json
 import time
 from fastapi.testclient import TestClient
 from fastapi import status
 from test_utils import check_invalid_msisdn, check_validation, check_valid_access_token
-from utils.password_hashing import hash_password, verify_password
+from utils.password_hashing import verify_password
 from main import app
-from db.main import SessionLocal
-from db.models import Otp, User
+from db.models import User
 from utils.jwt import sign_jwt
+from api.otp.repository import delete_otp, create_otp, get_otp
+from api.user.repository import delete_user, get_user
 
 client = TestClient(app)
 
@@ -19,26 +19,19 @@ new_password: str = "NewP@ssw0rD"
 confirmation: str = "fjuGQYmZvCBsQbEZ"
 user: User = User()
 
-db = SessionLocal()
 
 # cleaning otp
-if otp := db.query(Otp).filter(Otp.msisdn == msisdn).first():
-    db.delete(otp)
-if otp := db.query(Otp).filter(Otp.msisdn == "7555555555").first():
-    db.delete(otp)
-    db.commit()
+delete_otp(msisdn)
+delete_otp("7555555555")
 
-# cleaning usese
-if user := db.query(User).filter(User.msisdn == msisdn).first():
-    db.delete(user)
-if user := db.query(User).filter(User.msisdn == "7555555555").first():
-    db.delete(user)
-    db.commit()
+# cleaning users
+if user := get_user(msisdn):
+    delete_user(user)
+if user := get_user("7555555555"):
+    delete_user(user)
 
 # generate confirmation to create user
-otp = Otp(msisdn=msisdn, code="123456", confirmation=confirmation)
-db.add(otp)
-db.commit()
+otp = create_otp(msisdn, "123456", confirmation)
 
 
 code: str = "123456"
@@ -59,7 +52,7 @@ def test_request_otp():
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
 
-    otp = db.query(Otp).filter(Otp.msisdn == msisdn).first()
+    otp = get_otp(msisdn)
     assert otp
     code = otp.code
 
@@ -79,12 +72,15 @@ def test_confirm_otp():
 
     # Invalid code
     response = client.post(endpoint, json={"msisdn": msisdn, "code": "000000"})
+    # print(response.json())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "failed" == response.json().get("status")
     assert "otp" == response.json().get("error").get("type")
 
     response = client.post(endpoint, json={"msisdn": msisdn, "code": code})
+    # print(response.json())
     assert response.status_code == status.HTTP_200_OK
+    assert get_otp(msisdn).confirmation
     confirmation = response.json()["data"]["confirmation"]
 
 
@@ -118,9 +114,8 @@ def test_verify_otp():
 
 def test_create_user():
     # delete user if exists
-    if existing_user := db.query(User).filter(User.msisdn == msisdn).first():
-        db.delete(existing_user)
-        db.commit()
+    if existing_user := get_user(msisdn):
+        delete_user(existing_user)
 
     endpoint = "/api/user/create"
     request_data = {
@@ -154,7 +149,7 @@ def test_create_user():
     assert response.status_code == 200
 
     global user
-    user = db.query(User).filter(User.msisdn == msisdn).first()
+    user = get_user(msisdn)
     assert user
     assert response.json()["data"] == {
         "id": user.id,
@@ -187,7 +182,9 @@ def test_login_user():
 
     # login with correct credentials
     response = client.post(endpoint, json={"msisdn": msisdn, "password": password})
+    # print(response.json())
     assert response.status_code == status.HTTP_200_OK
+    assert get_user(msisdn).refresh_token  # assert persisted in the database
     data = response.json()
 
     global access_token
@@ -207,17 +204,20 @@ def test_validate_user():
 
     # wrong password
     response = client.post(endpoint, headers=headers, json={"password": "passwordx"})
+    # print(response.json())
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert "failed" == response.json().get("status")
     assert "auth" == response.json().get("error").get("type")
 
     response = client.post(endpoint, headers=headers, json={"password": password})
+    # print(response.json())
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
 
     # wrong access token
     headers = {"Authorization": f"Bearer {refresh_token}"}
     response = client.post(endpoint, headers=headers, json={"password": password})
+    # print(response.json())
     check_valid_access_token(response)
 
 
@@ -229,12 +229,7 @@ def test_update_profile():
     }
     response = client.patch(endpoint, headers=headers, json={"name": "someone else"})
     assert response.status_code == status.HTTP_200_OK
-    db.expire_all()
-    name = db.query(User).filter(User.msisdn == msisdn).first().name
-    assert name == "someone else"
-
-    response = client.patch(endpoint, headers=headers, json={"name": "someone else"})
-    assert response.status_code == status.HTTP_200_OK
+    assert get_user(msisdn).name == "someone else"
 
     msisdn_new = "7555555555"
     # request opt
@@ -254,7 +249,7 @@ def test_update_profile():
             "name": "tenno",
         },
     )
-    # fail on change name to exsisting one
+    # fail on change name to existing one
     response = client.patch(endpoint, headers=headers, json={"name": "tenno"})
     #! TODO investigate why 500 is being returned
     #! instead of 409 as set in SQLAE
@@ -365,8 +360,7 @@ def test_reset_password():
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
 
-    db.expire_all()
-    user = db.query(User).filter(User.msisdn == msisdn).first()
+    user = get_user(msisdn)
     assert verify_password(new_password, user.password)
 
     # test user not found
@@ -504,12 +498,13 @@ def test_charge_voucher():
 
 
 def test_nba():
-    endpoint = "/api/number/nba?msisdn"
+    endpoint = "/api/number/welcome-message?msisdn"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
     response = client.get(f"{endpoint}={msisdn}", headers=headers)
+    # print(response.json())
     assert response.status_code == status.HTTP_200_OK
 
     # Invalid msisdn format
@@ -560,10 +555,7 @@ def test_logout():
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
 
-    db.expire_all()
-
-    user = db.query(User).filter(User.msisdn == msisdn).first()
-    assert user.refresh_token is None
+    assert get_user(msisdn).refresh_token is None
 
     # wrong access token
     headers = {"Authorization": f"Bearer {refresh_token}"}
@@ -584,7 +576,7 @@ def test_delete():
     response = client.delete(endpoint, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert {"status": "success"} == response.json()
-    assert not db.query(User).filter(User.msisdn == msisdn).first()
+    assert not get_user(msisdn)
 
 
 if __name__ == "__main__":
@@ -598,7 +590,7 @@ if __name__ == "__main__":
     test_wallet()
     test_subscriptions()
     test_request_otp()
-    time.sleep(2)
+    time.sleep(0.5)
     test_confirm_otp()
     test_verify_otp()
     test_redeem_registration_gift()
